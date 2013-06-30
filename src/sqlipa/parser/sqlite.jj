@@ -1,0 +1,272 @@
+PARSER_BEGIN(SqliteParser)
+  public class SqliteParser {
+    public static void main(String args[]) {
+      SqliteParser parser = new SqliteParser(System.in);
+      try {
+        parser.createTableStmt();
+        System.out.println("Accept");
+      } catch (ParseException e) {
+        System.out.println("Reject");
+      }
+    }
+  } 
+PARSER_END(SqliteParser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+}
+
+void sqlStmtList() :{}
+{    (sqlStmt())*
+}
+void sqlStmt() :
+{
+}
+{    ["EXPLAIN" ["QUERY" "PLAN"]]
+    (	  alterTableStmt()
+	| analyzeStmt()
+	| attachStmt()
+	| beginStmt()
+	| commitStmt()
+	| createIndexStmt()
+	| createTableStmt()
+	| createTriggerStmt()
+	| createViewStmt()
+	| createVirtualTableStmt()	| deleteStmt()
+	| deleteStmtLimited()
+	| detachStmt()
+	| dropIndexStmt()
+	| dropTableStmt()
+	| dropTriggerStmt()
+	| dropViewStmt()
+	| insertStmt()
+	| pragmaStmt()
+	| reindexStmt()
+	| releaseStmt()
+	| rollbackStmt()
+	| savepointStmt()
+	| selectStmt()
+	| updateStmt()
+	| updateStmtLimited()
+	| vacuumStmt()
+	)
+}
+
+void alterTableStmt() :
+{
+}
+{}
+
+void analyzeStmt() :
+{}
+{}
+
+void attachStmt() :
+{}
+{}
+
+void beginStmt() :
+{}
+{}
+
+void commitStmt() :
+{}
+{}
+
+void rollbackStmt() :
+{
+}
+{
+}
+
+void savepointStmt() :
+{
+}
+{
+}
+
+void releaseStmt() :
+{
+}
+{
+}
+
+void createIndexStmt() :
+{}
+{}
+
+void indexedColumn() :
+{
+}
+{}
+
+void createTableStmt() :
+{}
+{
+    "CREATE" 
+    ["TEMP" ["ORARY"]]
+    "TABLE"
+    ["IF NOT EXISTS"]
+    [databaseName() "."]
+    tableName()
+    (
+      "(" columnDef() ")"
+    | "AS" selectStmt()
+    )}
+
+void columnDef() :
+{}
+{}
+
+void typeName() :
+{}
+{}
+
+void columnConstraint() :
+{}
+{}
+
+void signedNumber() :
+{}
+{}
+
+void tableConstraint() :
+{}
+{}
+
+void foreignKeyClause() :
+{}
+{}
+
+void conflictClause() :
+{}
+{}
+
+void createTriggerStmt() :
+{}
+{}
+
+void createViewStmt() :
+{}
+{}
+
+void createVirtualTableStmt() :
+{}
+{}
+
+void deleteStmt() :
+{}
+{}
+
+void deleteStmtLimited() :
+{}
+{}
+
+void detachStmt() :
+{}
+{}
+
+void dropIndexStmt() :
+{}
+{}
+
+void dropTableStmt() :
+{}
+{}
+
+void dropTriggerStmt() :
+{}
+{}
+
+void dropViewStmt() :
+{}
+{}
+
+void expr() :
+{}
+{}
+
+void raiseFunction() :
+{}
+{}
+
+void literalValue() :
+{}
+{}
+
+void numericLiteral() :
+{}
+{}
+
+void insertStmt() :
+{}
+{}
+
+void pragmaStmt() :
+{}
+{}
+
+void pragmaValue() :
+{}
+{}
+
+void reindexStmt() :
+{}
+{}
+
+void selectStmt() :
+{}
+{}
+
+
+void selectCore() :
+{}
+{}
+
+
+void resultColumn() :
+{}
+{}
+
+void joinSource() :
+{}
+{}
+
+void singleSource() :
+{}
+{}
+
+void joinOp() :
+{}
+{}
+
+void joinConstraint() :
+{}
+{}
+
+void orderingTerm() :
+{}
+{}
+
+void compoundOperator() :
+{}
+{}
+
+void updateStmt() :
+{}
+{}
+
+void updateStmtLimited() :
+{}
+{}
+
+void qualifiedTableName() :
+{}
+{}
+
+void vacuumStmt() :
+{}
+{}
