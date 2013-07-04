@@ -1,10 +1,9 @@
 options {
-  LOOKAHEAD=1;
-  STATIC=false;
-  JAVA_UNICODE_ESCAPE=true;
-  COMMON_TOKEN_ACTION=true;
-  //SUPPORT_CLASS_VISIBILITY_PUBLIC=false;
-  JDK_VERSION = "1.5";
+    LOOKAHEAD = 1;
+    STATIC = false;
+    COMMON_TOKEN_ACTION = true;
+    JDK_VERSION = "1.5";
+    IGNORE_CASE = true ;
 }
 
 PARSER_BEGIN(ASTParser)
@@ -27,11 +26,11 @@ PARSER_END(ASTParser)
 
 SKIP :
 {
-  " "
-| "\t"
-| "\n"
-| "\r"
-| "\f"
+    " "
+|   "\t"
+|   "\n"
+|   "\r"
+|   "\f"
 }
 
 /* COMMENTS */
@@ -43,6 +42,131 @@ TOKEN_MGR_DECLS :
     }
 }
 
+TOKEN:
+{
+    <ABORT: "ABORT">
+|   <ACTION: "ACTION">
+|   <ADD: "ADD">
+|   <AFTER: "AFTER">
+|   <ALL: "ALL">
+|   <ALTER: "ALTER">
+|   <ANALYZE: "ANALYZE">
+|   <AND: "AND">
+|   <AS: "AS">
+|   <ASC: "ASC">
+|   <ATTACH: "ATTACH">
+|   <AUTOINCREMENT: "AUTOINCREMENT">
+|   <BEFORE: "BEFORE">
+|   <BEGIN: "BEGIN">
+|   <BETWEEN: "BETWEEN">
+|   <BY: "BY">
+|   <CASCADE: "CASCADE">
+|   <CASE: "CASE">
+|   <CAST: "CAST">
+|   <CHECK: "CHECK">
+|   <COLLATE: "COLLATE">
+|   <COLUMN: "COLUMN">
+|   <COMMIT: "COMMIT">
+|   <CONFLICT: "CONFLICT">
+|   <CONSTRAINT: "CONSTRAINT">
+|   <CREATE: "CREATE">
+|   <CROSS: "CROSS">
+|   <CURRENT_DATE: "CURRENT_DATE">
+|   <CURRENT_TIME: "CURRENT_TIME">
+|   <CURRENT_TIMESTAMP: "CURRENT_TIMESTAMP">
+|   <DATABASE: "DATABASE">
+|   <DEFAULT: "DEFAULT">
+|   <DEFERRABLE: "DEFERRABLE">
+|   <DEFERRED: "DEFERRED">
+|   <DELETE: "DELETE">
+|   <DESC: "DESC">
+|   <DETACH: "DETACH">
+|   <DISTINCT: "DISTINCT">
+|   <DROP: "DROP">
+|   <EACH: "EACH">
+|   <ELSE: "ELSE">
+|   <END: "END">
+|   <ESCAPE: "ESCAPE">
+|   <EXCEPT: "EXCEPT">
+|   <EXCLUSIVE: "EXCLUSIVE">
+|   <EXISTS: "EXISTS">
+|   <EXPLAIN: "EXPLAIN">
+|   <FAIL: "FAIL">
+|   <FOR: "FOR">
+|   <FOREIGN: "FOREIGN">
+|   <FROM: "FROM">
+|   <FULL: "FULL">
+|   <GLOB: "GLOB">
+|   <GROUP: "GROUP">
+|   <HAVING: "HAVING">
+|   <IF: "IF">
+|   <IGNORE: "IGNORE">
+|   <IMMEDIATE: "IMMEDIATE">
+|   <IN: "IN">
+|   <INDEX: "INDEX">
+|   <INDEXED: "INDEXED">
+|   <INITIALLY: "INITIALLY">
+|   <INNER: "INNER">
+|   <INSERT: "INSERT">
+|   <INSTEAD: "INSTEAD">
+|   <INTERSECT: "INTERSECT">
+|   <INTO: "INTO">
+|   <IS: "IS">
+|   <ISNULL: "ISNULL">
+|   <JOIN: "JOIN">
+|   <KEY: "KEY">
+|   <LEFT: "LEFT">
+|   <LIKE: "LIKE">
+|   <LIMIT: "LIMIT">
+|   <MATCH: "MATCH">
+|   <NATURAL: "NATURAL">
+|   <NO: "NO">
+|   <NOT: "NOT">
+|   <NOTNULL: "NOTNULL">
+|   <NULL: "NULL">
+|   <OF: "OF">
+|   <OFFSET: "OFFSET">
+|   <ON: "ON">
+|   <OR: "OR">
+|   <ORDER: "ORDER">
+|   <OUTER: "OUTER">
+|   <PLAN: "PLAN">
+|   <PRAGMA: "PRAGMA">
+|   <PRIMARY: "PRIMARY">
+|   <QUERY: "QUERY">
+|   <RAISE: "RAISE">
+|   <REFERENCES: "REFERENCES">
+|   <REGEXP: "REGEXP">
+|   <REINDEX: "REINDEX">
+|   <RELEASE: "RELEASE">
+|   <RENAME: "RENAME">
+|   <REPLACE: "REPLACE">
+|   <RESTRICT: "RESTRICT">
+|   <RIGHT: "RIGHT">
+|   <ROLLBACK: "ROLLBACK">
+|   <ROW: "ROW">
+|   <SAVEPOINT: "SAVEPOINT">
+|   <SELECT: "SELECT">
+|   <SET: "SET">
+|   <TABLE: "TABLE">
+|   <TEMP: "TEMP">
+|   <TEMPORARY: "TEMPORARY">
+|   <THEN: "THEN">
+|   <TO: "TO">
+|   <TRANSACTION: "TRANSACTION">
+|   <TRIGGER: "TRIGGER">
+|   <UNION: "UNION">
+|   <UNIQUE: "UNIQUE">
+|   <UPDATE: "UPDATE">
+|   <USING: "USING">
+|   <VACUUM: "VACUUM">
+|   <VALUES: "VALUES">
+|   <VIEW: "VIEW">
+|   <VIRTUAL: "VIRTUAL">
+|   <WHEN: "WHEN">
+|   <WHERE: "WHERE">
+}
+
 void sqlStmtList() :{}
 {    (sqlStmt())*
 }
@@ -50,32 +174,33 @@ void sqlStmt() :
 {
 }
 {    ["EXPLAIN" ["QUERY" "PLAN"]]
-    (	  alterTableStmt()
-	/*| analyzeStmt()
-	| attachStmt()
-	| beginStmt()
-	| commitStmt()
-	| createIndexStmt()
-	| createTableStmt()
-	| createTriggerStmt()
-	| createViewStmt()
-	| createVirtualTableStmt()	| deleteStmt()
-	| deleteStmtLimited()
-	| detachStmt()
-	| dropIndexStmt()
-	| dropTableStmt()
-	| dropTriggerStmt()
-	| dropViewStmt()
-	| insertStmt()
-	| pragmaStmt()
-	| reindexStmt()
-	| releaseStmt()
-	| rollbackStmt()
-	| savepointStmt()
-	| selectStmt()
-	| updateStmt()
-	| updateStmtLimited()
-	| vacuumStmt()*/
+    (   
+        alterTableStmt()
+    |   analyzeStmt()
+    |   attachStmt()
+	|   beginStmt()
+	|   commitStmt()
+	|   createIndexStmt()
+	|   createTableStmt()
+	|   createTriggerStmt()
+	|   createViewStmt()
+	|   createVirtualTableStmt()	|   deleteStmt()
+	|   deleteStmtLimited()
+	|   detachStmt()
+	|   dropIndexStmt()
+	|   dropTableStmt()
+	|   dropTriggerStmt()
+	|   dropViewStmt()
+	|   insertStmt()
+	|   pragmaStmt()
+	|   reindexStmt()
+	|   releaseStmt()
+	|   rollbackStmt()
+	|   savepointStmt()
+	|   selectStmt()
+	|   updateStmt()
+	|   updateStmtLimited()
+	|   vacuumStmt()
 	)
 }
 
@@ -147,44 +272,89 @@ void createTableStmt() :
     [databaseName() "."]
     tableName()
     (
-      "(" columnDef() ")"
-    | "AS" selectStmt()
+        "(" columnDef() ("," columnDef())* ("," tableConstraint())* ")"
+    |   "AS" selectStmt()
     )}
 
 void columnDef() :
 {}
 {
-    ""}
+    columnName()
+    [typeName()]
+    (columnConstraint())*}
 
 void typeName() :
 {}
 {
-    ""}
+    (name())*
+    ["(" signedNumber() ["," signedNumber()] ")"]}
 
 void columnConstraint() :
 {}
 {
-    ""}
+    ["CONSTRAINT" name()]
+    (
+        "PRIMARY" "KEY" [("ASC" | "DESC")] conflictClause() ["AUTOINCREMENT"]
+    |   "NOT" "NULL" conflictClause()
+    |   "UNIQUE" conflictClause()
+    |   "CHECK" "(" expr() ")"
+    |   "DEFAULT" (signedNumber() | literalValue() | "(" expr() ")")    |   "COLLATE" collationName()
+    |   foreignKeyClause()
+    )
+}
 
 void signedNumber() :
 {}
 {
-    ""}
+    [("+" | "-")]
+    numericLiteral()}
 
 void tableConstraint() :
 {}
 {
-    ""}
+    ["CONSTRAINT" name()]
+    (
+        ("PRIMARY" "KEY" | "UNIQUE") "(" indexedColumn() ("," indexedColumn())* ")" conflictClause()
+    |   "CHECK" "(" expr() ")"
+    |   "FOREIGN" "KEY" "(" columnName() ("," columnName())* ")" foreignKeyClause()
+    )}
 
 void foreignKeyClause() :
 {}
 {
-    ""}
+    "REFERENCES"
+    foreignTable()
+    ["(" columnName() ("," columnName())* ")"]
+    (
+        "ON"
+        (   
+            "DELETE"
+        |   "UPDATE")
+        (
+            "SET" "NULL"
+        |   "SET" "CASCADE"
+        |   "CASCADE"
+        |   "RESTRICT"
+        |   "NO" "ACTION"
+        )
+    |   "MATCH" name()
+    )*
+    [["NOT"] "DEFERRABLE" [("INITIALLY" "DEFERRED" | "INITIALLY" "IMMEDIATE")]]}
 
 void conflictClause() :
 {}
 {
-    ""}
+    [   
+        "ON" 
+        "CONFLICT"
+        (
+            "ROLLBACK"
+        |   "ABORT"
+        |   "FAIL"
+        |   "IGNORE"
+        |   "REPLACE"
+        )
+    ]}
 
 void createTriggerStmt() :
 {}
@@ -352,6 +522,13 @@ void databaseName() :
 }
 
 void tableName() :
+{
+}
+{
+    ""
+}
+
+void name() :
 {
 }
 {
