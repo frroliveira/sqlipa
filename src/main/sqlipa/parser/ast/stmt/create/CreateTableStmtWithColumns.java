@@ -11,6 +11,7 @@ import main.sqlipa.parser.ast.name.Name;
 public class CreateTableStmtWithColumns extends CreateTableStmt {
 
     private List<ColumnDef> columns;
+    
     private List<TableConstraint> constraints;
     
     public CreateTableStmtWithColumns(int beginLine, int beginColumn,
@@ -30,12 +31,28 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
         return constraints;
     }
     
+    public void setColumns(List<ColumnDef> columns) {
+        this.columns = columns;
+    }
+    
+    public void setConstraints(List<TableConstraint> constraints) {
+        this.constraints = constraints;
+    }
+    
     public void addColumn(ColumnDef column) {
         columns.add(column);
     }
     
     public void addConstraint(TableConstraint constraint) {
         constraints.add(constraint);
+    }
+    
+    public void removeColumn(ColumnDef column) {
+        columns.remove(column);
+    }
+    
+    public void removeConstraint(TableConstraint constraint) {
+        constraints.remove(constraint);
     }
 
 }

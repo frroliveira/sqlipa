@@ -9,18 +9,10 @@ public class CreateTableStmtWithSelect extends CreateTableStmt {
     SelectStmt select;
 
     public CreateTableStmtWithSelect(int beginLine, int beginColumn,
-            int endLine, int endColumn, Explain explain,
-            boolean hasIfNotExists, DatabaseName db, Name struct, boolean temp) {
+            int endLine, int endColumn, Explain explain, boolean hasIfNotExists,
+            DatabaseName db, Name name, boolean temp, SelectStmt select) {
         super(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, struct, temp);
-    }
-
-    public CreateTableStmtWithSelect(int beginLine, int beginColumn,
-            int endLine, int endColumn, Explain explain,
-            boolean hasIfNotExists, DatabaseName db, Name struct, boolean temp,
-            SelectStmt select) {
-        super(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, struct, temp);
+                hasIfNotExists, db, name, temp);
         this.select = select;
     }
     

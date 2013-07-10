@@ -9,9 +9,9 @@ public abstract class CreateTableStmt extends CreateStmt {
     
     public CreateTableStmt(int beginLine, int beginColumn, int endLine,
             int endColumn, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name struct, boolean temp) {
+            DatabaseName db, Name name, boolean temp) {
         super(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, struct);
+                hasIfNotExists, db, name);
         this.temp = temp;
     }
     
