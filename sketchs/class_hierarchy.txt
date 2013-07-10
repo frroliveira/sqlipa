@@ -1,0 +1,746 @@
+// Check enumerations null safety.
+namespace stmt {
+    SqlStatementList {
+        List<SqlStatement> stmts;
+    }
+
+    SqlStatement {
+        enum Explain {
+            NORMAL,
+            PLAN
+        }
+
+        Explain explain;
+
+        AlterTableStmt {
+            DatabaseName db;
+            TableName tab;
+
+            RenameTableStmt {
+                TableName newTab;
+            }
+
+            AddColumnStmt {
+                ColumnDef column;
+            }
+        }
+
+        AnalyzeStmt {
+            DatabaseName db;
+            TableOrIndexName tabOrInd;
+        }
+
+        AttachStmt {
+            Expression expr;
+            DatabaseName db;
+        }
+
+        BeginStmt {
+            enum Type {
+                DEFERRED,
+                IMMEDIATE,
+                EXCLUSIVE
+            }
+
+            Type type;
+        }
+
+        CommitStmt {
+        }
+
+        RollbackStmt {
+            SavepointName savepoint;
+        }
+
+        SavepointStmt {
+            SavepointName savepoint;
+        }
+
+        ReleaseStmt {
+            SavepointName savepoint;
+        }
+
+        namespace create {
+            CreateStmt {
+                boolean ifNotExists;
+                DatabaseName db;
+                Name name;
+
+                CreateIndexStmt {
+                    boolean unique;
+                    TableName tab;
+                    List<IndexedColumn> columns;
+                }
+
+                CreateTableStmt {
+                    boolean temp;
+
+                    CreateTableStmtWithColumns {
+                        List<ColumnDef> columns;
+                        List<TableConstraint> constraints;
+                    }
+                    
+                    CreateTableStmtWithSelect {
+                        SelectStmt select;
+                    }
+                }
+
+                CreateTriggerStmt {
+                    enum Time {
+                        BEFORE,
+                        AFTER,
+                        INSTEAD_OF
+                    }
+                    
+                    enum Event {
+                        DELETE,
+                        INSERT,
+                        UPDATE
+                    }
+
+                    boolean temp;
+                    boolean forEachRow;
+                    Time time;
+                    Event event;
+                    List<ColumnName> columns;
+                    TableName tab;
+                    Expression whenExpr;
+                    List<EventStmt> stmts;
+                }
+
+                CreateViewStmt {
+                    boolean temp;
+                    SelectStmt stmt;
+                }
+
+                CreateVirtualTableStmt {
+                    ModuleName module;
+                    List<ModuleArgument> moduleArgs;
+                }
+            }
+        }
+        
+        DetachStmt {
+            DatabaseName db;
+        }
+
+        namespace drop {
+            DropStmt {
+                boolean ifExists;
+                DatabaseName db;
+                Name name;
+
+                DropIndexStmt {
+                }
+
+                DropTableStmt {
+                }
+
+                DropTriggerStmt {
+                }
+
+                DropViewStmt {
+                }
+            }
+        }
+
+        namespace event {
+            EventStmt {
+                DeleteStmt {
+                    QualifiedTableName tab;
+                    Expression whereExpr;
+                
+                    DeleteStmtLimited {
+                        List<OrderingTerm> terms;
+                        Expression limitExpr;
+                        Expression offsetExpr;
+                    }
+                }
+
+                InsertStmt {
+                    enum Type {
+                        INSERT,
+                        INSERT_OR_ROLLBACK,
+                        INSERT_OR_ABORT,
+                        INSERT_OR_REPLACE,
+                        INSERT_OR_FAIL,
+                        INSERT_OR_IGNORE,
+                        REPLACE
+                    }
+
+                    Type type;
+                    DatabaseName db;
+                    TableName tab;
+
+                    InsertStmtWithDefault {
+                    }
+
+                    InsertStmtWithValues {
+                        List<ColumnName> columns;
+                        List<List<Expression>> rows;
+                    }
+
+                    InsertStmtWithSelect {
+                        List<ColumnName> columns;
+                        SelectStmt stmt;
+                    }
+                }
+
+                namespace select {
+                    SelectStmt {
+                        SelectCore core;
+                        List<CompoundOperation> ops;
+                        List<OrderingTerm> terms;
+                        Expression limitExpr;
+                        Expression offsetExpr;
+                    }
+
+                    // Doesn't extend.
+                    CompoundOperation {
+                        enum Operator {
+                            UNION,
+                            UNION_ALL,
+                            INTERSECT,
+                            EXCEPT
+                        }
+
+                        Operator op;
+                        SelectCore core;
+                    }
+
+                    // Doesn't extend.
+                    SelectCore {
+                        boolean distinct;
+                        List<ResultColumn> columns;
+                        JoinSrc fromSrc;
+                        Expression whereExpr;
+                        List<Expression> groupByExprs;
+                        Expression havingExpr;
+                    }
+
+                    // Doesn't extend.
+                    ResultColumn {
+                        AllColumns {
+                        }
+
+                        AllTableColumns {
+                            TableName tab;
+                        }
+                        
+                        ExpressionColumn {
+                            Expression expr;
+
+                            AliasedColumn {
+                                ColumnAlias alias;
+                            }
+                        }
+                    }
+
+                    // Doesn't extend.
+                    SingleSrc {
+                        JoinSrc {
+                            SingleSrc src;
+                            List<JoinOperation> ops;
+                        }
+
+                        SelectSrc {
+                            SelectStmt stmt;
+                            TableAlias alias;
+                        }
+
+                        TableSrc {
+                            QualifiedTableName tab;
+                            TableAlias alias;
+                        }
+                    }
+
+                    // Doesn't extend.
+                    JoinOperation {
+                        enum Operator {
+                            COMMA,
+                            JOIN,
+                            LEFT_JOIN,
+                            LEFT_OUTER_JOIN,
+                            INNER_JOIN,
+                            CROSS_JOIN,
+                            NATURAL_JOIN,
+                            NATURAL_LEFT_JOIN,
+                            NATURAL_LEFT_OUTER_JOIN,
+                            NATURAL_INNER_JOIN,
+                            NATURAL_CROSS_JOIN,
+                        }
+
+                        Operator op;
+                        SingleSrc src;
+                        JoinConstraint constraint;
+                    }
+
+                    // Doesn't extend.
+                    JoinConstraint {
+                        JoinConstraintOn {
+                            Expression expr;
+                        }
+
+                        JoinConstraintUsing {
+                            List<ColumnName> columns;
+                        }
+                    }
+                }
+                
+                namespace update {
+                    UpdateStmt {
+                        enum Type {
+                            UPDATE,
+                            UPDATE_OR_ROLLBACK,
+                            UPDATE_OR_ABORT,
+                            UPDATE_OR_REPLACE,
+                            UPDATE_OR_FAIL,
+                            UPDATE_OR_IGNORE,
+                        }
+
+                        Type type;
+                        QualifiedTableName tab;
+                        List<ColumnAssign> assigns;
+                        Expression whereExpr;
+
+                        UpdateStmtLimiteed {
+                            List<OrderingTerm> terms;
+                            Expression limitExpr;
+                            Expression offsetExpr;
+                        }
+                    }
+
+                    // Doesn't extend.
+                    ColumnAssign {
+                        ColumnName column;
+                        Expression expr;
+                    }
+                }
+            }
+        
+            OrderingTerm {
+                enum Order {
+                    ASC, 
+                    DESC
+                }
+
+                Expression expr;
+                CollationName collation;
+                Order order;
+            }
+        }
+
+        namespace pragma {
+            PragmaStmt {
+                DatabaseName db;
+                PragmaName pragma;
+                PragmaValue value;
+            }
+
+
+            PragmaValue {
+                NumberPragmaValue {
+                    SignedNumber number;
+                }
+
+                NamePragmaValue {
+                    Name name;
+                }
+
+                StringLiteral; // TODO: see better.
+            }
+        }
+
+        ReindexStmt {
+
+            ReindexCollationStmt {
+                CollationName collation;
+            }
+
+            ReindexTableOrIndexStmt {
+                DatabaseName db;
+                TableOrIndexName tabOrInd;
+            }
+        }
+
+        VacuumStmt {        
+        }
+    }
+}
+
+namespace name {
+    Name {
+        String name;
+
+        DatabaseName {
+        }
+
+        TableName {
+        }
+
+        ColumnName {
+        }
+
+        IndexName {
+        }
+
+        TableOrIndexName {
+        }
+
+        SavepointName {
+        }
+
+        TypeName {
+            // Merge names into one.
+            SignedNumber xDim;
+            SignedNumber yDim;
+        }
+
+        ConstraintName {
+        }
+
+        ModuleName {
+        }
+
+        FunctionName {
+        }
+
+        PragmaName {
+        }
+
+        Alias {
+            ColumnAlias {
+            }
+
+            TableAlias {
+            }
+        }
+    }
+}
+
+namespace constraint {
+    Constraint {
+        ConstraintName name;
+
+        ColumnConstraint {
+
+            PrimaryKeyColumnConstraint {
+                enum Order {
+                    ASC,
+                    DESC
+                }
+
+                Order order;
+                ConflictClause clause;
+                boolean autoincrement;
+            }
+
+            NotNullColumnConstraint {
+                ConflictClause clause;
+            }
+
+            UniqueColumnConstraint {
+                ConflictClause clause;
+            }
+
+            CheckColumnConstraint {
+                Expression expr;
+            }
+
+            DefaultColumnConstraint {
+
+                NumberColumnConstraint {
+                    SignedNumber number;
+                }
+
+                LiteralColumnConstraint {
+                    LiteralValue literal;
+                }
+
+                ExpressionColumnConstraint {
+                    Expression expr;
+                }
+            }
+
+            CollateColumnConstraint {
+                CollationName collation;
+            }
+
+            ForeignKeyColumnConstraint {
+                ForeignKeyClause clause;
+            }
+        }
+
+        TableConstraint {
+
+            PrimaryKeyTableConstraint {
+                List<IndexedColumn> columns;
+                ConflictClause clause;
+            }
+
+            UniqueTableConstraint {
+                List<IndexedColumn> columns;
+                ConflictClause clause;
+            }
+
+            CheckTableConstraint {
+                Expression expr;
+            }
+
+            ForeignKeyTableConstraint {
+                List<ColumnName> columns;
+                ForeignKeyClause clause;
+            }
+        }
+    }
+
+    ForeignKeyClause {
+        TableName foreignTab;
+        List<ColumnName> columns;
+        List<ForeignKeySetting> settings;
+    }
+
+    ForeignKeySetting {
+        OnForeignKeySett {
+            enum Event {
+                DELETE,
+                UPDATE
+            }
+
+            enum Action {
+                SET_NULL,
+                SET_DEFAULT,
+                CASCADE,
+                RESTRICT,
+                NO_ACTION
+            }
+
+            Event event;
+            Action action;
+        }
+
+        MatchForeignKeySett {
+            Name name;
+        }
+
+        DeferrableForeignKeySett {
+            enum Mode {
+                DEFERRED,
+                IMMEDIATE
+            }
+
+            boolean deferrable;
+            Mode mode;
+        }
+    }
+
+    ConflictClause {
+        Action {
+            ROLLBACK,
+            ABORT,
+            FAIL,
+            IGNORE,
+            REPLACE
+        }
+
+        Action action;
+    }
+}
+
+namespace expr {
+    Expression {
+        LiteralExpr {
+            LiteralValue literal;
+        }
+
+        // See better.
+        BindParameterExpr {
+            String template;
+        }
+
+        ColumnReferenceExpr {
+            DatabaseName db;
+            TableName tab;
+            ColumnName column;
+        }
+
+        UnaryExpr {
+            enum Operator {
+                // To be defined.
+            }
+
+            Operator op;
+            Expression expr;
+        }
+
+        BinaryExpr {
+            enum Operator {
+                // To be defined.
+            }
+
+            Expression leftExpr;
+            Expression rightExpr;
+            Operator op;
+        }
+
+        FunctionExpr {
+            FunctionName func;
+            List<Expression> ;
+            // TODO: finish.
+        }
+
+        CastExpr {
+            Expression expr;
+            TypeName type;
+        }
+
+        CollateExpr {
+            Expression expr;
+            CollationName collation;
+        }
+
+        EscapableExpr {
+            enum Operator {
+                LIKE,
+                GLOB,
+                REGEXP,
+                MATCH,
+                NOT_LIKE,
+                NOT_GLOB,
+                NOT_REGEXP,
+                NOT_MATCH
+            }
+
+            Operator op;
+            Expression leftExpr;
+            Expression rightExpr;
+            Expression escapeExpr;
+        }
+
+        NullableExpr {
+            boolean isNull;
+            Expression expr;
+        }
+
+        IsExpr {
+            // Merge with binary expression.
+        }
+
+        BetweenExpr {
+            boolean between;
+            Expression expr;
+            Expression upperExpr;
+            Experssion lowerExpr;
+        }
+
+        InExpr {
+            boolean in;
+            Expression expr;
+
+            InSelectExpr {
+                SelectStmt stmt;
+            }
+
+            InSetExpr {
+                List<Expression> exprs;
+            }
+
+            InTableExpr {
+                DatabaseName db;
+                TableName tab;
+            }
+        }
+
+        ExistsExpr {
+            boolean exists;
+            SelectStmt stmt;
+        }
+        
+        CaseExpr {
+            Expression caseExpr;
+            List<WhenThenExpr> whenThenExprs;
+            Expression elseExpr;
+        }
+
+        WhenThenExpr {
+            Expression whenExpr;
+            Expression thenExpr;
+        }
+
+        RaiseFunctionExpr {
+            RaiseFunction func;
+        }
+    }
+}
+
+IndexedColumn {
+    enum Order {
+        ASC,
+        DESC
+    }
+
+    Order order;
+    ColumnName column;
+    CollationName collation;
+}
+
+ColumnDef {
+    ColumnName column;
+    TypeName type;
+    List<ColumnConstraint> constraints;
+}
+
+SignedNumber {
+    enum Signal {
+        PLUS,
+        MINUS
+    }
+
+    Signal signal;
+    NumericLiteral literal;
+}
+
+RaiseFunction {
+    enum Type {
+        IGNORE,
+        ROLLBACK,
+        ABORT,
+        FAIL
+    }
+
+    Type type;
+    String errorMsg;
+}
+
+LiteralValue {
+    NumericLiteral {
+        String literal;
+    }
+    StringLiteral {
+        String literal;
+    }
+    BlobLiteral {
+
+    }
+    NullLiteral {
+        
+    }
+
+    // See better
+}
+
+QualifiedTableName {
+    DatabaseName db;
+    TableName tab;
+
+    IndexedQualifiedTableName {
+        IndexName ind;
+    }
+
+    NotIndexedQualifiedTableName {
+    }
+}
+
+ModuleArgument {
+    String arg;
+}

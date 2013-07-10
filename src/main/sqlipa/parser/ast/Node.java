@@ -1,9 +1,9 @@
-package sqlipa.parser.ast;
+package main.sqlipa.parser.ast;
 
 // TODO: finish class.
-public class Node {
+public abstract class Node {
     
-    private int beginLine;
+    protected int beginLine;
     
     private int beginColumn;
     
