@@ -3,7 +3,7 @@ package main.sqlipa.parser.ast;
 import java.util.LinkedList;
 import java.util.List;
 
-import main.sqlipa.parser.ast.constraint.ColumnConstraint;
+import main.sqlipa.parser.ast.constraint.column.ColumnConstraint;
 import main.sqlipa.parser.ast.name.ColumnName;
 import main.sqlipa.parser.ast.name.TypeName;
 

@@ -1,5 +1,6 @@
-package main.sqlipa.parser.ast.constraint;
+package main.sqlipa.parser.ast.constraint.table;
 
+import main.sqlipa.parser.ast.constraint.Constraint;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
 public abstract class TableConstraint extends Constraint {

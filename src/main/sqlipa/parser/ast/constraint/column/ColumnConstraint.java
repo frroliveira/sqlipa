@@ -1,5 +1,6 @@
-package main.sqlipa.parser.ast.constraint;
+package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.constraint.Constraint;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
 public class ColumnConstraint extends Constraint {

@@ -9,18 +9,18 @@ public abstract class CreateTableStmt extends CreateStmt {
     
     public CreateTableStmt(int beginLine, int beginColumn, int endLine,
             int endColumn, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name name, boolean temp) {
+            DatabaseName db, Name name, boolean hasTemp) {
         super(beginLine, beginColumn, endLine, endColumn, explain, 
                 hasIfNotExists, db, name);
-        this.temp = temp;
+        this.temp = hasTemp;
     }
     
-    public boolean isTemporary() {
+    public boolean hasTemporary() {
         return temp;
     }
     
-    public void setTemporary(boolean temp) {
-        this.temp = temp;
+    public void setTemporary(boolean hasTemp) {
+        this.temp = hasTemp;
     }
 
 }

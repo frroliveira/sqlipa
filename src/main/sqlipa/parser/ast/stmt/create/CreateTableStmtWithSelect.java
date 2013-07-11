@@ -10,9 +10,9 @@ public class CreateTableStmtWithSelect extends CreateTableStmt {
 
     public CreateTableStmtWithSelect(int beginLine, int beginColumn,
             int endLine, int endColumn, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name name, boolean temp, SelectStmt select) {
+            DatabaseName db, Name name, boolean hasTemp, SelectStmt select) {
         super(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, name, temp);
+                hasIfNotExists, db, name, hasTemp);
         this.select = select;
     }
     

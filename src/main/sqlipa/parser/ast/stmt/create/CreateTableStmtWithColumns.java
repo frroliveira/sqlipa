@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.ColumnDef;
-import main.sqlipa.parser.ast.constraint.TableConstraint;
+import main.sqlipa.parser.ast.constraint.table.TableConstraint;
 import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.Name;
 
@@ -16,11 +16,20 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
     
     public CreateTableStmtWithColumns(int beginLine, int beginColumn,
             int endLine, int endColumn, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name struct, boolean temp) {
+            DatabaseName db, Name struct, boolean hasTemp) {
+        this(beginLine, beginColumn, endLine, endColumn, explain, 
+                hasIfNotExists, db, struct, hasTemp, 
+                new LinkedList<ColumnDef>(), new LinkedList<TableConstraint>());
+    }
+    
+    public CreateTableStmtWithColumns(int beginLine, int beginColumn,
+            int endLine, int endColumn, Explain explain, boolean hasIfNotExists,
+            DatabaseName db, Name struct, boolean hasTemp,
+            List<ColumnDef> columns, List<TableConstraint> constraints) {
         super(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, struct, temp);
-        columns = new LinkedList<ColumnDef>();
-        constraints = new LinkedList<TableConstraint>();
+                hasIfNotExists, db, struct, hasTemp);
+        this.columns = columns;
+        this.constraints = constraints;
     }
     
     public List<ColumnDef> getColumns() {
