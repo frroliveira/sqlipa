@@ -566,7 +566,10 @@ namespace expr {
 
         UnaryExpr {
             enum Operator {
-                // To be defined.
+                POSITIVE,
+                NEGATIVE,
+                BITWISE_NOT,
+                LOGICAL_NOT
             }
 
             Operator op;
@@ -578,13 +581,13 @@ namespace expr {
                 // To be defined.
             }
 
-            Expression leftExpr;
-            Expression rightExpr;
+            Expression left;
+            Expression right;
             Operator op;
         }
 
         FunctionExpr {
-            FunctionName func;
+            FunctionName function;
             List<Expression> ;
             // TODO: finish.
         }
@@ -612,25 +615,26 @@ namespace expr {
             }
 
             Operator op;
-            Expression leftExpr;
-            Expression rightExpr;
-            Expression escapeExpr;
+            Expression left;
+            Expression right;
+            Expression escape;
         }
 
-        NullableExpr {
-            boolean isNull;
-            Expression expr;
-        }
-
-        IsExpr {
-            // Merge with binary expression.
-        }
+        //NullableExpr {
+        //    boolean isNull;
+        //    Expression expr;
+        //}
 
         BetweenExpr {
-            boolean between;
+            enum Operator {
+                BETWEEN,
+                NOT_BETWEEN
+            }
+            
             Expression expr;
-            Expression upperExpr;
-            Experssion lowerExpr;
+            Expression upper;
+            Experssion lower;
+            Operator op;
         }
 
         InExpr {
@@ -657,14 +661,14 @@ namespace expr {
         }
         
         CaseExpr {
-            Expression caseExpr;
-            List<WhenThenExpr> whenThenExprs;
-            Expression elseExpr;
+            Expression case_;
+            List<WhenThenExpr> whenThen;
+            Expression else_;
         }
 
         WhenThenExpr {
-            Expression whenExpr;
-            Expression thenExpr;
+            Expression when;
+            Expression then;
         }
 
         RaiseFunctionExpr {
