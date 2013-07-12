@@ -29,7 +29,7 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
         return order;
     }
     
-    public ConflictClause getConflictClause() {
+    public ConflictClause getClause() {
         return clause;
     }
     
@@ -41,7 +41,7 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
         this.order = order;
     }
     
-    public void setConflictClause(ConflictClause clause) {
+    public void setClause(ConflictClause clause) {
         this.clause = clause;
     }
     

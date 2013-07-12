@@ -56,12 +56,12 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
         constraints.add(constraint);
     }
     
-    public void removeColumn(ColumnDef column) {
-        columns.remove(column);
+    public boolean removeColumn(ColumnDef column) {
+        return columns.remove(column);
     }
     
-    public void removeConstraint(TableConstraint constraint) {
-        constraints.remove(constraint);
+    public boolean removeConstraint(TableConstraint constraint) {
+        return constraints.remove(constraint);
     }
 
 }

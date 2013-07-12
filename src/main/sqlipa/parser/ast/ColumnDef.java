@@ -58,8 +58,8 @@ public class ColumnDef extends Node {
         constraints.add(constraint);
     }
     
-    public void removeConstraint(ColumnConstraint constraint) {
-        constraints.remove(constraint);
+    public boolean removeConstraint(ColumnConstraint constraint) {
+        return constraints.remove(constraint);
     }
 
 }

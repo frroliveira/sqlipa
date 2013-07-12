@@ -13,11 +13,11 @@ public class NotNullColumnConstraint extends ColumnConstraint {
         this.clause = clause;
     }
     
-    public ConflictClause getConflictClause() {
+    public ConflictClause getClause() {
         return clause;
     }
     
-    public void setConflictClause(ConflictClause clause) {
+    public void setClause(ConflictClause clause) {
         this.clause = clause;
     }
     

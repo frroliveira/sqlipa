@@ -27,7 +27,7 @@ public abstract class CreateStmt extends SqlStatement {
         this.name = name;
     }
     
-    public DatabaseName getDatabaseName() {
+    public DatabaseName getDatabase() {
         return db;
     }
     
@@ -39,7 +39,7 @@ public abstract class CreateStmt extends SqlStatement {
         return ifNotExists;
     }
     
-    public void setDatabaseName(DatabaseName db) {
+    public void setDatabase(DatabaseName db) {
         this.db = db;
     }
     
