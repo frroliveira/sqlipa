@@ -620,11 +620,6 @@ namespace expr {
             Expression escape;
         }
 
-        //NullableExpr {
-        //    boolean isNull;
-        //    Expression expr;
-        //}
-
         BetweenExpr {
             enum Operator {
                 BETWEEN,
@@ -638,7 +633,12 @@ namespace expr {
         }
 
         InExpr {
-            boolean in;
+            enum Operator {
+                IN,
+                NOT_IN,
+            }
+            
+            Operator op;
             Expression expr;
 
             InSelectExpr {
@@ -656,14 +656,17 @@ namespace expr {
         }
 
         ExistsExpr {
-            boolean exists;
+            SelectStmt stmt;
+        }
+        
+        SelectExpr {
             SelectStmt stmt;
         }
         
         CaseExpr {
             Expression case_;
-            List<WhenThenExpr> whenThen;
             Expression else_;
+            List<WhenThenExpr> whenThen;
         }
 
         WhenThenExpr {
@@ -672,7 +675,7 @@ namespace expr {
         }
 
         RaiseFunctionExpr {
-            RaiseFunction func;
+            RaiseFunction function;
         }
     }
 }
