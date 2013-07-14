@@ -1,22 +1,22 @@
 package main.sqlipa.parser.ast.expr;
 
-import main.sqlipa.parser.ast.LiteralValue;
+import main.sqlipa.parser.ast.literal.Literal;
 
 public class LiteralExpr extends Expression {
 
-    private LiteralValue literal;
+    private Literal literal;
     
     public LiteralExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, LiteralValue literal) {
+            int endColumn, Literal literal) {
         super(beginLine, beginColumn, endLine, endColumn);
         this.literal = literal;
     }
     
-    public LiteralValue getLiteral() {
+    public Literal getLiteral() {
         return literal;
     }
     
-    public void setLiteral(LiteralValue literal) {
+    public void setLiteral(Literal literal) {
         this.literal = literal;
     }
     

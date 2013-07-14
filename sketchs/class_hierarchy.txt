@@ -1,4 +1,6 @@
-// Check enumerations null safety.
+// Abstract for all classes that can't be used.
+// All classes extend except Node.
+// Create 'add' and 'remove' methods for lists.
 namespace stmt {
     SqlStatementList {
         List<SqlStatement> stmts;
@@ -221,12 +223,9 @@ namespace stmt {
                     // Doesn't extend.
                     ResultColumn {
                         AllColumns {
-                        }
-
-                        AllTableColumns {
                             TableName tab;
                         }
-                        
+
                         ExpressionColumn {
                             Expression expr;
 
@@ -267,7 +266,7 @@ namespace stmt {
                             NATURAL_LEFT_JOIN,
                             NATURAL_LEFT_OUTER_JOIN,
                             NATURAL_INNER_JOIN,
-                            NATURAL_CROSS_JOIN,
+                            NATURAL_CROSS_JOIN
                         }
 
                         Operator op;
@@ -680,6 +679,19 @@ namespace expr {
     }
 }
 
+namespace literal {
+    Literal {
+        String value;
+
+        NumericLiteral {
+        }
+        StringLiteral {
+        }
+        BlobLiteral {
+        }
+    }
+}
+
 IndexedColumn {
     enum Order {
         ASC,
@@ -717,23 +729,6 @@ RaiseFunction {
 
     Type type;
     String errorMsg;
-}
-
-LiteralValue {
-    NumericLiteral {
-        String literal;
-    }
-    StringLiteral {
-        String literal;
-    }
-    BlobLiteral {
-
-    }
-    NullLiteral {
-        
-    }
-
-    // See better
 }
 
 QualifiedTableName {
