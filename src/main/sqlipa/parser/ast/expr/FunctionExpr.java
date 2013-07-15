@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.FunctionName;
 
 public class FunctionExpr extends Expression {
@@ -9,9 +10,8 @@ public class FunctionExpr extends Expression {
     // private List<Expression> ;
     // TODO: Do when reference is done.
     
-    public FunctionExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public FunctionExpr(Block block) {
+        super(block);
     }
     
     public FunctionName getFunction() {

@@ -1,14 +1,14 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.RaiseFunction;
 
 public class RaiseFunctionExpr extends Expression {
 
     private RaiseFunction function;
     
-    public RaiseFunctionExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, RaiseFunction function) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public RaiseFunctionExpr(Block block, RaiseFunction function) {
+        super(block);
         this.function = function;
     }
     

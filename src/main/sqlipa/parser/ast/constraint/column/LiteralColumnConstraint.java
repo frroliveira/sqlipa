@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.literal.Literal;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -7,9 +8,9 @@ public class LiteralColumnConstraint extends DefaultColumnConstraint {
 
     private Literal literal;
     
-    public LiteralColumnConstraint(int beginLine, int beginColumn, int endLine,
-            int endColumn, ConstraintName name, Literal literal) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public LiteralColumnConstraint(Block block, ConstraintName name,
+            Literal literal) {
+        super(block, name);
         this.literal = literal;
     }
     

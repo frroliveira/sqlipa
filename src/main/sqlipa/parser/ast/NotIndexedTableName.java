@@ -5,9 +5,8 @@ import main.sqlipa.parser.ast.name.TableName;
 
 public class NotIndexedTableName extends QualifiedTableName {
 
-    public NotIndexedTableName(int beginLine, int beginColumn, int endLine,
-            int endColumn, DatabaseName db, TableName tab) {
-        super(beginLine, beginColumn, endLine, endColumn, db, tab);
+    public NotIndexedTableName(Block block, DatabaseName db, TableName tab) {
+        super(block, db, tab);
     }
     
 }

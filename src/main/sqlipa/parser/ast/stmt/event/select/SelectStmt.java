@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.stmt.event.select;
 
 import java.util.List;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
 import main.sqlipa.parser.ast.stmt.event.EventStmt;
 import main.sqlipa.parser.ast.stmt.event.OrderingTerm;
@@ -18,11 +19,10 @@ public class SelectStmt extends EventStmt {
     
     private List<OrderingTerm> terms;
     
-    public SelectStmt(int beginLine, int beginColumn, int endLine,
-            int endColumn, Explain explain, SelectCore core, Expression limit,
-            Expression offset, List<CompoundOperation> ops,
+    public SelectStmt(Block block, Explain explain, SelectCore core,
+            Expression limit, Expression offset, List<CompoundOperation> ops,
             List<OrderingTerm> terms) {
-        super(beginLine, beginColumn, endLine, endColumn, explain);
+        super(block, explain);
         this.core = core;
         this.limit = limit;
         this.offset = offset;

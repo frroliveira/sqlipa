@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.QualifiedTableName;
 import main.sqlipa.parser.ast.name.TableAlias;
 
@@ -9,9 +10,8 @@ public class TableSrc extends SingleSrc {
     
     private TableAlias alias;
 
-    public TableSrc(int beginLine, int beginColumn, int endLine,
-            int endColumn) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public TableSrc(Block block) {
+        super(block);
     }
     
     public QualifiedTableName getTable() {

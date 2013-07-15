@@ -13,9 +13,8 @@ public class RaiseFunction extends Node {
     
     private String error;
     
-    public RaiseFunction(int beginLine, int beginColumn, int endLine,
-            int endColumn, Type type, String error) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public RaiseFunction(Block block, Type type, String error) {
+        super(block);
         this.type = type;
         this.error = error;
     }

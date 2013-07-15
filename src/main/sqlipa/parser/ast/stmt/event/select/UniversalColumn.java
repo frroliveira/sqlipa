@@ -1,14 +1,14 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.TableName;
 
 public class UniversalColumn extends ResultColumn {
 
     private TableName tab;
     
-    public UniversalColumn(int beginLine, int beginColumn, int endLine,
-            int endColumn, TableName tab) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public UniversalColumn(Block block, TableName tab) {
+        super(block);
         this.tab = tab;
     }
     

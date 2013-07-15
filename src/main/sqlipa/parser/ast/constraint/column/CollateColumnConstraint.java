@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.CollationName;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -7,9 +8,9 @@ public class CollateColumnConstraint extends ColumnConstraint {
 
     CollationName collation;
     
-    public CollateColumnConstraint(int beginLine, int beginColumn, int endLine,
-            int endColumn, ConstraintName name, CollationName collation) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public CollateColumnConstraint(Block block, ConstraintName name,
+            CollationName collation) {
+        super(block, name);
     }
     
     public CollationName getCollation() {

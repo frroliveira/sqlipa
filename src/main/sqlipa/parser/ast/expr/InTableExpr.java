@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.TableName;
 
@@ -9,10 +10,9 @@ public class InTableExpr extends InExpr {
     
     private TableName tab;
     
-    public InTableExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, Operator op, Expression expr, DatabaseName db,
-            TableName tab) {
-        super(beginLine, beginColumn, endLine, endColumn, op, expr);
+    public InTableExpr(Block block, Operator op, Expression expr,
+            DatabaseName db, TableName tab) {
+        super(block, op, expr);
         this.db = db;
         this.tab = tab;
     }

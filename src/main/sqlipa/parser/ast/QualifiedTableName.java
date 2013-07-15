@@ -9,9 +9,8 @@ public class QualifiedTableName extends Node {
     
     private TableName tab;
     
-    public QualifiedTableName(int beginLine, int beginColumn, int endLine,
-            int endColumn, DatabaseName db, TableName tab) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public QualifiedTableName(Block block, DatabaseName db, TableName tab) {
+        super(block);
         this.db = db;
         this.tab = tab;
     }

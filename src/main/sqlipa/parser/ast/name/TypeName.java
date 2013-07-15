@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.name;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.SignedNumber;
 
 public class TypeName extends Name {
@@ -14,9 +15,9 @@ public class TypeName extends Name {
         this.yDim = yDim;
     }
     
-    public TypeName(int beginLine, int beginColumn, int endLine,
-            int endColumn, String name, SignedNumber xDim, SignedNumber yDim) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public TypeName(Block block, String name, SignedNumber xDim,
+            SignedNumber yDim) {
+        super(block, name);
         this.xDim = xDim;
         this.yDim = yDim;
     }

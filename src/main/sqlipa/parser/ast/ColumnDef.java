@@ -15,16 +15,13 @@ public class ColumnDef extends Node {
     
     private List<ColumnConstraint> constraints;
     
-    public ColumnDef(int beginLine, int beginColumn, int endLine, int endColumn, 
-            ColumnName column, TypeName type) {
-        this(beginLine, beginColumn, endLine, endColumn, column, type, 
-                new LinkedList<ColumnConstraint>());
+    public ColumnDef(Block block, ColumnName column, TypeName type) {
+        this(block, column, type, new LinkedList<ColumnConstraint>());
     }
     
-    public ColumnDef(int beginLine, int beginColumn, int endLine, int endColumn, 
-            ColumnName column, TypeName type, 
+    public ColumnDef(Block block, ColumnName column, TypeName type, 
             List<ColumnConstraint> constraints) {
-        super(beginLine, beginColumn, endLine, endColumn);
+        super(block);
         this.column = column;
         this.type = type;
         this.constraints = constraints;

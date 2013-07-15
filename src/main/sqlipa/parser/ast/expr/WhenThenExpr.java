@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
 public class WhenThenExpr extends Node {
@@ -8,9 +9,8 @@ public class WhenThenExpr extends Node {
     
     private Expression then;
     
-    public WhenThenExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, Expression when, Expression then) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public WhenThenExpr(Block block, Expression when, Expression then) {
+        super(block);
         this.when = when;
         this.then = then;
     }

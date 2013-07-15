@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ForeignKeyClause;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -7,10 +8,9 @@ public class ForeignKeyColumnConstraint extends ColumnConstraint {
 
     private ForeignKeyClause clause;
     
-    public ForeignKeyColumnConstraint(int beginLine, int beginColumn,
-            int endLine, int endColumn, ConstraintName name, 
+    public ForeignKeyColumnConstraint(Block block, ConstraintName name, 
             ForeignKeyClause clause) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+        super(block, name);
         this.clause = clause;
     }
     

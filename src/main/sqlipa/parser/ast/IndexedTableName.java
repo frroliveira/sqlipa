@@ -8,9 +8,8 @@ public class IndexedTableName extends QualifiedTableName {
 
     private IndexName ind;
     
-    public IndexedTableName(int beginLine, int beginColumn, int endLine,
-            int endColumn, DatabaseName db, TableName tab, IndexName ind) {
-        super(beginLine, beginColumn, endLine, endColumn, db, tab);
+    public IndexedTableName(Block block, DatabaseName db, TableName tab, IndexName ind) {
+        super(block, db, tab);
         this.ind = ind;
     }
     

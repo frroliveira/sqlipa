@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.TypeName;
 
 public class CastExpr extends Expression {
@@ -8,9 +9,8 @@ public class CastExpr extends Expression {
     
     private TypeName type;
     
-    public CastExpr(int beginLine, int beginColumn, int endLine, int endColumn,
-            Expression expr, TypeName type) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public CastExpr(Block block, Expression expr, TypeName type) {
+        super(block);
         this.expr = expr;
         this.type = type;
     }

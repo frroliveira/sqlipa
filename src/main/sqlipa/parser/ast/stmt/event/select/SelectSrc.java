@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.TableAlias;
 
 public class SelectSrc extends SingleSrc {
@@ -8,9 +9,8 @@ public class SelectSrc extends SingleSrc {
     
     private TableAlias alias;
     
-    public SelectSrc(int beginLine, int beginColumn, int endLine,
-            int endColumn, SelectStmt stmt, TableAlias alias) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public SelectSrc(Block block, SelectStmt stmt, TableAlias alias) {
+        super(block);
         this.stmt = stmt;
         this.alias = alias;
     }

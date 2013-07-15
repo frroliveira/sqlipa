@@ -1,10 +1,11 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
+
 public class BindParameterExpr extends Expression {
 
-    public BindParameterExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public BindParameterExpr(Block block) {
+        super(block);
     }
     
     // TODO: As in reference 'see better'.

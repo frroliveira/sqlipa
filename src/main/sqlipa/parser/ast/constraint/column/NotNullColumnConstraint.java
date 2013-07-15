@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -7,9 +8,9 @@ public class NotNullColumnConstraint extends ColumnConstraint {
 
     ConflictClause clause;
     
-    public NotNullColumnConstraint(int beginLine, int beginColumn, int endLine,
-            int endColumn, ConstraintName name, ConflictClause clause) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public NotNullColumnConstraint(Block block, ConstraintName name,
+            ConflictClause clause) {
+        super(block, name);
         this.clause = clause;
     }
     

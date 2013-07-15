@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.ColumnName;
 import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.TableName;
@@ -12,9 +13,9 @@ public class ColumnReferenceExpr extends Expression {
     
     private ColumnName column;
     
-    public ColumnReferenceExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, DatabaseName db, TableName tab, ColumnName column) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public ColumnReferenceExpr(Block block, DatabaseName db, TableName tab,
+            ColumnName column) {
+        super(block);
         this.db = db;
         this.tab = tab;
         this.column = column;

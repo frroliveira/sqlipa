@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.create;
 import java.util.LinkedList;
 import java.util.List;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.ColumnDef;
 import main.sqlipa.parser.ast.constraint.table.TableConstraint;
 import main.sqlipa.parser.ast.name.DatabaseName;
@@ -14,20 +15,18 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
     
     private List<TableConstraint> constraints;
     
-    public CreateTableStmtWithColumns(int beginLine, int beginColumn,
-            int endLine, int endColumn, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name struct, boolean hasTemp) {
-        this(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, struct, hasTemp, 
+    public CreateTableStmtWithColumns(Block block, Explain explain, 
+            boolean hasIfNotExists, DatabaseName db, Name struct,
+            boolean hasTemp) {
+        this(block, explain, hasIfNotExists, db, struct, hasTemp, 
                 new LinkedList<ColumnDef>(), new LinkedList<TableConstraint>());
     }
     
-    public CreateTableStmtWithColumns(int beginLine, int beginColumn,
-            int endLine, int endColumn, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name struct, boolean hasTemp,
-            List<ColumnDef> columns, List<TableConstraint> constraints) {
-        super(beginLine, beginColumn, endLine, endColumn, explain, 
-                hasIfNotExists, db, struct, hasTemp);
+    public CreateTableStmtWithColumns(Block block, Explain explain,
+            boolean hasIfNotExists, DatabaseName db, Name struct, 
+            boolean hasTemp, List<ColumnDef> columns, 
+            List<TableConstraint> constraints) {
+        super(block, explain, hasIfNotExists, db, struct, hasTemp);
         this.columns = columns;
         this.constraints = constraints;
     }

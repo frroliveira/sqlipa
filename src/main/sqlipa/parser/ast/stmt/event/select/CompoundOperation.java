@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
 public class CompoundOperation extends Node {
@@ -15,9 +16,8 @@ public class CompoundOperation extends Node {
     
     private SelectCore core;
     
-    public CompoundOperation(int beginLine, int beginColumn, int endLine,
-            int endColumn, Operator op, SelectCore core) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public CompoundOperation(Block block, Operator op, SelectCore core) {
+        super(block);
         this.op = op;
         this.core = core;
     }

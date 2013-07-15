@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
 import main.sqlipa.parser.ast.name.CollationName;
@@ -17,10 +18,9 @@ public class OrderingTerm extends Node {
     
     private Order order;
     
-    public OrderingTerm(int beginLine, int beginColumn, int endLine,
-            int endColumn, Expression expr, CollationName collation,
+    public OrderingTerm(Block block, Expression expr, CollationName collation,
             Order order) {
-        super(beginLine, beginColumn, endLine, endColumn);
+        super(block);
         this.expr = expr;
         this.collation = collation;
         this.order = order;

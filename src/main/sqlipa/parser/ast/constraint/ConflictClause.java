@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
 public class ConflictClause extends Node {
@@ -14,9 +15,8 @@ public class ConflictClause extends Node {
 
     Action action;
     
-    public ConflictClause(int beginLine, int beginColumn, int endLine, 
-            int endColumn, Action action) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public ConflictClause(Block block, Action action) {
+        super(block);
         this.action = action;
     }
     

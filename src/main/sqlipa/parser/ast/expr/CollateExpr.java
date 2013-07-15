@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.name.CollationName;
 
 public class CollateExpr extends Expression {
@@ -8,9 +9,8 @@ public class CollateExpr extends Expression {
     
     private CollationName collation;
     
-    public CollateExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, Expression expr, CollationName collation) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public CollateExpr(Block block, Expression expr, CollationName collation) {
+        super(block);
         this.expr = expr;
         this.collation = collation;
     }

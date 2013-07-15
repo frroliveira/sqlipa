@@ -1,14 +1,15 @@
 package main.sqlipa.parser.ast.name;
 
+import main.sqlipa.parser.ast.Block;
+
 public class TableAlias extends Alias {
 
     public TableAlias(String name) {
         super(name);
     }
     
-    public TableAlias(int beginLine, int beginColumn, int endLine,
-            int endColumn, String name) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public TableAlias(Block block, String name) {
+        super(block, name);
     }
     
 }

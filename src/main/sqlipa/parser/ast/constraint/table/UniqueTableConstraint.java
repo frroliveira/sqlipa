@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.constraint.table;
 import java.util.LinkedList;
 import java.util.List;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedColumn;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
 import main.sqlipa.parser.ast.name.ConstraintName;
@@ -13,17 +14,14 @@ public class UniqueTableConstraint extends TableConstraint {
 
     private List<IndexedColumn> columns;
 
-    public UniqueTableConstraint(int beginLine, int beginColumn,
-            int endLine, int endColumn, ConstraintName name,
+    public UniqueTableConstraint(Block block, ConstraintName name,
             ConflictClause clause) {
-        this(beginLine, beginColumn, endLine, endColumn, name, clause,
-                new LinkedList<IndexedColumn>());
+        this(block, name, clause, new LinkedList<IndexedColumn>());
     }
             
-    public UniqueTableConstraint(int beginLine, int beginColumn,
-            int endLine, int endColumn, ConstraintName name,
+    public UniqueTableConstraint(Block block, ConstraintName name,
             ConflictClause clause, List<IndexedColumn> columns) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+        super(block, name);
         this.clause = clause;
         this.columns = columns;
     }

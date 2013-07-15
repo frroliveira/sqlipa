@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -16,10 +17,9 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
     
     boolean autoincrement;
 
-    public PrimaryKeyColumnConstraint(int beginLine, int beginColumn,
-            int endLine, int endColumn, ConstraintName name, Order order, 
-            ConflictClause clause, boolean hasAutoincrement) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public PrimaryKeyColumnConstraint(Block block, ConstraintName name,
+            Order order, ConflictClause clause, boolean hasAutoincrement) {
+        super(block, name);
         this.order = order;
         this.clause = clause;
         this.autoincrement = hasAutoincrement;

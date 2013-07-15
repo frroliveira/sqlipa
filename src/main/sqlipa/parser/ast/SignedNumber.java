@@ -13,9 +13,8 @@ public class SignedNumber extends Node {
     
     private NumericLiteral literal;
     
-    public SignedNumber(int beginLine, int beginColumn, int endLine,
-            int endColumn, Signal signal, NumericLiteral literal) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public SignedNumber(Block block, Signal signal, NumericLiteral literal) {
+        super(block);
         this.signal = signal;
         this.literal = literal;
     }

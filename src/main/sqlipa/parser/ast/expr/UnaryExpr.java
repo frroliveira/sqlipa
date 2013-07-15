@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
+
 public class UnaryExpr extends Expression {
 
     public enum Operator {
@@ -13,9 +15,8 @@ public class UnaryExpr extends Expression {
     
     private Expression expr;
     
-    public UnaryExpr(int beginLine, int beginColumn, int endLine, int endColumn,
-            Operator op, Expression expr) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public UnaryExpr(Block block, Operator op, Expression expr) {
+        super(block);
         this.op = op;
         this.expr = expr;
     }

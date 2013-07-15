@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -7,9 +8,8 @@ public abstract class Constraint extends Node {
     
     private ConstraintName name;
 
-    public Constraint(int beginLine, int beginColumn, int endLine, 
-            int endColumn, ConstraintName name) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public Constraint(Block block, ConstraintName name) {
+        super(block);
         this.name = name;
     }
     

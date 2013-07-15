@@ -3,6 +3,8 @@ package main.sqlipa.parser.ast.expr;
 import java.util.LinkedList;
 import java.util.List;
 
+import main.sqlipa.parser.ast.Block;
+
 public class CaseExpr extends Expression {
     
     private Expression caseExpr;
@@ -11,16 +13,13 @@ public class CaseExpr extends Expression {
     
     private List<WhenThenExpr> whenThen;
 
-    public CaseExpr(int beginLine, int beginColumn, int endLine, int endColumn,
-            Expression caseExpr, Expression elseExpr) {
-        this(beginLine, beginColumn, endLine, endColumn, caseExpr, elseExpr,
-                new LinkedList<WhenThenExpr>());
+    public CaseExpr(Block block, Expression caseExpr, Expression elseExpr) {
+        this(block, caseExpr, elseExpr, new LinkedList<WhenThenExpr>());
     }
     
-    public CaseExpr(int beginLine, int beginColumn, int endLine, int endColumn,
-            Expression caseExpr, Expression elseExpr,
+    public CaseExpr(Block block, Expression caseExpr, Expression elseExpr,
             List<WhenThenExpr> whenThen) {
-        super(beginLine, beginColumn, endLine, endColumn);
+        super(block);
         this.caseExpr = caseExpr;
         this.elseExpr = elseExpr;
         this.whenThen = whenThen;

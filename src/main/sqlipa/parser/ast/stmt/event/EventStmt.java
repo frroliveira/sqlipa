@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
 
 public abstract class EventStmt extends SqlStatement {
@@ -8,9 +9,8 @@ public abstract class EventStmt extends SqlStatement {
         super(explain);
     }
     
-    public EventStmt(int beginLine, int beginColumn, int endLine,
-            int endColumn, Explain explain) {
-        super(beginLine, beginColumn, endLine, endColumn, explain);
+    public EventStmt(Block block, Explain explain) {
+        super(block, explain);
     }
     
 }

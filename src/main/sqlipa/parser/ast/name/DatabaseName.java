@@ -1,14 +1,15 @@
 package main.sqlipa.parser.ast.name;
 
+import main.sqlipa.parser.ast.Block;
+
 public class DatabaseName extends Name {
 
     public DatabaseName(String name) {
         super(name);
     }
     
-    public DatabaseName(int beginLine, int beginColumn, int endLine,
-            int endColumn, String name) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public DatabaseName(Block block, String name) {
+        super(block, name);
     }
     
 }

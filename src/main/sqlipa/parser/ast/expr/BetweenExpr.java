@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
+
 public class BetweenExpr extends Expression {
 
     public enum Operator {
@@ -15,10 +17,9 @@ public class BetweenExpr extends Expression {
     
     private Operator op;
     
-    public BetweenExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, Expression expr, Expression lower, Expression upper,
-            Operator op) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public BetweenExpr(Block block, Expression expr, Expression lower,
+            Expression upper, Operator op) {
+        super(block);
         this.expr = expr;
         this.lower = lower;
         this.upper = upper;

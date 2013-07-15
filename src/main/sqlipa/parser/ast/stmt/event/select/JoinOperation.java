@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
 public class JoinOperation extends Node {
@@ -24,10 +25,9 @@ public class JoinOperation extends Node {
     
     private JoinConstraint constraint;
     
-    public JoinOperation(int beginLine, int beginColumn, int endLine,
-            int endColumn, Operator op, SingleSrc src,
+    public JoinOperation(Block block, Operator op, SingleSrc src,
             JoinConstraint constraint) {
-        super(beginLine, beginColumn, endLine, endColumn);
+        super(block);
         this.op = op;
         this.src = src;
         this.constraint = constraint;

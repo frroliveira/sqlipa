@@ -1,14 +1,15 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
 
 public class InSelectExpr extends InExpr {
 
     private SelectStmt stmt;
     
-    public InSelectExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, Operator op, Expression expr, SelectStmt stmt) {
-        super(beginLine, beginColumn, endLine, endColumn, op, expr);
+    public InSelectExpr(Block block, Operator op, Expression expr,
+            SelectStmt stmt) {
+        super(block, op, expr);
         this.stmt = stmt;
     }
     

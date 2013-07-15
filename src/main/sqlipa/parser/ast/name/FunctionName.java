@@ -1,14 +1,15 @@
 package main.sqlipa.parser.ast.name;
 
+import main.sqlipa.parser.ast.Block;
+
 public class FunctionName extends Name {
 
     public FunctionName(String name) {
         super(name);
     }
     
-    public FunctionName(int beginLine, int beginColumn, int endLine,
-            int endColumn, String name) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public FunctionName(Block block, String name) {
+        super(block, name);
     }
     
 }

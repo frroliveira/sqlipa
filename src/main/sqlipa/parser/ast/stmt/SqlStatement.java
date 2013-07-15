@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
 public abstract class SqlStatement extends Node {
@@ -15,9 +16,8 @@ public abstract class SqlStatement extends Node {
         this.explain = explain;
     }
     
-    public SqlStatement(int beginLine, int beginColumn, int endLine, 
-            int endColumn, Explain explain) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public SqlStatement(Block block, Explain explain) {
+        super(block);
         this.explain = explain;
     }
     

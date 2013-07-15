@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
+
 public class BinaryExpr extends Expression {
 
     public enum Operator {
@@ -36,9 +38,9 @@ public class BinaryExpr extends Expression {
     
     private Operator op;
     
-    public BinaryExpr(int beginLine, int beginColumn, int endLine, 
-            int endColumn, Expression left, Expression right, Operator op) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public BinaryExpr(Block block, Expression left, Expression right,
+            Operator op) {
+        super(block);
         this.left = left;
         this.right = right;
         this.op = op;

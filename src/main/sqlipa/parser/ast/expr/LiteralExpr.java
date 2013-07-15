@@ -1,14 +1,14 @@
 package main.sqlipa.parser.ast.expr;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.literal.Literal;
 
 public class LiteralExpr extends Expression {
 
     private Literal literal;
     
-    public LiteralExpr(int beginLine, int beginColumn, int endLine,
-            int endColumn, Literal literal) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public LiteralExpr(Block block, Literal literal) {
+        super(block);
         this.literal = literal;
     }
     

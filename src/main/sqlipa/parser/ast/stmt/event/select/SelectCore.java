@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.stmt.event.select;
 
 import java.util.List;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
 
@@ -19,11 +20,10 @@ public class SelectCore extends Node {
     
     private List<Expression> groupBy;
     
-    public SelectCore(int beginLine, int beginColumn, int endLine, 
-            int endColumn, boolean returnsDistinct, JoinSrc from,
+    public SelectCore(Block block, boolean returnsDistinct, JoinSrc from,
             Expression where, Expression having, List<ResultColumn> columns,
             List<Expression> groupBy) {
-        super(beginLine, beginColumn, endLine, endColumn);
+        super(block);
         this.distinct = returnsDistinct;
         this.from = from;
         this.where = where;

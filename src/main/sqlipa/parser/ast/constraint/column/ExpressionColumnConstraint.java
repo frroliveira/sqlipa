@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.constraint.column;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
 import main.sqlipa.parser.ast.name.ConstraintName;
 
@@ -7,9 +8,9 @@ public class ExpressionColumnConstraint extends ColumnConstraint {
 
     private Expression expr;
     
-    public ExpressionColumnConstraint(int beginLine, int beginColumn,
-            int endLine, int endColumn, ConstraintName name, Expression expr) {
-        super(beginLine, beginColumn, endLine, endColumn, name);
+    public ExpressionColumnConstraint(Block block, ConstraintName name,
+            Expression expr) {
+        super(block, name);
         this.expr = expr;
     }
     

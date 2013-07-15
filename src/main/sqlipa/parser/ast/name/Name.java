@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.name;
 
+import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
 public class Name extends Node {
@@ -10,9 +11,8 @@ public class Name extends Node {
         this.name = name;
     }
     
-    public Name(int beginLine, int beginColumn, int endLine, int endColumn, 
-            String name) {
-        super(beginLine, beginColumn, endLine, endColumn);
+    public Name(Block block, String name) {
+        super(block);
         this.name = name;
     }
     

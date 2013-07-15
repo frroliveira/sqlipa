@@ -170,37 +170,40 @@ TOKEN:
 void sqlStmtList() :{}
 {    (sqlStmt())*
 }
-void sqlStmt() :
+
+SqlStatement sqlStmt() :
 {
+    Explain explain;
+    SqlStatement stmt;
 }
 {    ["EXPLAIN" ["QUERY" "PLAN"]]
     (   
-        alterTableStmt()
-    |   analyzeStmt()
-    |   attachStmt()
-	|   beginStmt()
-	|   commitStmt()
-	|   createIndexStmt()
-	|   createTableStmt()
-	|   createTriggerStmt()
-	|   createViewStmt()
-	|   createVirtualTableStmt()	|   deleteStmt()
-	|   deleteStmtLimited()
-	|   detachStmt()
-	|   dropIndexStmt()
-	|   dropTableStmt()
-	|   dropTriggerStmt()
-	|   dropViewStmt()
-	|   insertStmt()
-	|   pragmaStmt()
-	|   reindexStmt()
-	|   releaseStmt()
-	|   rollbackStmt()
-	|   savepointStmt()
-	|   selectStmt()
-	|   updateStmt()
-	|   updateStmtLimited()
-	|   vacuumStmt()
+        stmt = alterTableStmt()
+    |   stmt = analyzeStmt()
+    |   stmt = attachStmt()
+	|   stmt = beginStmt()
+	|   stmt = commitStmt()
+	|   stmt = createIndexStmt()
+	|   stmt = createTableStmt()
+	|   stmt = createTriggerStmt()
+	|   stmt = createViewStmt()
+	|   stmt = createVirtualTableStmt()	|   stmt = deleteStmt()
+	|   stmt = deleteStmtLimited()
+	|   stmt = detachStmt()
+	|   stmt = dropIndexStmt()
+	|   stmt = dropTableStmt()
+	|   stmt = dropTriggerStmt()
+	|   stmt = dropViewStmt()
+	|   stmt = insertStmt()
+	|   stmt = pragmaStmt()
+	|   stmt = reindexStmt()
+	|   stmt = releaseStmt()
+	|   stmt = rollbackStmt()
+	|   stmt = savepointStmt()
+	|   stmt = selectStmt()
+	|   stmt = updateStmt()
+	|   stmt = updateStmtLimited()
+	|   stmt = vacuumStmt()
 	)
 }
 

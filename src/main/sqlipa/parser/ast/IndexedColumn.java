@@ -16,10 +16,9 @@ public class IndexedColumn extends Node {
     
     private CollationName collation;
     
-    public IndexedColumn(int beginLine, int beginColumn, int endLine,
-            int endColumn, Order order, ColumnName column,
+    public IndexedColumn(Block block, Order order, ColumnName column,
             CollationName collation) {
-        super(beginLine, beginColumn, endLine, endColumn);
+        super(block);
         this.order = order;
         this.column = column;
         this.collation = collation;
