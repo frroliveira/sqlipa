@@ -2,11 +2,11 @@ package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.name.TableName;
 
-public class AllColumns extends ResultColumns {
+public class UniversalColumn extends ResultColumn {
 
     private TableName tab;
     
-    public AllColumns(int beginLine, int beginColumn, int endLine,
+    public UniversalColumn(int beginLine, int beginColumn, int endLine,
             int endColumn, TableName tab) {
         super(beginLine, beginColumn, endLine, endColumn);
         this.tab = tab;

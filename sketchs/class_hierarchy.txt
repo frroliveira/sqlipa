@@ -1,6 +1,7 @@
 // Abstract for all classes that can't be used.
 // All classes extend except Node.
 // Create 'add' and 'remove' methods for lists.
+// Constructors without line and column numbers?
 namespace stmt {
     SqlStatementList {
         List<SqlStatement> stmts;
@@ -193,8 +194,8 @@ namespace stmt {
                         SelectCore core;
                         List<CompoundOperation> ops;
                         List<OrderingTerm> terms;
-                        Expression limitExpr;
-                        Expression offsetExpr;
+                        Expression limit;
+                        Expression offset;
                     }
 
                     // Doesn't extend.
@@ -214,10 +215,10 @@ namespace stmt {
                     SelectCore {
                         boolean distinct;
                         List<ResultColumn> columns;
-                        JoinSrc fromSrc;
-                        Expression whereExpr;
-                        List<Expression> groupByExprs;
-                        Expression havingExpr;
+                        JoinSrc from;
+                        Expression where;
+                        List<Expression> groupBy;
+                        Expression having;
                     }
 
                     // Doesn't extend.
@@ -735,11 +736,11 @@ QualifiedTableName {
     DatabaseName db;
     TableName tab;
 
-    IndexedQualifiedTableName {
+    IndexedTableName {
         IndexName ind;
     }
 
-    NotIndexedQualifiedTableName {
+    NotIndexedTableName {
     }
 }
 
