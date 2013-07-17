@@ -6,6 +6,10 @@ import main.sqlipa.parser.ast.name.ConstraintName;
 
 public class ColumnConstraint extends Constraint {
 
+    public ColumnConstraint() {
+        super();
+    }
+    
     public ColumnConstraint(Block block, ConstraintName name) {
         super(block, name);
     }

@@ -4,8 +4,8 @@ import main.sqlipa.parser.ast.Block;
 
 public class FunctionName extends Name {
 
-    public FunctionName(String name) {
-        super(name);
+    public FunctionName() {
+        super();
     }
     
     public FunctionName(Block block, String name) {

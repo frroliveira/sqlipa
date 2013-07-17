@@ -1,6 +1,5 @@
 package main.sqlipa.parser.ast;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.constraint.column.ColumnConstraint;
@@ -15,8 +14,8 @@ public class ColumnDef extends Node {
     
     private List<ColumnConstraint> constraints;
     
-    public ColumnDef(Block block, ColumnName column, TypeName type) {
-        this(block, column, type, new LinkedList<ColumnConstraint>());
+    public ColumnDef() {
+        super();
     }
     
     public ColumnDef(Block block, ColumnName column, TypeName type, 

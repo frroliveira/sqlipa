@@ -8,6 +8,11 @@ public class UniqueColumnConstraint extends ColumnConstraint {
 
     ConflictClause clause;
     
+    public UniqueColumnConstraint(ConflictClause clause) {
+        super();
+        this.clause = clause;
+    }
+    
     public UniqueColumnConstraint(Block block, ConstraintName name,
             ConflictClause clause) {
         super(block, name);

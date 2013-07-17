@@ -18,7 +18,23 @@ public abstract class Node {
         return block;
     }
     
-    public final Object getData() {
+    public int getBeginLine() {
+        return block == null ? -1 : block.beginLine;
+    }
+    
+    public int getBeginColumn() {
+        return block == null ? -1 : block.beginColumn;
+    }
+    
+    public int getEndLine() {
+        return block == null ? -1 : block.endLine;
+    }
+    
+    public int getEndColumn() {
+        return block == null ? -1 : block.endColumn;
+    }
+    
+    public Object getData() {
         return data;
     }
     
@@ -26,7 +42,7 @@ public abstract class Node {
         this.block = block;
     }
     
-    public final void setData(Object data) {
+    public void setData(Object data) {
         this.data = data;
     }
 

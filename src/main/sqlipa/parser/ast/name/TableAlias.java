@@ -4,8 +4,8 @@ import main.sqlipa.parser.ast.Block;
 
 public class TableAlias extends Alias {
 
-    public TableAlias(String name) {
-        super(name);
+    public TableAlias() {
+        super();
     }
     
     public TableAlias(Block block, String name) {

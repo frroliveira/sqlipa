@@ -3,19 +3,37 @@ package main.sqlipa.parser.ast;
 public class ExpansibleBlock extends Block {
     
     public ExpansibleBlock() {
-        super(-1, -1, -1, -1);
+        super(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE,
+                Integer.MIN_VALUE);
+    }
+    
+    public ExpansibleBlock(int beginLine, int beginColumn, int endLine,
+            int endColumn) {
+        super(beginLine, beginColumn, endLine, endColumn);
     }
     
     @Override
     public void setBeginLine(int beginLine) {
-        if (getBeginLine() == -1)
-            super.setBeginLine(beginLine);
+        if (beginLine < this.beginLine)
+            this.beginLine = beginLine;
     }
     
     @Override
     public void setBeginColumn(int beginColumn) {
-        if (getBeginColumn() == -1)
-            super.setBeginColumn(beginColumn);
+        if (beginColumn < this.beginColumn)
+            this.beginColumn = beginColumn;
+    }
+    
+    @Override
+    public void setEndLine(int endLine) {
+        if (endLine > this.endLine)
+            this.endLine = endLine;
+    }
+    
+    @Override
+    public void setEndColumn(int endColumn) {
+        if (endColumn > this.endColumn)
+            this.endColumn = endColumn;
     }
     
 }

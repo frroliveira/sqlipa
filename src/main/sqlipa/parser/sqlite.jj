@@ -187,7 +187,8 @@ TOKEN:
 }
 
 void sqlStmtList() :{}
-{    (sqlStmt())*
+{
+    (sqlStmt())*
 }
 
 SqlStatement sqlStmt() :
@@ -366,7 +367,7 @@ CreateTableStmt createTableStmt(Block block) :
     ]
     "TABLE"
     [
-        "IF NOT EXISTS" { 
+        "IF" "NOT" "EXISTS" { 
             hasIfNotExists = true;
         }
     ]
@@ -395,6 +396,9 @@ CreateTableStmt createTableStmtWithColumns() :
     column = columnDef() { 
         stmt.addColumn(column);
     }
+    // As the two next expressions start by "," it's necessary to use 
+    // LOOKAHAED(2) to decide if we're seeing a column definition or a table
+    // constraint.
     (
         LOOKAHEAD(2)
         "," 
@@ -419,47 +423,246 @@ CreateTableStmtWithSelect createTableStmtWithSelect() :
 }
 {
     "AS"
-    select = selectStmt(new ExpansibleBlock()) {
+    select = selectStmt(new Block()) {
         return new CreateTableStmtWithSelect(select);
     }
 }
 
 ColumnDef columnDef() :
 {
-    ColumnDef column = null;}
+    ColumnDef columnDef = new ColumnDef();
+    ColumnName column;
+    TypeName type = null;
+    ColumnConstraint constraint;}
 {
-    columnName()
-    [typeName()]
-    (columnConstraint())*
-    {
-        return column;
+    column = columnName()
+    [
+        type = typeName()
+    ]
+    (
+        constraint = columnConstraint() {
+            columnDef.addConstraint(constraint);
+        }
+    )* {
+        columnDef.setBlock(new Block(column.getBeginLine(), 
+            column.getBeginColumn(), token.endLine, token.endColumn));
+        columnDef.setColumn(column);
+        columnDef.setType(type);
+        return columnDef;
     }}
 
-void typeName() :
-{}
+TypeName typeName() :
 {
-    (name())+
-    ["(" signedNumber() ["," signedNumber()] ")"]}
-
-void columnConstraint() :
-{}
+    Block block = new Block();
+    String name = new String();
+    SignedNumber xDim = null;
+    SignedNumber yDim = null;}
 {
-    ["CONSTRAINT" name()]
+    name() {
+        block.setBegin(token.beginLine, token.beginColumn);
+        name += token.image;
+    }
     (
-        "PRIMARY" "KEY" [("ASC" | "DESC")] conflictClause() ["AUTOINCREMENT"]
-    |   "NOT" "NULL" conflictClause()
-    |   "UNIQUE" conflictClause()
-    |   "CHECK" "(" expr() ")"
-    |   "DEFAULT" (signedNumber() | literalValue() | "(" expr() ")")    |   "COLLATE" collationName()
-    |   foreignKeyClause()
-    )
+        name() {
+            name += " " + token.image;
+        }
+    )*
+    [
+        "("
+        xDim = signedNumber() 
+        [
+            "," 
+            yDim = signedNumber()
+        ]
+        ")"
+    ] {
+        block.setEnd(token.endLine, token.endColumn);
+        return new TypeName(block, name, xDim, yDim);
+    }}
+
+ColumnConstraint columnConstraint() :
+{
+    ColumnConstraint constraint;
+    Block block = new ExpansibleBlock();
+    ConstraintName name = null;}
+{
+    [
+        "CONSTRAINT" {
+            block.setBegin(token.beginLine, token.beginColumn);
+        }
+        name = constraintName()
+    ]
+    // Each constraint function receives a Block to get the begin values in case 
+    // the constraint doesn't start by CONSTRAINT. To get the right values is 
+    // used an ExpansibleBlock.
+    (
+        constraint = primaryKeyColumnConstraint(block)
+    |   constraint = notNullColumnConstraint(block)
+    |   constraint = uniqueColumnConstraint(block)
+    |   constraint = checkColumnConstraint(block)
+    |   constraint = defaultColumnConstraint(block)    |   constraint = collateColumnConstraint(block)
+    |   constraint = foreignKeyColumnConstraint(block)
+    ) {
+        block.setEnd(token.endLine, token.endColumn);
+        constraint.setBlock(block);
+        constraint.setName(name);
+        return constraint;
+    }
 }
 
-void signedNumber() :
+PrimaryKeyColumnConstraint primaryKeyColumnConstraint(Block block) :
+{
+    PrimaryKeyColumnConstraint.Order order = null;
+    ConflictClause clause;
+    boolean hasAutoincrement = false;
+}
+{
+    "PRIMARY" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "KEY" 
+    [
+        (
+            "ASC" {
+                order = PrimaryKeyColumnConstraint.Order.ASC;
+            }
+        |   "DESC" {
+                order = PrimaryKeyColumnConstraint.Order.DESC;
+            }
+        )
+    ]
+    clause = conflictClause()
+    [
+        "AUTOINCREMENT" {
+            hasAutoincrement = true;
+        }
+    ] {
+        return new PrimaryKeyColumnConstraint(order, clause, hasAutoincrement);
+    }
+}
+
+NotNullColumnConstraint notNullColumnConstraint(Block block) :
+{
+    ConflictClause clause;
+}
+{
+    "NOT" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "NULL"
+    clause = conflictClause() {
+        return new NotNullColumnConstraint(clause);
+    }
+}
+
+UniqueColumnConstraint uniqueColumnConstraint(Block block) :
+{
+    ConflictClause clause;
+}
+{
+    "UNIQUE" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    clause = conflictClause() {
+        return new UniqueColumnConstraint(clause);
+    }
+}
+
+CheckColumnConstraint checkColumnConstraint(Block block) :
+{
+    Expression expr;
+}
+{
+    "CHECK" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "(" 
+    expr = expr()
+    ")" {
+        return new CheckColumnConstraint(expr);
+    }
+}
+
+DefaultColumnConstraint defaultColumnConstraint(Block block) :
+{
+    DefaultColumnConstraint constraint;
+}
+{
+    "DEFAULT" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    (
+        constraint = numberColumnConstraint()
+    |   constraint = literalColumnConstraint()
+    |   constraint = expressionColumnConstraint()
+    ) {
+        return constraint;
+    }
+}
+
+NumberColumnConstraint numberColumnConstraint():
+{
+    SignedNumber number;
+}
+{
+    number = signedNumber() {
+        return new NumberColumnConstraint(number);
+    }
+}
+
+LiteralColumnConstraint literalColumnConstraint() :
+{
+    Literal literal;
+}
+{
+    literal = literalValue() {
+        return new LiteralColumnConstraint(literal);
+    }
+}
+
+ExpressionColumnConstraint expressionColumnConstraint() :
+{
+    Expression expr;
+}
+{
+    "("
+    expr = expr()
+    ")" {
+        return new ExpressionColumnConstraint(expr);
+    }
+}
+
+CollateColumnConstraint collateColumnConstraint(Block block) :
+{
+    CollationName collation;
+}
+{
+    "COLLATE" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    collation = collationName() {
+        return new CollateColumnConstraint(collation);
+    }
+}
+
+ForeignKeyColumnConstraint foreignKeyColumnConstraint(Block block) :
+{
+    ForeignKeyClause clause;
+}
+{
+    clause = foreignKeyClause() {
+        block.setBegin(clause.getBeginLine(), clause.getBeginColumn());
+        return new ForeignKeyColumnConstraint(clause);
+    }
+}
+
+SignedNumber signedNumber() :
 {}
 {
     [("+" | "-")]
-    numericLiteral()}
+    numericLiteral() {
+        return null;
+    }}
 
 TableConstraint tableConstraint() :
 {
@@ -475,7 +678,7 @@ TableConstraint tableConstraint() :
         return constraint;
     }}
 
-void foreignKeyClause() :
+ForeignKeyClause foreignKeyClause() :
 {}
 {
     "REFERENCES"
@@ -498,9 +701,12 @@ void foreignKeyClause() :
         )
     |   "MATCH" name()
     )*
-    [LOOKAHEAD(2) ["NOT"] "DEFERRABLE" ["INITIALLY" ("DEFERRED" | "IMMEDIATE")]]}
+    [LOOKAHEAD(2) ["NOT"] "DEFERRABLE" ["INITIALLY" ("DEFERRED" | "IMMEDIATE")]]
+    {
+        return null;
+    }}
 
-void conflictClause() :
+ConflictClause conflictClause() :
 {}
 {
     [   
@@ -513,7 +719,9 @@ void conflictClause() :
         |   "IGNORE"
         |   "REPLACE"
         )
-    ]}
+    ] {
+        return null;
+    }}
 
 SqlStatement createTriggerStmt(Block block) :
 {
@@ -625,20 +833,24 @@ SqlStatement dropViewStmt(Block block) :
     }
 }
 
-void expr() :
+Expression expr() :
 {}
 {
-    "c"}
+    "c" {
+        return null;
+    }}
 
 void raiseFunction() :
 {}
 {
     "d"}
 
-void literalValue() :
+Literal literalValue() :
 {}
 {
-    "a"}
+    "a" {
+        return null;
+    }}
 
 void numericLiteral() :
 {}
@@ -802,11 +1014,14 @@ void name() :
     "r"
 }
 
-void columnName() :
+ColumnName columnName() :
 {
+    
 }
 {
-    "v"
+    "v" {
+        return null;
+    }
 }
 
 void foreignTable() :
@@ -816,9 +1031,20 @@ void foreignTable() :
     "t"
 }
 
-void collationName() :
+CollationName collationName() :
 {
 }
 {
-    "y"
+    "y" {
+        return null;
+    }
+}
+
+ConstraintName constraintName() :
+{
+}
+{
+    {
+        return null;
+    }
 }

@@ -4,8 +4,8 @@ import main.sqlipa.parser.ast.Block;
 
 public class ConstraintName extends Name {
 
-    public ConstraintName(String name) {
-        super(name);
+    public ConstraintName() {
+        super();
     }
     
     public ConstraintName(Block block, String name) {

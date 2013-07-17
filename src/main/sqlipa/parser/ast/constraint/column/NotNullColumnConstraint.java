@@ -8,6 +8,11 @@ public class NotNullColumnConstraint extends ColumnConstraint {
 
     ConflictClause clause;
     
+    public NotNullColumnConstraint(ConflictClause clause) {
+        super();
+        this.clause = clause;
+    }
+    
     public NotNullColumnConstraint(Block block, ConstraintName name,
             ConflictClause clause) {
         super(block, name);

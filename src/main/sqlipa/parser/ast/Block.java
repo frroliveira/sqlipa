@@ -2,13 +2,13 @@ package main.sqlipa.parser.ast;
 
 public class Block {
     
-    protected int beginLine;
+    public int beginLine;
     
-    private int beginColumn;
+    public int beginColumn;
     
-    private int endLine;
+    public int endLine;
     
-    private int endColumn;
+    public int endColumn;
     
     public Block() {
     }
@@ -18,22 +18,6 @@ public class Block {
         this.beginColumn = beginColumn;
         this.endLine = endLine;
         this.endColumn = endColumn;
-    }
-    
-    public final int getBeginLine() {
-        return beginLine;
-    }
-    
-    public final int getBeginColumn() {
-        return beginColumn;
-    }
-    
-    public final int getEndLine() {
-        return endLine;
-    }
-    
-    public final int getEndColumn() {
-        return endColumn;
     }
     
     public void setBeginLine(int beginLine) {

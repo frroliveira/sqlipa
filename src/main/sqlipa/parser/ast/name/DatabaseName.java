@@ -4,8 +4,8 @@ import main.sqlipa.parser.ast.Block;
 
 public class DatabaseName extends Name {
 
-    public DatabaseName(String name) {
-        super(name);
+    public DatabaseName() {
+        super();
     }
     
     public DatabaseName(Block block, String name) {

@@ -4,8 +4,8 @@ import main.sqlipa.parser.ast.Block;
 
 public class ColumnName extends Name {
 
-    public ColumnName(String name) {
-        super(name);
+    public ColumnName() {
+        super();
     }
     
     public ColumnName(Block block, String name) {

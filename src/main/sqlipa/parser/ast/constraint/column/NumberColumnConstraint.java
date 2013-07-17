@@ -8,6 +8,11 @@ public class NumberColumnConstraint extends DefaultColumnConstraint {
 
     private SignedNumber number;
     
+    public NumberColumnConstraint(SignedNumber number) {
+        super();
+        this.number = number;
+    }
+    
     public NumberColumnConstraint(Block block, ConstraintName name,
             SignedNumber number) {
         super(block, name);

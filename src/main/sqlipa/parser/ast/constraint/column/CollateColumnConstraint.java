@@ -8,9 +8,15 @@ public class CollateColumnConstraint extends ColumnConstraint {
 
     CollationName collation;
     
+    public CollateColumnConstraint(CollationName collation) {
+        super();
+        this.collation = collation;
+    }
+    
     public CollateColumnConstraint(Block block, ConstraintName name,
             CollationName collation) {
         super(block, name);
+        this.collation = collation;
     }
     
     public CollationName getCollation() {

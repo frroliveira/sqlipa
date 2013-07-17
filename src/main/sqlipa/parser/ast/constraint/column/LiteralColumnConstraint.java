@@ -7,6 +7,11 @@ import main.sqlipa.parser.ast.name.ConstraintName;
 public class LiteralColumnConstraint extends DefaultColumnConstraint {
 
     private Literal literal;
+
+    public LiteralColumnConstraint(Literal literal) {
+        super();
+        this.literal = literal;
+    }
     
     public LiteralColumnConstraint(Block block, ConstraintName name,
             Literal literal) {

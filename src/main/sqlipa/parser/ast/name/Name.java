@@ -7,15 +7,14 @@ public class Name extends Node {
     
     private String name;
     
-    public Name(String name) {
-        this.name = name;
+    public Name() {
     }
     
     public Name(Block block, String name) {
         super(block);
         this.name = name;
     }
-    
+
     public String getName() {
         return name;
     }

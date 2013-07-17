@@ -7,6 +7,11 @@ import main.sqlipa.parser.ast.name.ConstraintName;
 public class CheckColumnConstraint extends ColumnConstraint {
 
     Expression expr;
+
+    public CheckColumnConstraint(Expression expr) {
+        super();
+        this.expr = expr;
+    }
     
     public CheckColumnConstraint(Block block, ConstraintName name,
             Expression expr) {

@@ -8,11 +8,15 @@ public abstract class Constraint extends Node {
     
     private ConstraintName name;
 
+    public Constraint() {
+        super();
+    }
+    
     public Constraint(Block block, ConstraintName name) {
         super(block);
         this.name = name;
     }
-    
+
     public ConstraintName getName() {
         return name;
     }

@@ -4,8 +4,8 @@ import main.sqlipa.parser.ast.Block;
 
 public class IndexName extends Name {
 
-    public IndexName(String name) {
-        super(name);
+    public IndexName() {
+        super();
     }
     
     public IndexName(Block block, String name) {

@@ -17,6 +17,14 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
     
     boolean autoincrement;
 
+    public PrimaryKeyColumnConstraint(Order order, ConflictClause clause,
+            boolean hasAutoincrement) {
+        super();
+        this.order = order;
+        this.clause = clause;
+        this.autoincrement = hasAutoincrement;
+    }
+    
     public PrimaryKeyColumnConstraint(Block block, ConstraintName name,
             Order order, ConflictClause clause, boolean hasAutoincrement) {
         super(block, name);

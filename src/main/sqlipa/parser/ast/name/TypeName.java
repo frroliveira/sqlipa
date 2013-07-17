@@ -9,10 +9,8 @@ public class TypeName extends Name {
     
     private SignedNumber yDim;
     
-    public TypeName(String name, SignedNumber xDim, SignedNumber yDim) {
-        super(name);
-        this.xDim = xDim;
-        this.yDim = yDim;
+    public TypeName() {
+        super();
     }
     
     public TypeName(Block block, String name, SignedNumber xDim,
