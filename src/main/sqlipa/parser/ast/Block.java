@@ -10,6 +10,9 @@ public class Block {
     
     private int endColumn;
     
+    public Block() {
+    }
+    
     public Block(int beginLine, int beginColumn, int endLine, int endColumn) {
         this.beginLine = beginLine;
         this.beginColumn = beginColumn;
@@ -33,20 +36,30 @@ public class Block {
         return endColumn;
     }
     
-    public final void setBeginLine(int beginLine) {
+    public void setBeginLine(int beginLine) {
         this.beginLine = beginLine;
     }
     
-    public final void setBeginColumn(int beginColumn) {
+    public void setBeginColumn(int beginColumn) {
         this.beginColumn = beginColumn;
     }
     
-    public final void setEndLine(int endLine) {
+    public void setBegin(int beginLine, int beginColumn) {
+        setBeginLine(beginLine);
+        setBeginColumn(beginColumn);
+    }
+    
+    public void setEndLine(int endLine) {
         this.endLine = endLine;
     }
     
-    public final void setEndColumn(int endColumn) {
+    public void setEndColumn(int endColumn) {
         this.endColumn = endColumn;
+    }
+    
+    public void setEnd(int endLine, int endColumn) {
+        setEndLine(endLine);
+        setEndColumn(endColumn);
     }
     
 }

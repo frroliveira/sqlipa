@@ -1,6 +1,5 @@
 package main.sqlipa.parser.ast.stmt.create;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
@@ -15,11 +14,8 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
     
     private List<TableConstraint> constraints;
     
-    public CreateTableStmtWithColumns(Block block, Explain explain, 
-            boolean hasIfNotExists, DatabaseName db, Name struct,
-            boolean hasTemp) {
-        this(block, explain, hasIfNotExists, db, struct, hasTemp, 
-                new LinkedList<ColumnDef>(), new LinkedList<TableConstraint>());
+    public CreateTableStmtWithColumns() {
+        super();
     }
     
     public CreateTableStmtWithColumns(Block block, Explain explain,
@@ -30,7 +26,7 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
         this.columns = columns;
         this.constraints = constraints;
     }
-    
+
     public List<ColumnDef> getColumns() {
         return columns;
     }

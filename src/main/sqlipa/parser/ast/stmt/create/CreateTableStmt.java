@@ -8,12 +8,16 @@ public abstract class CreateTableStmt extends CreateStmt {
 
     private boolean temp;
     
+    public CreateTableStmt() {
+        super();
+    }
+    
     public CreateTableStmt(Block block, Explain explain, boolean hasIfNotExists,
             DatabaseName db, Name name, boolean hasTemp) {
         super(block, explain, hasIfNotExists, db, name);
         this.temp = hasTemp;
     }
-    
+
     public boolean hasTemporary() {
         return temp;
     }

@@ -7,13 +7,28 @@ options {
 }
 
 PARSER_BEGIN(ASTParser)
-package sqlipa.parser;
+package main.sqlipa.parser;
+
+import main.sqlipa.parser.ast.*;
+import main.sqlipa.parser.ast.constraint.*;
+import main.sqlipa.parser.ast.constraint.table.*;
+import main.sqlipa.parser.ast.constraint.column.*;
+import main.sqlipa.parser.ast.expr.*;
+import main.sqlipa.parser.ast.literal.*;
+import main.sqlipa.parser.ast.name.*;
+import main.sqlipa.parser.ast.stmt.*;
+import main.sqlipa.parser.ast.stmt.create.*;
+import main.sqlipa.parser.ast.stmt.drop.*;
+import main.sqlipa.parser.ast.stmt.event.*;
+import main.sqlipa.parser.ast.stmt.event.select.*;
+import main.sqlipa.parser.ast.stmt.event.update.*;
+import main.sqlipa.parser.ast.stmt.pragma.*;
 
 final class ASTParser {
     public static void main(String args[]) {
         ASTParser parser = new ASTParser(System.in);
         try {
-            parser.createTableStmt();
+            parser.sqlStmt();
             System.out.println("Accept");
         } catch (ParseException e) {
             System.out.println("Reject");
@@ -42,129 +57,133 @@ TOKEN_MGR_DECLS :
     }
 }
 
+// Prefixed tokens avoid name collisions.
+//
+// K_ - Keyword, O_ - Operator, S_ - Substitutes
+
 TOKEN:
 {
-    <ABORT: "ABORT">
-|   <ACTION: "ACTION">
-|   <ADD: "ADD">
-|   <AFTER: "AFTER">
-|   <ALL: "ALL">
-|   <ALTER: "ALTER">
-|   <ANALYZE: "ANALYZE">
-|   <AND: "AND">
-|   <AS: "AS">
-|   <ASC: "ASC">
-|   <ATTACH: "ATTACH">
-|   <AUTOINCREMENT: "AUTOINCREMENT">
-|   <BEFORE: "BEFORE">
-|   <BEGIN: "BEGIN">
-|   <BETWEEN: "BETWEEN">
-|   <BY: "BY">
-|   <CASCADE: "CASCADE">
-|   <CASE: "CASE">
-|   <CAST: "CAST">
-|   <CHECK: "CHECK">
-|   <COLLATE: "COLLATE">
-|   <COLUMN: "COLUMN">
-|   <COMMIT: "COMMIT">
-|   <CONFLICT: "CONFLICT">
-|   <CONSTRAINT: "CONSTRAINT">
-|   <CREATE: "CREATE">
-|   <CROSS: "CROSS">
-|   <CURRENT_DATE: "CURRENT_DATE">
-|   <CURRENT_TIME: "CURRENT_TIME">
-|   <CURRENT_TIMESTAMP: "CURRENT_TIMESTAMP">
-|   <DATABASE: "DATABASE">
-|   <DEFAULT: "DEFAULT">
-|   <DEFERRABLE: "DEFERRABLE">
-|   <DEFERRED: "DEFERRED">
-|   <DELETE: "DELETE">
-|   <DESC: "DESC">
-|   <DETACH: "DETACH">
-|   <DISTINCT: "DISTINCT">
-|   <DROP: "DROP">
-|   <EACH: "EACH">
-|   <ELSE: "ELSE">
-|   <END: "END">
-|   <ESCAPE: "ESCAPE">
-|   <EXCEPT: "EXCEPT">
-|   <EXCLUSIVE: "EXCLUSIVE">
-|   <EXISTS: "EXISTS">
-|   <EXPLAIN: "EXPLAIN">
-|   <FAIL: "FAIL">
-|   <FOR: "FOR">
-|   <FOREIGN: "FOREIGN">
-|   <FROM: "FROM">
-|   <FULL: "FULL">
-|   <GLOB: "GLOB">
-|   <GROUP: "GROUP">
-|   <HAVING: "HAVING">
-|   <IF: "IF">
-|   <IGNORE: "IGNORE">
-|   <IMMEDIATE: "IMMEDIATE">
-|   <IN: "IN">
-|   <INDEX: "INDEX">
-|   <INDEXED: "INDEXED">
-|   <INITIALLY: "INITIALLY">
-|   <INNER: "INNER">
-|   <INSERT: "INSERT">
-|   <INSTEAD: "INSTEAD">
-|   <INTERSECT: "INTERSECT">
-|   <INTO: "INTO">
-|   <IS: "IS">
-|   <ISNULL: "ISNULL">
-|   <JOIN: "JOIN">
-|   <KEY: "KEY">
-|   <LEFT: "LEFT">
-|   <LIKE: "LIKE">
-|   <LIMIT: "LIMIT">
-|   <MATCH: "MATCH">
-|   <NATURAL: "NATURAL">
-|   <NO: "NO">
-|   <NOT: "NOT">
-|   <NOTNULL: "NOTNULL">
-|   <NULL: "NULL">
-|   <OF: "OF">
-|   <OFFSET: "OFFSET">
-|   <ON: "ON">
-|   <OR: "OR">
-|   <ORDER: "ORDER">
-|   <OUTER: "OUTER">
-|   <PLAN: "PLAN">
-|   <PRAGMA: "PRAGMA">
-|   <PRIMARY: "PRIMARY">
-|   <QUERY: "QUERY">
-|   <RAISE: "RAISE">
-|   <REFERENCES: "REFERENCES">
-|   <REGEXP: "REGEXP">
-|   <REINDEX: "REINDEX">
-|   <RELEASE: "RELEASE">
-|   <RENAME: "RENAME">
-|   <REPLACE: "REPLACE">
-|   <RESTRICT: "RESTRICT">
-|   <RIGHT: "RIGHT">
-|   <ROLLBACK: "ROLLBACK">
-|   <ROW: "ROW">
-|   <SAVEPOINT: "SAVEPOINT">
-|   <SELECT: "SELECT">
-|   <SET: "SET">
-|   <TABLE: "TABLE">
-|   <TEMP: "TEMP">
-|   <TEMPORARY: "TEMPORARY">
-|   <THEN: "THEN">
-|   <TO: "TO">
-|   <TRANSACTION: "TRANSACTION">
-|   <TRIGGER: "TRIGGER">
-|   <UNION: "UNION">
-|   <UNIQUE: "UNIQUE">
-|   <UPDATE: "UPDATE">
-|   <USING: "USING">
-|   <VACUUM: "VACUUM">
-|   <VALUES: "VALUES">
-|   <VIEW: "VIEW">
-|   <VIRTUAL: "VIRTUAL">
-|   <WHEN: "WHEN">
-|   <WHERE: "WHERE">
+    <K_ABORT: "ABORT">
+|   <K_ACTION: "ACTION">
+|   <K_ADD: "ADD">
+|   <K_AFTER: "AFTER">
+|   <K_ALL: "ALL">
+|   <K_ALTER: "ALTER">
+|   <K_ANALYZE: "ANALYZE">
+|   <K_AND: "AND">
+|   <K_AS: "AS">
+|   <K_ASC: "ASC">
+|   <K_ATTACH: "ATTACH">
+|   <K_AUTOINCREMENT: "AUTOINCREMENT">
+|   <K_BEFORE: "BEFORE">
+|   <K_BEGIN: "BEGIN">
+|   <K_BETWEEN: "BETWEEN">
+|   <K_BY: "BY">
+|   <K_CASCADE: "CASCADE">
+|   <K_CASE: "CASE">
+|   <K_CAST: "CAST">
+|   <K_CHECK: "CHECK">
+|   <K_COLLATE: "COLLATE">
+|   <K_COLUMN: "COLUMN">
+|   <K_COMMIT: "COMMIT">
+|   <K_CONFLICT: "CONFLICT">
+|   <K_CONSTRAINT: "CONSTRAINT">
+|   <K_CREATE: "CREATE">
+|   <K_CROSS: "CROSS">
+|   <K_CURRENT_DATE: "CURRENT_DATE">
+|   <K_CURRENT_TIME: "CURRENT_TIME">
+|   <K_CURRENT_TIMESTAMP: "CURRENT_TIMESTAMP">
+|   <K_DATABASE: "DATABASE">
+|   <K_DEFAULT: "DEFAULT">
+|   <K_DEFERRABLE: "DEFERRABLE">
+|   <K_DEFERRED: "DEFERRED">
+|   <K_DELETE: "DELETE">
+|   <K_DESC: "DESC">
+|   <K_DETACH: "DETACH">
+|   <K_DISTINCT: "DISTINCT">
+|   <K_DROP: "DROP">
+|   <K_EACH: "EACH">
+|   <K_ELSE: "ELSE">
+|   <K_END: "END">
+|   <K_ESCAPE: "ESCAPE">
+|   <K_EXCEPT: "EXCEPT">
+|   <K_EXCLUSIVE: "EXCLUSIVE">
+|   <K_EXISTS: "EXISTS">
+|   <K_EXPLAIN: "EXPLAIN">
+|   <K_FAIL: "FAIL">
+|   <K_FOR: "FOR">
+|   <K_FOREIGN: "FOREIGN">
+|   <K_FROM: "FROM">
+|   <K_FULL: "FULL">
+|   <K_GLOB: "GLOB">
+|   <K_GROUP: "GROUP">
+|   <K_HAVING: "HAVING">
+|   <K_IF: "IF">
+|   <K_IGNORE: "IGNORE">
+|   <K_IMMEDIATE: "IMMEDIATE">
+|   <K_IN: "IN">
+|   <K_INDEX: "INDEX">
+|   <K_INDEXED: "INDEXED">
+|   <K_INITIALLY: "INITIALLY">
+|   <K_INNER: "INNER">
+|   <K_INSERT: "INSERT">
+|   <K_INSTEAD: "INSTEAD">
+|   <K_INTERSECT: "INTERSECT">
+|   <K_INTO: "INTO">
+|   <K_IS: "IS">
+|   <K_ISNULL: "ISNULL">
+|   <K_JOIN: "JOIN">
+|   <K_KEY: "KEY">
+|   <K_LEFT: "LEFT">
+|   <K_LIKE: "LIKE">
+|   <K_LIMIT: "LIMIT">
+|   <K_MATCH: "MATCH">
+|   <K_NATURAL: "NATURAL">
+|   <K_NO: "NO">
+|   <K_NOT: "NOT">
+|   <K_NOTNULL: "NOTNULL">
+|   <K_NULL: "NULL">
+|   <K_OF: "OF">
+|   <K_OFFSET: "OFFSET">
+|   <K_ON: "ON">
+|   <K_OR: "OR">
+|   <K_ORDER: "ORDER">
+|   <K_OUTER: "OUTER">
+|   <K_PLAN: "PLAN">
+|   <K_PRAGMA: "PRAGMA">
+|   <K_PRIMARY: "PRIMARY">
+|   <K_QUERY: "QUERY">
+|   <K_RAISE: "RAISE">
+|   <K_REFERENCES: "REFERENCES">
+|   <K_REGEXP: "REGEXP">
+|   <K_REINDEX: "REINDEX">
+|   <K_RELEASE: "RELEASE">
+|   <K_RENAME: "RENAME">
+|   <K_REPLACE: "REPLACE">
+|   <K_RESTRICT: "RESTRICT">
+|   <K_RIGHT: "RIGHT">
+|   <K_ROLLBACK: "ROLLBACK">
+|   <K_ROW: "ROW">
+|   <K_SAVEPOINT: "SAVEPOINT">
+|   <K_SELECT: "SELECT">
+|   <K_SET: "SET">
+|   <K_TABLE: "TABLE">
+|   <K_TEMP: "TEMP">
+|   <K_TEMPORARY: "TEMPORARY">
+|   <K_THEN: "THEN">
+|   <K_TO: "TO">
+|   <K_TRANSACTION: "TRANSACTION">
+|   <K_TRIGGER: "TRIGGER">
+|   <K_UNION: "UNION">
+|   <K_UNIQUE: "UNIQUE">
+|   <K_UPDATE: "UPDATE">
+|   <K_USING: "USING">
+|   <K_VACUUM: "VACUUM">
+|   <K_VALUES: "VALUES">
+|   <K_VIEW: "VIEW">
+|   <K_VIRTUAL: "VIRTUAL">
+|   <K_WHEN: "WHEN">
+|   <K_WHERE: "WHERE">
 }
 
 void sqlStmtList() :{}
@@ -173,123 +192,253 @@ void sqlStmtList() :{}
 
 SqlStatement sqlStmt() :
 {
-    Explain explain;
+    Block block = new ExpansibleBlock();
+    SqlStatement.Explain explain = null;
     SqlStatement stmt;
 }
-{    ["EXPLAIN" ["QUERY" "PLAN"]]
-    (   
-        stmt = alterTableStmt()
-    |   stmt = analyzeStmt()
-    |   stmt = attachStmt()
-	|   stmt = beginStmt()
-	|   stmt = commitStmt()
-	|   stmt = createIndexStmt()
-	|   stmt = createTableStmt()
-	|   stmt = createTriggerStmt()
-	|   stmt = createViewStmt()
-	|   stmt = createVirtualTableStmt()	|   stmt = deleteStmt()
-	|   stmt = deleteStmtLimited()
-	|   stmt = detachStmt()
-	|   stmt = dropIndexStmt()
-	|   stmt = dropTableStmt()
-	|   stmt = dropTriggerStmt()
-	|   stmt = dropViewStmt()
-	|   stmt = insertStmt()
-	|   stmt = pragmaStmt()
-	|   stmt = reindexStmt()
-	|   stmt = releaseStmt()
-	|   stmt = rollbackStmt()
-	|   stmt = savepointStmt()
-	|   stmt = selectStmt()
-	|   stmt = updateStmt()
-	|   stmt = updateStmtLimited()
-	|   stmt = vacuumStmt()
-	)
+{    [   
+        "EXPLAIN" {
+            block.setBegin(token.beginLine, token.beginColumn);
+            explain = SqlStatement.Explain.NORMAL;
+        } 
+        ["QUERY" "PLAN"] {
+            explain = SqlStatement.Explain.PLAN;
+        }
+    ]
+    // Each statement function receives a Block to get the begin values in case 
+    // the statement doesn't start by EXPLAIN. To get the right values is used 
+    // an ExpansibleBlock.
+    (
+        stmt = alterTableStmt(block)
+    |   stmt = analyzeStmt(block)
+    |   stmt = attachStmt(block)
+	|   stmt = beginStmt(block)
+	|   stmt = commitStmt(block)
+	|   stmt = createIndexStmt(block)
+	|   stmt = createTableStmt(block)
+	|   stmt = createTriggerStmt(block)
+	|   stmt = createViewStmt(block)
+	|   stmt = createVirtualTableStmt(block)	|   stmt = deleteStmt(block)
+	|   stmt = deleteStmtLimited(block)
+	|   stmt = detachStmt(block)
+	|   stmt = dropIndexStmt(block)
+	|   stmt = dropTableStmt(block)
+	|   stmt = dropTriggerStmt(block)
+	|   stmt = dropViewStmt(block)
+	|   stmt = insertStmt(block)
+	|   stmt = pragmaStmt(block)
+	|   stmt = reindexStmt(block)
+	|   stmt = releaseStmt(block)
+	|   stmt = rollbackStmt(block)
+	|   stmt = savepointStmt(block)
+	|   stmt = selectStmt(block)
+	|   stmt = updateStmt(block)
+	|   stmt = updateStmtLimited(block)
+	|   stmt = vacuumStmt(block)
+	) {
+	   block.setEnd(token.endLine, token.endColumn);
+	   stmt.setBlock(block);
+	   stmt.setExplain(explain);
+	   return stmt;
+    }
 }
 
-void alterTableStmt() :
+SqlStatement alterTableStmt(Block block) :
 {
+    SqlStatement stmt = null;
 }
 {
-    ""}
+    "ALTER"
+    {
+        return stmt;
+    }}
 
-void analyzeStmt() :
-{}
+SqlStatement analyzeStmt(Block block) :
 {
-    ""}
-
-void attachStmt() :
-{}
-{
-    ""}
-
-void beginStmt() :
-{}
-{
-    ""}
-
-void commitStmt() :
-{}
-{
-    ""}
-
-void rollbackStmt() :
-{
+    SqlStatement stmt = null;
 }
 {
-    ""
+    "ANALYZE"
+    {
+        return stmt;
+    }
 }
 
-void savepointStmt() :
+SqlStatement attachStmt(Block block) :
 {
+    SqlStatement stmt = null;
 }
 {
-    ""
-}
-
-void releaseStmt() :
-{
-}
-{
-    ""
+    "ATTACH"
+    {
+        return stmt;
+    }
 }
 
-void createIndexStmt() :
-{}
+SqlStatement beginStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "BEGIN"
+    {
+        return stmt;
+    }
+}
+
+SqlStatement commitStmt(Block block) :
+{
+    SqlStatement stmt = null;
+}
+{
+    "COMMIT"
+    {
+        return stmt;
+    }
+}
+
+SqlStatement rollbackStmt(Block block) :
+{
+    SqlStatement stmt = null;
+}
+{
+    "ROLLBACK"
+    {
+        return stmt;
+    }
+}
+
+SqlStatement savepointStmt(Block block) :
+{
+    SqlStatement stmt = null;
+}
+{
+    "SAVEPOINT"
+    {
+        return stmt;
+    }
+}
+
+SqlStatement releaseStmt(Block block) :
+{
+    SqlStatement stmt = null;
+}
+{
+    "RELEASE"
+    {
+        return stmt;
+    }
+}
+
+SqlStatement createIndexStmt(Block block) :
+{
+    SqlStatement stmt = null;
+}
+{
+    "CREATE INDEX"
+    {
+        return stmt;
+    }
+}
 
 void indexedColumn() :
 {
 }
 {
-    ""}
+    "b"}
 
-void createTableStmt() :
-{}
+CreateTableStmt createTableStmt(Block block) :
 {
-    "CREATE" 
-    ["TEMP" ["ORARY"]]
+    CreateTableStmt stmt;
+    boolean hasTemp = false;
+    boolean hasIfNotExists = false;
+    DatabaseName db = null;
+    TableName tab;
+    SelectStmt select = null;}
+{
+    "CREATE" {
+        block.setBegin(token.beginLine, token.beginColumn); 
+    }
+    [
+        ("TEMP" | "TEMPORARY") { 
+            hasTemp = true;
+        }
+    ]
     "TABLE"
-    ["IF NOT EXISTS"]
-    [databaseName() "."]
-    tableName()
+    [
+        "IF NOT EXISTS" { 
+            hasIfNotExists = true;
+        }
+    ]
+    [   
+        db = databaseName() "."
+    ]
+    tab = tableName()
     (
-        "(" columnDef() ("," columnDef())* ("," tableConstraint())* ")"
-    |   "AS" selectStmt()
-    )}
+        stmt = createTableStmtWithColumns()
+    |   stmt = createTableStmtWithSelect()
+    ) {
+        stmt.setIfNotExists(hasIfNotExists);
+        stmt.setName(tab);
+        stmt.setDatabase(db);
+        return stmt;
+    }}
 
-void columnDef() :
-{}
+CreateTableStmt createTableStmtWithColumns() :
+{
+    CreateTableStmtWithColumns stmt = new CreateTableStmtWithColumns();
+    ColumnDef column;
+    TableConstraint constraint;
+}
+{
+    "("
+    column = columnDef() { 
+        stmt.addColumn(column);
+    }
+    (
+        LOOKAHEAD(2)
+        "," 
+        column = columnDef() {
+            stmt.addColumn(column);
+        }
+    )* 
+    (   
+        "," 
+        constraint = tableConstraint() { 
+            stmt.addConstraint(constraint);
+        }
+    )*
+    ")" {
+        return stmt;
+    }
+}
+
+CreateTableStmtWithSelect createTableStmtWithSelect() :
+{
+    SelectStmt select;
+}
+{
+    "AS"
+    select = selectStmt(new ExpansibleBlock()) {
+        return new CreateTableStmtWithSelect(select);
+    }
+}
+
+ColumnDef columnDef() :
+{
+    ColumnDef column = null;}
 {
     columnName()
     [typeName()]
-    (columnConstraint())*}
+    (columnConstraint())*
+    {
+        return column;
+    }}
 
 void typeName() :
 {}
 {
-    (name())*
+    (name())+
     ["(" signedNumber() ["," signedNumber()] ")"]}
 
 void columnConstraint() :
@@ -312,15 +461,19 @@ void signedNumber() :
     [("+" | "-")]
     numericLiteral()}
 
-void tableConstraint() :
-{}
+TableConstraint tableConstraint() :
+{
+    TableConstraint constraint = null;}
 {
     ["CONSTRAINT" name()]
     (
         ("PRIMARY" "KEY" | "UNIQUE") "(" indexedColumn() ("," indexedColumn())* ")" conflictClause()
     |   "CHECK" "(" expr() ")"
     |   "FOREIGN" "KEY" "(" columnName() ("," columnName())* ")" foreignKeyClause()
-    )}
+    )
+    {
+        return constraint;
+    }}
 
 void foreignKeyClause() :
 {}
@@ -334,15 +487,18 @@ void foreignKeyClause() :
             "DELETE"
         |   "UPDATE")
         (
-            "SET" "NULL"
-        |   "SET" "CASCADE"
+            "SET" 
+            (
+              "NULL"
+            | "CASCADE"
+            )
         |   "CASCADE"
         |   "RESTRICT"
         |   "NO" "ACTION"
         )
     |   "MATCH" name()
     )*
-    [["NOT"] "DEFERRABLE" [("INITIALLY" "DEFERRED" | "INITIALLY" "IMMEDIATE")]]}
+    [LOOKAHEAD(2) ["NOT"] "DEFERRABLE" ["INITIALLY" ("DEFERRED" | "IMMEDIATE")]]}
 
 void conflictClause() :
 {}
@@ -359,181 +515,310 @@ void conflictClause() :
         )
     ]}
 
-void createTriggerStmt() :
-{}
+SqlStatement createTriggerStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "CREATE TRIGGER"
+    {
+        return stmt;
+    }
+}
 
-void createViewStmt() :
-{}
+SqlStatement createViewStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "CREATE VIEW"
+    {
+        return stmt;
+    }
+}
 
-void createVirtualTableStmt() :
-{}
+SqlStatement createVirtualTableStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "CREATE VIRTUAL"
+    {
+        return stmt;
+    }
+}
 
-void deleteStmt() :
-{}
+SqlStatement deleteStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DELETE"
+    {
+        return stmt;
+    }
+}
 
-void deleteStmtLimited() :
-{}
+SqlStatement deleteStmtLimited(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DELETE limited"
+    {
+        return stmt;
+    }
+}
 
-void detachStmt() :
-{}
+SqlStatement detachStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DETACH"
+    {
+        return stmt;
+    }
+}
 
-void dropIndexStmt() :
-{}
+SqlStatement dropIndexStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DROP INDEX"
+    {
+        return stmt;
+    }
+}
 
-void dropTableStmt() :
-{}
+SqlStatement dropTableStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DROP TABLE"
+    {
+        return stmt;
+    }
+}
 
-void dropTriggerStmt() :
-{}
+SqlStatement dropTriggerStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DROP TRIGGER"
+    {
+        return stmt;
+    }
+}
 
-void dropViewStmt() :
-{}
+SqlStatement dropViewStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "DROP VIEW"
+    {
+        return stmt;
+    }
+}
 
 void expr() :
 {}
 {
-    ""}
+    "c"}
 
 void raiseFunction() :
 {}
 {
-    ""}
+    "d"}
 
 void literalValue() :
 {}
 {
-    ""}
+    "a"}
 
 void numericLiteral() :
 {}
 {
-    ""}
+    "e"}
 
-void insertStmt() :
-{}
+SqlStatement insertStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "INSERT"
+    {
+        return stmt;
+    }
+}
 
-void pragmaStmt() :
-{}
+SqlStatement pragmaStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "PRAGMA"
+    {
+        return stmt;
+    }
+}
 
 void pragmaValue() :
 {}
 {
-    ""}
+    "q"}
 
-void reindexStmt() :
-{}
+SqlStatement reindexStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "REINDEX"
+    {
+        return stmt;
+    }
+}
 
-void selectStmt() :
-{}
+SelectStmt selectStmt(Block block) :
 {
-    ""}
+    SelectStmt stmt = null;
+}
+{
+    "SELECT"
+    {
+        return stmt;
+    }
+}
 
 
 void selectCore() :
 {}
 {
-    ""}
+    "as"}
 
 
 void resultColumn() :
 {}
 {
-    ""}
+    "d"}
 
 void joinSource() :
 {}
 {
-    ""}
+    "f"}
 
 void singleSource() :
 {}
 {
-    ""}
+    "g"}
 
 void joinOp() :
 {}
 {
-    ""}
+    "h"}
 
 void joinConstraint() :
 {}
 {
-    ""}
+    "j"}
 
 void orderingTerm() :
 {}
 {
-    ""}
+    "k"}
 
 void compoundOperator() :
 {}
 {
-    ""}
+    "l"}
 
-void updateStmt() :
-{}
+SqlStatement updateStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "UPDATE"
+    {
+        return stmt;
+    }
+}
 
-void updateStmtLimited() :
-{}
+SqlStatement updateStmtLimited(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "UPDATE limi"
+    {
+        return stmt;
+    }
+}
 
 void qualifiedTableName() :
 {}
 {
-    ""}
+    "m"}
 
-void vacuumStmt() :
-{}
+SqlStatement vacuumStmt(Block block) :
 {
-    ""}
+    SqlStatement stmt = null;
+}
+{
+    "VACUUM"
+    {
+        return stmt;
+    }
+}
 
 // Functions not mentioned in the specification.
-void databaseName() :
+DatabaseName databaseName() :
 {
 }
 {
-    ""
+    "w"
+    {
+        return null;
+    }
 }
 
-void tableName() :
+TableName tableName() :
 {
 }
 {
-    ""
+    "e"
+    {
+        return null;
+    }
 }
 
 void name() :
 {
 }
 {
-    ""
+    "r"
+}
+
+void columnName() :
+{
+}
+{
+    "v"
+}
+
+void foreignTable() :
+{
+}
+{
+    "t"
+}
+
+void collationName() :
+{
+}
+{
+    "y"
 }
