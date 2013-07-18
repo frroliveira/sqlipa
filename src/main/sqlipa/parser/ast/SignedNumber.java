@@ -4,31 +4,31 @@ import main.sqlipa.parser.ast.literal.NumericLiteral;
 
 public class SignedNumber extends Node {
     
-    public enum Signal {
+    public enum Sign {
         PLUS,
         MINUS
     }
     
-    private Signal signal;
+    private Sign sign;
     
     private NumericLiteral literal;
     
-    public SignedNumber(Block block, Signal signal, NumericLiteral literal) {
+    public SignedNumber(Block block, Sign sign, NumericLiteral literal) {
         super(block);
-        this.signal = signal;
+        this.sign = sign;
         this.literal = literal;
     }
     
-    public Signal getSignal() {
-        return signal;
+    public Sign getSign() {
+        return sign;
     }
     
     public NumericLiteral getLiteral() {
         return literal;
     }
     
-    public void setSignal(Signal signal) {
-        this.signal = signal;
+    public void setSign(Sign sign) {
+        this.sign = sign;
     }
     
     public void setLiteral(NumericLiteral literal) {

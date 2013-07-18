@@ -712,12 +712,12 @@ ColumnDef {
 }
 
 SignedNumber {
-    enum Signal {
+    enum Sign {
         PLUS,
         MINUS
     }
 
-    Signal signal;
+    Sign sign;
     NumericLiteral literal;
 }
 

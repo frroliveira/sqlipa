@@ -657,26 +657,152 @@ ForeignKeyColumnConstraint foreignKeyColumnConstraint(Block block) :
 }
 
 SignedNumber signedNumber() :
-{}
 {
-    [("+" | "-")]
-    numericLiteral() {
-        return null;
+    Block block = new ExpansibleBlock();
+    SignedNumber.Signal sign = null;
+    NumericLiteral literal;}
+{
+    [
+        (
+            "+" {
+                sign = SignedNumber.Signal.PLUS;
+            }
+        |   "-" {
+                sign = SignedNumber.Signal.MINUS;
+            }
+        ) {
+            block.setBegin(token.beginLine, token.beginColumn);
+        }
+    ]
+    literal = numericLiteral() {
+        block.setValues(literal.getBeginLine(), literal.getBeginColumn(),
+            token.endLine, token.endColumn);
+        return new SignedNumber(block, sign, literal);
     }}
 
 TableConstraint tableConstraint() :
 {
-    TableConstraint constraint = null;}
+    TableConstraint constraint;    Block block = new ExpansibleBlock();
+    ConstraintName name = null;
+}
 {
-    ["CONSTRAINT" name()]
+    [
+        "CONSTRAINT" {
+            block.setBegin(token.beginLine, token.beginColumn);
+        }
+        name = name()
+    ]
+    // Each constraint function receives a Block to get the begin values in case 
+    // the constraint doesn't start by CONSTRAINT. To get the right values is 
+    // used an ExpansibleBlock.
     (
-        ("PRIMARY" "KEY" | "UNIQUE") "(" indexedColumn() ("," indexedColumn())* ")" conflictClause()
-    |   "CHECK" "(" expr() ")"
-    |   "FOREIGN" "KEY" "(" columnName() ("," columnName())* ")" foreignKeyClause()
-    )
-    {
+        constraint = primaryKeyTableConstraint(block)
+    |   constraint = checkTableConstraint(block)
+    |   constraint = foreignKeyTableConstraint(block)
+    ) {
+        block.setEnd(token.endLine, token.endColumn);
+        constraint.setBlock(block);
+        constraint.setName(name);
         return constraint;
     }}
+
+PrimaryKeyTableConstraint primaryKeyTableConstraint(Block block) :
+{
+    PrimaryKeyTableConstraint constraint = new PrimaryKeyTableConstraint();
+    IndexedColumn column;
+    ConflictClause clause;
+}
+{
+    "PRIMARY" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "KEY"
+    "(" 
+    column = indexedColumn() {
+        constraint.addColumn(column);
+    }
+    (
+        ","
+        column = indexedColumn() {
+            constraint.addColumn(column);
+        }
+    )*
+    ")"
+    clause = conflictClause() {
+        constraint.setClause(clause);
+        return constraint;
+    }
+}
+
+UniqueTableConstraint uniqueTableConstraint(Block block) :
+{
+    UniqueTableConstraint constraint = new UniqueTableConstraint();
+    IndexedColumn column;
+    ConflictClause clause;
+}
+{
+    "UNIQUE" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "(" 
+    column = indexedColumn() {
+        constraint.addColumn(column);
+    }
+    (
+        ","
+        column = indexedColumn() {
+            constraint.addColumn(column);
+        }
+    )*
+    ")"
+    clause = conflictClause() {
+        constraint.setClause(clause);
+        return constraint;
+    }
+}
+
+CheckTableConstraint checkTableConstraint(Block block) :
+{
+    Expression expr;
+}
+{
+    "CHECK" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "("
+    expr = expr() 
+    ")" {
+        return new CheckTableConstraint(expr);
+    }
+}
+
+ForeignKeyTableConstraint foreignKeyTableConstraint(Block block) :
+{
+    ForeignKeyTableConstraint constraint = new ForeignKeyTableConstraint();
+    ColumnName column;
+    ForeignKeyClause clause;
+}
+{
+    "FOREIGN" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    "KEY"
+    "("
+    column = columnName() {
+        constraint.addColumn(column);
+    }
+    (
+        "," 
+        column = columnName() {
+            constraint.addColumn(column);
+        }
+    )*
+    ")"
+    clause = foreignKeyClause() {
+        constraint.setClause(clause);
+        return constraint;
+    }
+}
 
 ForeignKeyClause foreignKeyClause() :
 {}

@@ -14,9 +14,9 @@ public class ForeignKeyTableConstraint extends TableConstraint {
     
     private List<ColumnName> columns;
     
-    public ForeignKeyTableConstraint(Block block, ConstraintName name,
-            ForeignKeyClause clause) {
-        this(block, name, clause, new LinkedList<ColumnName>());
+    public ForeignKeyTableConstraint() {
+        super();
+        this.columns = new LinkedList<ColumnName>();
     }
 
     public ForeignKeyTableConstraint(Block block, ConstraintName name,

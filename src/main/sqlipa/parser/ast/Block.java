@@ -46,4 +46,12 @@ public class Block {
         setEndColumn(endColumn);
     }
     
+    public void setValues(int beginLine, int beginColumn, int endLine, 
+            int endColumn) {
+        setBeginLine(beginLine);
+        setBeginColumn(beginColumn);
+        setEndLine(endLine);
+        setEndColumn(endColumn);
+    }
+    
 }

@@ -14,10 +14,9 @@ public class PrimaryKeyTableConstraint extends TableConstraint {
 
     private List<IndexedColumn> columns;
 
-    public PrimaryKeyTableConstraint(Block block, ConstraintName name,
-            ConflictClause clause) {
-        this(block, name, clause,
-                new LinkedList<IndexedColumn>());
+    public PrimaryKeyTableConstraint() {
+        super();
+        this.columns = new LinkedList<IndexedColumn>();
     }
             
     public PrimaryKeyTableConstraint(Block block, ConstraintName name,

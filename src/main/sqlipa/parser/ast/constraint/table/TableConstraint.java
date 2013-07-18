@@ -6,6 +6,10 @@ import main.sqlipa.parser.ast.name.ConstraintName;
 
 public abstract class TableConstraint extends Constraint {
 
+    public TableConstraint() {
+        super();
+    }
+    
     public TableConstraint(Block block, ConstraintName name) {
         super(block, name);
     }

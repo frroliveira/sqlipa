@@ -14,9 +14,9 @@ public class UniqueTableConstraint extends TableConstraint {
 
     private List<IndexedColumn> columns;
 
-    public UniqueTableConstraint(Block block, ConstraintName name,
-            ConflictClause clause) {
-        this(block, name, clause, new LinkedList<IndexedColumn>());
+    public UniqueTableConstraint() {
+        super();
+        this.columns = new LinkedList<IndexedColumn>();
     }
             
     public UniqueTableConstraint(Block block, ConstraintName name,
