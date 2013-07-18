@@ -344,10 +344,32 @@ SqlStatement createIndexStmt(Block block) :
 
 IndexedColumn indexedColumn() :
 {
+    Block block = new Block();
+    ColumnName column;
+    CollationName collation = null;
+    IndexedColumn.Order order = null;
+    
 }
 {
-    "b" {
-        return null;
+    column = columnName() {
+        block.setBegin(column.getBeginLine(), column.getBeginColumn());
+    }
+    [
+        "COLLATE"
+        collation = collationName()
+    ]
+    [
+        (
+            "ASC" {
+                order = IndexedColumn.Order.ASC;
+            }
+        |   "DESC" {
+                order = IndexedColumn.Order.DESC;
+            }
+        )
+    ] {
+        block.setEnd(token.endLine, token.endColumn);
+        return new IndexedColumn(block, order, column, collation);
     }}
 
 CreateTableStmt createTableStmt(Block block) :
@@ -913,9 +935,8 @@ MatchForeignKeySett matchForeignKeySett() :
 
 DeferrableForeignKeySett deferrableForeignKeySett() :
 {
-    Block block = new ExpansibleBlock();
-    DeferrableForeignKeySett.Type type = 
-        DeferrableForeignKeySett.Type.DEFERRABLE;
+    Block block = new Block();
+    DeferrableForeignKeySett.Type type;
     DeferrableForeignKeySett.Mode mode = null; 
 }
 {
@@ -927,6 +948,7 @@ DeferrableForeignKeySett deferrableForeignKeySett() :
         "DEFERRABLE"
     |   "DEFERRABLE" {
             block.setBegin(token.beginLine, token.beginColumn);
+            type = DeferrableForeignKeySett.Type.DEFERRABLE;
         }
     )
     [
@@ -946,18 +968,35 @@ DeferrableForeignKeySett deferrableForeignKeySett() :
 }
 
 ConflictClause conflictClause() :
-{}
+{
+    Block block = new Block();
+    ConflictClause.Action action;}
 {
     [   
-        "ON" 
+        "ON" {
+            block.setBegin(token.beginLine, token.beginColumn);
+        }
         "CONFLICT"
         (
-            "ROLLBACK"
-        |   "ABORT"
-        |   "FAIL"
-        |   "IGNORE"
-        |   "REPLACE"
-        )
+            "ROLLBACK" {
+                action = ConflictClause.Action.ROLLBACK;
+            }
+        |   "ABORT" {
+                action = ConflictClause.Action.ABORT;
+            }
+        |   "FAIL" {
+                action = ConflictClause.Action.FAIL;
+            }
+        |   "IGNORE" {
+                action = ConflictClause.Action.IGNORE;
+            }
+        |   "REPLACE" {
+                action = ConflictClause.Action.REPLACE;
+            }
+        ) {
+            block.setEnd(token.endLine, token.endColumn);
+            return new ConflictClause(block, action);
+        }
     ] {
         return null;
     }}
@@ -1141,8 +1180,26 @@ SelectStmt selectStmt(Block block) :
     SelectStmt stmt = null;
 }
 {
-    "SELECT"
-    {
+    selectCore()
+    (
+        compoundOperation()
+    )*
+    [
+        "ORDER" "BY"
+        orderingTerm()
+        (
+            ","
+            orderingTerm()
+        )*
+    ]
+    [
+        "LIMIT"
+        expr()
+        [
+            ( "OFFSET" | "," )
+            expr()
+        ]
+    ] {
         return stmt;
     }
 }
@@ -1151,8 +1208,47 @@ SelectStmt selectStmt(Block block) :
 void selectCore() :
 {}
 {
-    "as"}
+    "SELECT"
+    [
+        (
+            "DISTINCT"
+        |   "ALL"
+        )
+    ]
+    resultColumn()
+    (
+        ","
+        resultColumn()
+    )*
+    [
+        "FROM"
+        joinSource()
+    ]
+    [
+        "WHERE"
+        expr()
+    ]
+    [
+        "GROUP" "BY"
+        expr()
+        (
+            ","
+            expr()
+        )
+        [
+            "HAVING"
+            expr()
+        ]
+    ]
+}
 
+void compoundOperation() :
+{
+}
+{
+    // Operator
+    selectCore()
+}
 
 void resultColumn() :
 {}
