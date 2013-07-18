@@ -16,9 +16,10 @@ public class ForeignKeyClause extends Node {
     
     private List<ForeignKeySetting> settings;
     
-    public ForeignKeyClause(Block block, TableName tab) {
-        this(block, tab, new LinkedList<ColumnName>(),
-                new LinkedList<ForeignKeySetting>());
+    public ForeignKeyClause() {
+        super();
+        this.columns = new LinkedList<ColumnName>();
+        this.settings = new LinkedList<ForeignKeySetting>();
     }
 
     public ForeignKeyClause(Block block, TableName tab,

@@ -342,11 +342,13 @@ SqlStatement createIndexStmt(Block block) :
     }
 }
 
-void indexedColumn() :
+IndexedColumn indexedColumn() :
 {
 }
 {
-    "b"}
+    "b" {
+        return null;
+    }}
 
 CreateTableStmt createTableStmt(Block block) :
 {
@@ -659,16 +661,16 @@ ForeignKeyColumnConstraint foreignKeyColumnConstraint(Block block) :
 SignedNumber signedNumber() :
 {
     Block block = new ExpansibleBlock();
-    SignedNumber.Signal sign = null;
+    SignedNumber.Sign sign = null;
     NumericLiteral literal;}
 {
     [
         (
             "+" {
-                sign = SignedNumber.Signal.PLUS;
+                sign = SignedNumber.Sign.PLUS;
             }
         |   "-" {
-                sign = SignedNumber.Signal.MINUS;
+                sign = SignedNumber.Sign.MINUS;
             }
         ) {
             block.setBegin(token.beginLine, token.beginColumn);
@@ -805,32 +807,143 @@ ForeignKeyTableConstraint foreignKeyTableConstraint(Block block) :
 }
 
 ForeignKeyClause foreignKeyClause() :
-{}
 {
-    "REFERENCES"
-    foreignTable()
-    ["(" columnName() ("," columnName())* ")"]
-    (
-        "ON"
-        (   
-            "DELETE"
-        |   "UPDATE")
+    ForeignKeyClause clause = new ForeignKeyClause();
+    Block block = new Block();
+    TableName tab;
+    ColumnName column;
+    ForeignKeySetting sett;}
+{
+    "REFERENCES" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    tab = foreignTable()
+    [
+        "("
+        column = columnName() {
+            clause.addColumn(column);
+        }
         (
-            "SET" 
-            (
-              "NULL"
-            | "CASCADE"
-            )
-        |   "CASCADE"
-        |   "RESTRICT"
-        |   "NO" "ACTION"
-        )
-    |   "MATCH" name()
+            ","
+            column = columnName() {
+                clause.addColumn(column);
+            }
+        )*
+        ")"
+    ]
+    (
+        sett = onForeignKeySett() {
+            clause.addSetting(sett);
+        }
+    |   sett = matchForeignKeySett() {
+            clause.addSetting(sett);
+        }
     )*
-    [LOOKAHEAD(2) ["NOT"] "DEFERRABLE" ["INITIALLY" ("DEFERRED" | "IMMEDIATE")]]
-    {
-        return null;
+    [
+        LOOKAHEAD(2) // Ensures that is deferrable because first token can be 
+                     // either NOT or DEFERRABLE but second token is always
+                     // DEFERRABLE.
+        sett = deferrableForeignKeySett() {
+            clause.addSetting(sett);
+        }
+    ] {
+        block.setEnd(token.endLine, token.endColumn);
+        clause.setBlock(block);
+        clause.setTable(tab);
+        return clause;
     }}
+
+OnForeignKeySett onForeignKeySett() :
+{
+    Block block = new Block();
+    OnForeignKeySett.Event event;
+    OnForeignKeySett.Action action;
+}
+{
+    "ON" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    (
+        "DELETE" {
+            event = OnForeignKeySett.Event.DELETE;
+        }
+    |   "UPDATE" {
+            event = OnForeignKeySett.Event.UPDATE;
+        }
+    )
+    (
+        "SET" // SET merged to remove ambiguity.
+        (
+            "NULL" {
+                action = OnForeignKeySett.Action.SET_NULL;
+            }
+        |   "DEFAULT" {
+                action = OnForeignKeySett.Action.SET_DEFAULT;
+            }
+        )
+    |   "CASCADE" {
+            action = OnForeignKeySett.Action.CASCADE;
+        }
+    |   "RESTRICT" {
+            action = OnForeignKeySett.Action.RESTRICT;
+        }
+    |   "NO" "ACTION" {
+            action = OnForeignKeySett.Action.NO_ACTION;
+        }
+    ) {
+        block.setEnd(token.endLine, token.endColumn);
+        return new OnForeignKeySett(block, event, action);
+    }
+}
+
+MatchForeignKeySett matchForeignKeySett() :
+{
+    Block block = new Block();
+    Name name;
+}
+{
+    "MATCH" {
+        block.setBegin(token.beginLine, token.beginColumn);
+    }
+    name = name() {
+        block.setEnd(token.endLine, token.endColumn);
+        return new MatchForeignKeySett(block, name);
+    }
+}
+
+DeferrableForeignKeySett deferrableForeignKeySett() :
+{
+    Block block = new ExpansibleBlock();
+    DeferrableForeignKeySett.Type type = 
+        DeferrableForeignKeySett.Type.DEFERRABLE;
+    DeferrableForeignKeySett.Mode mode = null; 
+}
+{
+    (
+        "NOT" {
+            block.setBegin(token.beginLine, token.beginColumn);
+            type = DeferrableForeignKeySett.Type.NOT_DEFERRABLE;
+        }
+        "DEFERRABLE"
+    |   "DEFERRABLE" {
+            block.setBegin(token.beginLine, token.beginColumn);
+        }
+    )
+    [
+        "INITIALLY"
+        (
+            "DEFERRED" {
+                mode = DeferrableForeignKeySett.Mode.DEFERRED;
+            }
+        |   "IMMEDIATE" {
+                mode = DeferrableForeignKeySett.Mode.IMMEDIATE;
+            }
+        )
+    ] {
+        block.setEnd(token.endLine, token.endColumn);
+        return new DeferrableForeignKeySett(block, type, mode);
+    }
+}
 
 ConflictClause conflictClause() :
 {}
@@ -978,10 +1091,12 @@ Literal literalValue() :
         return null;
     }}
 
-void numericLiteral() :
+NumericLiteral numericLiteral() :
 {}
 {
-    "e"}
+    "e" {
+        return null;
+    }}
 
 SqlStatement insertStmt(Block block) :
 {
@@ -1133,11 +1248,13 @@ TableName tableName() :
     }
 }
 
-void name() :
+ConstraintName name() :
 {
 }
 {
-    "r"
+    "r" {
+        return null;
+    }
 }
 
 ColumnName columnName() :
@@ -1150,11 +1267,13 @@ ColumnName columnName() :
     }
 }
 
-void foreignTable() :
+TableName foreignTable() :
 {
 }
 {
-    "t"
+    "t" {
+        return null;
+    }
 }
 
 CollationName collationName() :

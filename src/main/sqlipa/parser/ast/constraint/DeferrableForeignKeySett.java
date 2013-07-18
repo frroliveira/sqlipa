@@ -4,21 +4,36 @@ import main.sqlipa.parser.ast.Block;
 
 public class DeferrableForeignKeySett extends ForeignKeySetting {
 
+    public enum Type {
+        DEFERRABLE,
+        NOT_DEFERRABLE
+    }
+    
     public enum Mode {
         DEFERRED,
         IMMEDIATE
     }
     
-    Mode mode;
+    private Type type;
     
-    public DeferrableForeignKeySett(Block block, boolean isDeferrable,
-            Mode mode) {
+    private Mode mode;
+    
+    public DeferrableForeignKeySett(Block block, Type type, Mode mode) {
         super(block);
+        this.type = type;
         this.mode = mode;
+    }
+    
+    public Type getType() {
+        return type;
     }
     
     public Mode getMode() {
         return mode;
+    }
+    
+    public void setType(Type type) {
+        this.type = type;
     }
     
     public void setMode(Mode mode) {
