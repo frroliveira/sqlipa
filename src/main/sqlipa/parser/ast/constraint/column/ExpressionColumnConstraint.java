@@ -8,9 +8,8 @@ public class ExpressionColumnConstraint extends DefaultColumnConstraint {
 
     private Expression expr;
 
-    public ExpressionColumnConstraint(Expression expr) {
+    public ExpressionColumnConstraint() {
         super();
-        this.expr = expr;
     }
     
     public ExpressionColumnConstraint(Block block, ConstraintName name,

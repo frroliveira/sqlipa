@@ -13,7 +13,11 @@ public class ConflictClause extends Node {
         REPLACE
     }
 
-    Action action;
+    private Action action;
+    
+    public ConflictClause() {
+        super();
+    }
     
     public ConflictClause(Block block, Action action) {
         super(block);

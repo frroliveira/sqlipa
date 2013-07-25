@@ -11,12 +11,16 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
         DESC
     }
 
-    Order order;
+    private Order order;
     
-    ConflictClause clause;
+    private ConflictClause clause;
     
-    boolean autoincrement;
+    private boolean autoincrement;
 
+    public PrimaryKeyColumnConstraint() {
+        super();
+    }
+    
     public PrimaryKeyColumnConstraint(Order order, ConflictClause clause,
             boolean hasAutoincrement) {
         super();

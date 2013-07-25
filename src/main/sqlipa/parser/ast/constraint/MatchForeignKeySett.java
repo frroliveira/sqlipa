@@ -7,6 +7,10 @@ public class MatchForeignKeySett extends ForeignKeySetting {
     
     private Name name;
     
+    public MatchForeignKeySett() {
+        super();
+    }
+    
     public MatchForeignKeySett(Block block, Name name) {
         super(block);
         this.name = name;

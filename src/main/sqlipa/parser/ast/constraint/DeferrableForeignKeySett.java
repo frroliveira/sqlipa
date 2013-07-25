@@ -18,6 +18,10 @@ public class DeferrableForeignKeySett extends ForeignKeySetting {
     
     private Mode mode;
     
+    public DeferrableForeignKeySett() {
+        super();
+    }
+    
     public DeferrableForeignKeySett(Block block, Type type, Mode mode) {
         super(block);
         this.type = type;

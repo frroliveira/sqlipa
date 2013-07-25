@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
@@ -9,31 +10,32 @@ import main.sqlipa.parser.ast.stmt.event.OrderingTerm;
 
 public class SelectStmt extends EventStmt {
 
-    private SelectCore core;
+    private SelectUnit unit;
     
     private Expression limit;
     
     private Expression offset;
-    
-    private List<CompoundOperation> ops;
-    
+        
     private List<OrderingTerm> terms;
+
+    public SelectStmt() {
+        super();
+        this.terms = new LinkedList<OrderingTerm>();
+    }
     
-    public SelectStmt(Block block, Explain explain, SelectCore core,
-            Expression limit, Expression offset, List<CompoundOperation> ops,
-            List<OrderingTerm> terms) {
+    public SelectStmt(Block block, Explain explain, SelectUnit unit,
+            Expression limit, Expression offset, List<OrderingTerm> terms) {
         super(block, explain);
-        this.core = core;
+        this.unit = unit;
         this.limit = limit;
         this.offset = offset;
-        this.ops = ops;
         this.terms = terms;
     }
     
-    public SelectCore getCore() {
-        return core;
+    public SelectUnit getUnit() {
+        return unit;
     }
-    
+
     public Expression getLimit() {
         return limit;
     }
@@ -42,16 +44,12 @@ public class SelectStmt extends EventStmt {
         return offset;
     }
     
-    public List<CompoundOperation> getOperations() {
-        return ops;
-    }
-    
     public List<OrderingTerm> getTerms() {
         return terms;
     }
     
-    public void setCore(SelectCore core) {
-        this.core = core;
+    public void setUnit(SelectUnit unit) {
+        this.unit = unit;
     }
     
     public void setLimit(Expression limit) {
@@ -62,12 +60,16 @@ public class SelectStmt extends EventStmt {
         this.offset = offset;
     }
     
-    public void setOperations(List<CompoundOperation> ops) {
-        this.ops = ops;
-    }
-    
     public void setTerms(List<OrderingTerm> terms) {
         this.terms = terms;
+    }
+    
+    public void addTerm(OrderingTerm term) {
+        terms.add(term);
+    }
+    
+    public boolean removeTerm(OrderingTerm term) {
+        return terms.remove(term);
     }
     
 }

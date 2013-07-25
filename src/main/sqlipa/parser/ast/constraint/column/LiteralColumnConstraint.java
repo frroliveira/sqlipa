@@ -8,9 +8,8 @@ public class LiteralColumnConstraint extends DefaultColumnConstraint {
 
     private Literal literal;
 
-    public LiteralColumnConstraint(Literal literal) {
+    public LiteralColumnConstraint() {
         super();
-        this.literal = literal;
     }
     
     public LiteralColumnConstraint(Block block, ConstraintName name,

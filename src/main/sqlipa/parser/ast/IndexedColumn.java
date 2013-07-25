@@ -16,6 +16,10 @@ public class IndexedColumn extends Node {
     
     private CollationName collation;
     
+    public IndexedColumn() {
+        super();
+    }
+    
     public IndexedColumn(Block block, Order order, ColumnName column,
             CollationName collation) {
         super(block);

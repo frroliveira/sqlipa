@@ -6,11 +6,10 @@ import main.sqlipa.parser.ast.name.ConstraintName;
 
 public class CollateColumnConstraint extends ColumnConstraint {
 
-    CollationName collation;
+    private CollationName collation;
     
-    public CollateColumnConstraint(CollationName collation) {
+    public CollateColumnConstraint() {
         super();
-        this.collation = collation;
     }
     
     public CollateColumnConstraint(Block block, ConstraintName name,

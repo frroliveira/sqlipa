@@ -13,6 +13,10 @@ public class SignedNumber extends Node {
     
     private NumericLiteral literal;
     
+    public SignedNumber() {
+        super();
+    }
+    
     public SignedNumber(Block block, Sign sign, NumericLiteral literal) {
         super(block);
         this.sign = sign;

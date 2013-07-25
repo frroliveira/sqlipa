@@ -8,9 +8,8 @@ public class NumberColumnConstraint extends DefaultColumnConstraint {
 
     private SignedNumber number;
     
-    public NumberColumnConstraint(SignedNumber number) {
+    public NumberColumnConstraint() {
         super();
-        this.number = number;
     }
     
     public NumberColumnConstraint(Block block, ConstraintName name,

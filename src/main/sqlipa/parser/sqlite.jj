@@ -25,6 +25,7 @@ import main.sqlipa.parser.ast.stmt.event.update.*;
 import main.sqlipa.parser.ast.stmt.pragma.*;
 
 final class ASTParser {
+
     public static void main(String args[]) {
         ASTParser parser = new ASTParser(System.in);
         try {
@@ -34,6 +35,7 @@ final class ASTParser {
             System.out.println("Reject");
         }
     }
+
 } 
 PARSER_END(ASTParser)
 
@@ -193,58 +195,59 @@ void sqlStmtList() :{}
 
 SqlStatement sqlStmt() :
 {
-    Block block = new ExpansibleBlock();
+    int line = 0;
+    int column = 0;
     SqlStatement.Explain explain = null;
     SqlStatement stmt;
 }
 {    [   
         "EXPLAIN" {
-            block.setBegin(token.beginLine, token.beginColumn);
+            line = token.beginLine;
+            column = token.beginColumn;
             explain = SqlStatement.Explain.NORMAL;
         } 
         ["QUERY" "PLAN"] {
             explain = SqlStatement.Explain.PLAN;
         }
     ]
-    // Each statement function receives a Block to get the begin values in case 
-    // the statement doesn't start by EXPLAIN. To get the right values is used 
-    // an ExpansibleBlock.
     (
-        stmt = alterTableStmt(block)
-    |   stmt = analyzeStmt(block)
-    |   stmt = attachStmt(block)
-	|   stmt = beginStmt(block)
-	|   stmt = commitStmt(block)
-	|   stmt = createIndexStmt(block)
-	|   stmt = createTableStmt(block)
-	|   stmt = createTriggerStmt(block)
-	|   stmt = createViewStmt(block)
-	|   stmt = createVirtualTableStmt(block)	|   stmt = deleteStmt(block)
-	|   stmt = deleteStmtLimited(block)
-	|   stmt = detachStmt(block)
-	|   stmt = dropIndexStmt(block)
-	|   stmt = dropTableStmt(block)
-	|   stmt = dropTriggerStmt(block)
-	|   stmt = dropViewStmt(block)
-	|   stmt = insertStmt(block)
-	|   stmt = pragmaStmt(block)
-	|   stmt = reindexStmt(block)
-	|   stmt = releaseStmt(block)
-	|   stmt = rollbackStmt(block)
-	|   stmt = savepointStmt(block)
-	|   stmt = selectStmt(block)
-	|   stmt = updateStmt(block)
-	|   stmt = updateStmtLimited(block)
-	|   stmt = vacuumStmt(block)
+        stmt = alterTableStmt()
+    |   stmt = analyzeStmt()
+    |   stmt = attachStmt()
+	|   stmt = beginStmt()
+	|   stmt = commitStmt()
+	|   stmt = createIndexStmt()
+	|   stmt = createTableStmt()
+	|   stmt = createTriggerStmt()
+	|   stmt = createViewStmt()
+	|   stmt = createVirtualTableStmt()	|   stmt = deleteStmt()
+	|   stmt = deleteStmtLimited()
+	|   stmt = detachStmt()
+	|   stmt = dropIndexStmt()
+	|   stmt = dropTableStmt()
+	|   stmt = dropTriggerStmt()
+	|   stmt = dropViewStmt()
+	|   stmt = insertStmt()
+	|   stmt = pragmaStmt()
+	|   stmt = reindexStmt()
+	|   stmt = releaseStmt()
+	|   stmt = rollbackStmt()
+	|   stmt = savepointStmt()
+	|   stmt = selectStmt()
+	|   stmt = updateStmt()
+	|   stmt = updateStmtLimited()
+	|   stmt = vacuumStmt()
 	) {
-	   block.setEnd(token.endLine, token.endColumn);
-	   stmt.setBlock(block);
-	   stmt.setExplain(explain);
-	   return stmt;
+        if (explain != null) {
+            // If statement starts by EXPLAIN.
+            stmt.setBegin(line, column);
+            stmt.setExplain(explain);
+        }
+        return stmt;
     }
 }
 
-SqlStatement alterTableStmt(Block block) :
+SqlStatement alterTableStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -254,7 +257,7 @@ SqlStatement alterTableStmt(Block block) :
         return stmt;
     }}
 
-SqlStatement analyzeStmt(Block block) :
+SqlStatement analyzeStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -265,7 +268,7 @@ SqlStatement analyzeStmt(Block block) :
     }
 }
 
-SqlStatement attachStmt(Block block) :
+SqlStatement attachStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -276,7 +279,7 @@ SqlStatement attachStmt(Block block) :
     }
 }
 
-SqlStatement beginStmt(Block block) :
+SqlStatement beginStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -287,7 +290,7 @@ SqlStatement beginStmt(Block block) :
     }
 }
 
-SqlStatement commitStmt(Block block) :
+SqlStatement commitStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -298,7 +301,7 @@ SqlStatement commitStmt(Block block) :
     }
 }
 
-SqlStatement rollbackStmt(Block block) :
+SqlStatement rollbackStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -309,7 +312,7 @@ SqlStatement rollbackStmt(Block block) :
     }
 }
 
-SqlStatement savepointStmt(Block block) :
+SqlStatement savepointStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -320,7 +323,7 @@ SqlStatement savepointStmt(Block block) :
     }
 }
 
-SqlStatement releaseStmt(Block block) :
+SqlStatement releaseStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -331,7 +334,7 @@ SqlStatement releaseStmt(Block block) :
     }
 }
 
-SqlStatement createIndexStmt(Block block) :
+SqlStatement createIndexStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -344,45 +347,50 @@ SqlStatement createIndexStmt(Block block) :
 
 IndexedColumn indexedColumn() :
 {
-    Block block = new Block();
+    IndexedColumn indColumn = new IndexedColumn();
     ColumnName column;
-    CollationName collation = null;
-    IndexedColumn.Order order = null;
-    
 }
 {
     column = columnName() {
-        block.setBegin(column.getBeginLine(), column.getBeginColumn());
+        indColumn.setColumn(column);
+        indColumn.setBegin(column.beginLine, column.beginColumn);
     }
     [
-        "COLLATE"
-        collation = collationName()
+        "COLLATE" {
+            CollationName collation;
+        }
+        collation = collationName() {
+            indColumn.setCollation(collation);
+        }
     ]
     [
         (
             "ASC" {
-                order = IndexedColumn.Order.ASC;
+                indColumn.setOrder(IndexedColumn.Order.ASC);
             }
         |   "DESC" {
-                order = IndexedColumn.Order.DESC;
+                indColumn.setOrder(IndexedColumn.Order.DESC);
             }
         )
     ] {
-        block.setEnd(token.endLine, token.endColumn);
-        return new IndexedColumn(block, order, column, collation);
+        indColumn.setEnd(token.endLine, token.endColumn);
+        return indColumn;
     }}
 
-CreateTableStmt createTableStmt(Block block) :
+CreateTableStmt createTableStmt() :
 {
     CreateTableStmt stmt;
+    int line;
+    int column;
     boolean hasTemp = false;
     boolean hasIfNotExists = false;
     DatabaseName db = null;
     TableName tab;
-    SelectStmt select = null;}
+}
 {
     "CREATE" {
-        block.setBegin(token.beginLine, token.beginColumn); 
+        line = token.beginLine;
+        column = token.beginColumn; 
     }
     [
         ("TEMP" | "TEMPORARY") { 
@@ -403,6 +411,8 @@ CreateTableStmt createTableStmt(Block block) :
         stmt = createTableStmtWithColumns()
     |   stmt = createTableStmtWithSelect()
     ) {
+        stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
+        stmt.setTemporary(hasTemp);
         stmt.setIfNotExists(hasIfNotExists);
         stmt.setName(tab);
         stmt.setDatabase(db);
@@ -413,12 +423,11 @@ CreateTableStmt createTableStmtWithColumns() :
 {
     CreateTableStmtWithColumns stmt = new CreateTableStmtWithColumns();
     ColumnDef column;
-    TableConstraint constraint;
 }
 {
     "("
     column = columnDef() { 
-        stmt.addColumn(column);
+        stmt.addColumn(columnDef());
     }
     // As the two next expressions start by "," it's necessary to use 
     // LOOKAHAED(2) to decide if we're seeing a column definition or a table
@@ -431,7 +440,9 @@ CreateTableStmt createTableStmtWithColumns() :
         }
     )* 
     (   
-        "," 
+        "," {
+            TableConstraint constraint;
+        }
         constraint = tableConstraint() { 
             stmt.addConstraint(constraint);
         }
@@ -447,7 +458,7 @@ CreateTableStmtWithSelect createTableStmtWithSelect() :
 }
 {
     "AS"
-    select = selectStmt(new Block()) {
+    select = selectStmt() {
         return new CreateTableStmtWithSelect(select);
     }
 }
@@ -456,34 +467,37 @@ ColumnDef columnDef() :
 {
     ColumnDef columnDef = new ColumnDef();
     ColumnName column;
-    TypeName type = null;
+    TypeName type;
     ColumnConstraint constraint;}
 {
-    column = columnName()
+    column = columnName() {
+        columnDef.setColumn(column);
+        columnDef.setBegin(column.beginLine, column.beginColumn);
+    }
     [
-        type = typeName()
+        type = typeName() {
+            columnDef.setType(type);
+        }
     ]
     (
         constraint = columnConstraint() {
             columnDef.addConstraint(constraint);
         }
     )* {
-        columnDef.setBlock(new Block(column.getBeginLine(), 
-            column.getBeginColumn(), token.endLine, token.endColumn));
-        columnDef.setColumn(column);
-        columnDef.setType(type);
+        columnDef.setEnd(token.endLine, token.endColumn);
         return columnDef;
     }}
 
 TypeName typeName() :
 {
-    Block block = new Block();
+    TypeName type = new TypeName();
     String name = new String();
-    SignedNumber xDim = null;
-    SignedNumber yDim = null;}
+    
+    type.setName(name);}
 {
     name() {
-        block.setBegin(token.beginLine, token.beginColumn);
+        // TODO: name must return.
+        type.setBegin(token.beginLine, token.beginColumn);
         name += token.image;
     }
     (
@@ -492,245 +506,287 @@ TypeName typeName() :
         }
     )*
     [
-        "("
-        xDim = signedNumber() 
+        "(" {
+            SignedNumber xDim;
+        }
+        xDim = signedNumber() {
+            type.setDimensionInX(xDim);
+        }
         [
-            "," 
-            yDim = signedNumber()
+            "," {
+                SignedNumber yDim;
+            }
+            yDim = signedNumber() {
+                type.setDimensionInY(yDim);
+            }
         ]
         ")"
     ] {
-        block.setEnd(token.endLine, token.endColumn);
-        return new TypeName(block, name, xDim, yDim);
+        type.setEnd(token.endLine, token.endColumn);
+        return type;
     }}
 
 ColumnConstraint columnConstraint() :
 {
     ColumnConstraint constraint;
-    Block block = new ExpansibleBlock();
+    int line = 0;
+    int column = 0;
     ConstraintName name = null;}
 {
     [
         "CONSTRAINT" {
-            block.setBegin(token.beginLine, token.beginColumn);
+            line = token.beginLine;
+            column = token.beginColumn;
         }
         name = constraintName()
     ]
-    // Each constraint function receives a Block to get the begin values in case 
-    // the constraint doesn't start by CONSTRAINT. To get the right values is 
-    // used an ExpansibleBlock.
     (
-        constraint = primaryKeyColumnConstraint(block)
-    |   constraint = notNullColumnConstraint(block)
-    |   constraint = uniqueColumnConstraint(block)
-    |   constraint = checkColumnConstraint(block)
-    |   constraint = defaultColumnConstraint(block)    |   constraint = collateColumnConstraint(block)
-    |   constraint = foreignKeyColumnConstraint(block)
+        constraint = primaryKeyColumnConstraint()
+    |   constraint = notNullColumnConstraint()
+    |   constraint = uniqueColumnConstraint()
+    |   constraint = checkColumnConstraint()
+    |   constraint = defaultColumnConstraint()    |   constraint = collateColumnConstraint()
+    |   constraint = foreignKeyColumnConstraint()
     ) {
-        block.setEnd(token.endLine, token.endColumn);
-        constraint.setBlock(block);
-        constraint.setName(name);
+        if (name != null) {
+            constraint.setBegin(line, column);
+            constraint.setName(name);
+        }
         return constraint;
     }
 }
 
-PrimaryKeyColumnConstraint primaryKeyColumnConstraint(Block block) :
+PrimaryKeyColumnConstraint primaryKeyColumnConstraint() :
 {
-    PrimaryKeyColumnConstraint.Order order = null;
+    PrimaryKeyColumnConstraint constraint = new PrimaryKeyColumnConstraint();
     ConflictClause clause;
-    boolean hasAutoincrement = false;
 }
 {
     "PRIMARY" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "KEY" 
     [
         (
             "ASC" {
-                order = PrimaryKeyColumnConstraint.Order.ASC;
+                constraint.setOrder(PrimaryKeyColumnConstraint.Order.ASC);
             }
         |   "DESC" {
-                order = PrimaryKeyColumnConstraint.Order.DESC;
+                constraint.setOrder(PrimaryKeyColumnConstraint.Order.DESC);
             }
         )
     ]
-    clause = conflictClause()
+    clause = conflictClause() {
+        constraint.setClause(clause);
+    }
     [
         "AUTOINCREMENT" {
-            hasAutoincrement = true;
+            constraint.setAutoincrement(true);
         }
     ] {
-        return new PrimaryKeyColumnConstraint(order, clause, hasAutoincrement);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
     }
 }
 
-NotNullColumnConstraint notNullColumnConstraint(Block block) :
+NotNullColumnConstraint notNullColumnConstraint() :
 {
+    NotNullColumnConstraint constraint = new NotNullColumnConstraint();
     ConflictClause clause;
 }
 {
     "NOT" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "NULL"
     clause = conflictClause() {
-        return new NotNullColumnConstraint(clause);
+        constraint.setClause(clause);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
     }
 }
 
-UniqueColumnConstraint uniqueColumnConstraint(Block block) :
+UniqueColumnConstraint uniqueColumnConstraint() :
 {
+    UniqueColumnConstraint constraint = new UniqueColumnConstraint();
     ConflictClause clause;
 }
 {
     "UNIQUE" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     clause = conflictClause() {
-        return new UniqueColumnConstraint(clause);
+        constraint.setClause(clause);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
     }
 }
 
-CheckColumnConstraint checkColumnConstraint(Block block) :
+CheckColumnConstraint checkColumnConstraint() :
 {
+    CheckColumnConstraint constraint = new CheckColumnConstraint();
     Expression expr;
 }
 {
     "CHECK" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "(" 
     expr = expr()
     ")" {
-        return new CheckColumnConstraint(expr);
+        constraint.setExpression(expr);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
     }
 }
 
-DefaultColumnConstraint defaultColumnConstraint(Block block) :
+DefaultColumnConstraint defaultColumnConstraint() :
 {
     DefaultColumnConstraint constraint;
+    int line;
+    int column;
 }
 {
     "DEFAULT" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        line = token.beginLine;
+        column = token.beginColumn;
     }
     (
         constraint = numberColumnConstraint()
     |   constraint = literalColumnConstraint()
     |   constraint = expressionColumnConstraint()
     ) {
+        constraint.setBegin(line, column);
         return constraint;
     }
 }
 
 NumberColumnConstraint numberColumnConstraint():
 {
+    NumberColumnConstraint constraint = new NumberColumnConstraint();
     SignedNumber number;
 }
 {
     number = signedNumber() {
-        return new NumberColumnConstraint(number);
+        constraint.setBeginEnd(number);
+        constraint.setNumber(number);
+        return constraint;
     }
 }
 
 LiteralColumnConstraint literalColumnConstraint() :
 {
+    LiteralColumnConstraint constraint = new LiteralColumnConstraint();
     Literal literal;
 }
 {
     literal = literalValue() {
-        return new LiteralColumnConstraint(literal);
+        constraint.setBeginEnd(literal);
+        constraint.setLiteral(literal);
+        return constraint;
     }
 }
 
 ExpressionColumnConstraint expressionColumnConstraint() :
 {
+    ExpressionColumnConstraint constraint = new ExpressionColumnConstraint();
     Expression expr;
 }
 {
-    "("
+    "(" {
+        constraint.setBegin(token.beginLine, token.beginColumn);
+    }
     expr = expr()
     ")" {
-        return new ExpressionColumnConstraint(expr);
+        constraint.setEnd(token.endLine, token.endColumn);
+        constraint.setExpression(expr);
+        return constraint;
     }
 }
 
-CollateColumnConstraint collateColumnConstraint(Block block) :
+CollateColumnConstraint collateColumnConstraint() :
 {
+    CollateColumnConstraint constraint = new CollateColumnConstraint();
     CollationName collation;
 }
 {
     "COLLATE" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     collation = collationName() {
-        return new CollateColumnConstraint(collation);
+        constraint.setCollation(collation);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
     }
 }
 
-ForeignKeyColumnConstraint foreignKeyColumnConstraint(Block block) :
+ForeignKeyColumnConstraint foreignKeyColumnConstraint() :
 {
+    ForeignKeyColumnConstraint constraint = new ForeignKeyColumnConstraint();
     ForeignKeyClause clause;
 }
 {
     clause = foreignKeyClause() {
-        block.setBegin(clause.getBeginLine(), clause.getBeginColumn());
-        return new ForeignKeyColumnConstraint(clause);
+        constraint.setBeginEnd(clause);
+        constraint.setClause(clause);
+        return constraint;
     }
 }
 
 SignedNumber signedNumber() :
 {
-    Block block = new ExpansibleBlock();
-    SignedNumber.Sign sign = null;
+    SignedNumber number = new SignedNumber();
     NumericLiteral literal;}
 {
     [
         (
             "+" {
-                sign = SignedNumber.Sign.PLUS;
+                number.setSign(SignedNumber.Sign.PLUS);
             }
         |   "-" {
-                sign = SignedNumber.Sign.MINUS;
+                number.setSign(SignedNumber.Sign.MINUS);
             }
         ) {
-            block.setBegin(token.beginLine, token.beginColumn);
+            number.setBegin(token.beginLine, token.beginColumn);
         }
     ]
     literal = numericLiteral() {
-        block.setValues(literal.getBeginLine(), literal.getBeginColumn(),
-            token.endLine, token.endColumn);
-        return new SignedNumber(block, sign, literal);
+        if (number.getSign() == null) {
+            number.setBeginEnd(literal);
+        } else {
+            number.setEnd(token.endLine, token.endColumn);
+        }
+        number.setLiteral(literal);
+        return number;
     }}
 
 TableConstraint tableConstraint() :
 {
-    TableConstraint constraint;    Block block = new ExpansibleBlock();
+    TableConstraint constraint;    int line = 0;
+    int column = 0;
     ConstraintName name = null;
 }
 {
     [
         "CONSTRAINT" {
-            block.setBegin(token.beginLine, token.beginColumn);
+            line = token.beginLine;
+            column = token.beginColumn;
         }
-        name = name()
+        name = constraintName()
     ]
-    // Each constraint function receives a Block to get the begin values in case 
-    // the constraint doesn't start by CONSTRAINT. To get the right values is 
-    // used an ExpansibleBlock.
     (
-        constraint = primaryKeyTableConstraint(block)
-    |   constraint = checkTableConstraint(block)
-    |   constraint = foreignKeyTableConstraint(block)
+        constraint = primaryKeyTableConstraint()
+    |   constraint = checkTableConstraint()
+    |   constraint = foreignKeyTableConstraint()
     ) {
-        block.setEnd(token.endLine, token.endColumn);
-        constraint.setBlock(block);
-        constraint.setName(name);
+        if (name != null) {
+            constraint.setBegin(line, column);
+            constraint.setName(name);
+        }
         return constraint;
     }}
 
-PrimaryKeyTableConstraint primaryKeyTableConstraint(Block block) :
+PrimaryKeyTableConstraint primaryKeyTableConstraint() :
 {
     PrimaryKeyTableConstraint constraint = new PrimaryKeyTableConstraint();
     IndexedColumn column;
@@ -738,7 +794,7 @@ PrimaryKeyTableConstraint primaryKeyTableConstraint(Block block) :
 }
 {
     "PRIMARY" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "KEY"
     "(" 
@@ -754,11 +810,12 @@ PrimaryKeyTableConstraint primaryKeyTableConstraint(Block block) :
     ")"
     clause = conflictClause() {
         constraint.setClause(clause);
+        constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
 }
 
-UniqueTableConstraint uniqueTableConstraint(Block block) :
+UniqueTableConstraint uniqueTableConstraint() :
 {
     UniqueTableConstraint constraint = new UniqueTableConstraint();
     IndexedColumn column;
@@ -766,7 +823,7 @@ UniqueTableConstraint uniqueTableConstraint(Block block) :
 }
 {
     "UNIQUE" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "(" 
     column = indexedColumn() {
@@ -781,26 +838,30 @@ UniqueTableConstraint uniqueTableConstraint(Block block) :
     ")"
     clause = conflictClause() {
         constraint.setClause(clause);
+        constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
 }
 
-CheckTableConstraint checkTableConstraint(Block block) :
+CheckTableConstraint checkTableConstraint() :
 {
+    CheckTableConstraint constraint = new CheckTableConstraint();
     Expression expr;
 }
 {
     "CHECK" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "("
     expr = expr() 
     ")" {
-        return new CheckTableConstraint(expr);
+        constraint.setExpression(expr);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
     }
 }
 
-ForeignKeyTableConstraint foreignKeyTableConstraint(Block block) :
+ForeignKeyTableConstraint foreignKeyTableConstraint() :
 {
     ForeignKeyTableConstraint constraint = new ForeignKeyTableConstraint();
     ColumnName column;
@@ -808,7 +869,7 @@ ForeignKeyTableConstraint foreignKeyTableConstraint(Block block) :
 }
 {
     "FOREIGN" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "KEY"
     "("
@@ -824,6 +885,7 @@ ForeignKeyTableConstraint foreignKeyTableConstraint(Block block) :
     ")"
     clause = foreignKeyClause() {
         constraint.setClause(clause);
+        constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
 }
@@ -833,15 +895,18 @@ ForeignKeyClause foreignKeyClause() :
     ForeignKeyClause clause = new ForeignKeyClause();
     Block block = new Block();
     TableName tab;
-    ColumnName column;
     ForeignKeySetting sett;}
 {
     "REFERENCES" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        clause.setBegin(token.beginLine, token.beginColumn);
     }
-    tab = foreignTable()
+    tab = foreignTable() {
+        clause.setTable(tab);
+    }
     [
-        "("
+        "(" {
+            ColumnName column;
+        }
         column = columnName() {
             clause.addColumn(column);
         }
@@ -863,145 +928,139 @@ ForeignKeyClause foreignKeyClause() :
     )*
     [
         LOOKAHEAD(2) // Ensures that is deferrable because first token can be 
-                     // either NOT or DEFERRABLE but second token is always
-                     // DEFERRABLE.
+                     // either NOT or DEFERRABLE.
         sett = deferrableForeignKeySett() {
             clause.addSetting(sett);
         }
     ] {
-        block.setEnd(token.endLine, token.endColumn);
-        clause.setBlock(block);
-        clause.setTable(tab);
+        clause.setEnd(token.endLine, token.endColumn);
         return clause;
     }}
 
 OnForeignKeySett onForeignKeySett() :
 {
-    Block block = new Block();
-    OnForeignKeySett.Event event;
-    OnForeignKeySett.Action action;
+    OnForeignKeySett sett = new OnForeignKeySett();
 }
 {
     "ON" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        sett.setBegin(token.beginLine, token.beginColumn);
     }
     (
         "DELETE" {
-            event = OnForeignKeySett.Event.DELETE;
+            sett.setEvent(OnForeignKeySett.Event.DELETE);
         }
     |   "UPDATE" {
-            event = OnForeignKeySett.Event.UPDATE;
+            sett.setEvent(OnForeignKeySett.Event.UPDATE);
         }
     )
     (
         "SET" // SET merged to remove ambiguity.
         (
             "NULL" {
-                action = OnForeignKeySett.Action.SET_NULL;
+                sett.setAction(OnForeignKeySett.Action.SET_NULL);
             }
         |   "DEFAULT" {
-                action = OnForeignKeySett.Action.SET_DEFAULT;
+                sett.setAction(OnForeignKeySett.Action.SET_DEFAULT);
             }
         )
     |   "CASCADE" {
-            action = OnForeignKeySett.Action.CASCADE;
+            sett.setAction(OnForeignKeySett.Action.CASCADE);
         }
     |   "RESTRICT" {
-            action = OnForeignKeySett.Action.RESTRICT;
+            sett.setAction(OnForeignKeySett.Action.RESTRICT);
         }
     |   "NO" "ACTION" {
-            action = OnForeignKeySett.Action.NO_ACTION;
+            sett.setAction(OnForeignKeySett.Action.NO_ACTION);
         }
     ) {
-        block.setEnd(token.endLine, token.endColumn);
-        return new OnForeignKeySett(block, event, action);
+        sett.setEnd(token.endLine, token.endColumn);
+        return sett;
     }
 }
 
 MatchForeignKeySett matchForeignKeySett() :
 {
-    Block block = new Block();
+    MatchForeignKeySett sett = new MatchForeignKeySett();
     Name name;
 }
 {
     "MATCH" {
-        block.setBegin(token.beginLine, token.beginColumn);
+        sett.setBegin(token.beginLine, token.beginColumn);
     }
     name = name() {
-        block.setEnd(token.endLine, token.endColumn);
-        return new MatchForeignKeySett(block, name);
+        sett.setName(name);
+        sett.setEnd(token.endLine, token.endColumn);
+        return sett;
     }
 }
 
 DeferrableForeignKeySett deferrableForeignKeySett() :
 {
-    Block block = new Block();
-    DeferrableForeignKeySett.Type type;
-    DeferrableForeignKeySett.Mode mode = null; 
+    DeferrableForeignKeySett sett = new DeferrableForeignKeySett();
 }
 {
     (
         "NOT" {
-            block.setBegin(token.beginLine, token.beginColumn);
-            type = DeferrableForeignKeySett.Type.NOT_DEFERRABLE;
+            sett.setBegin(token.beginLine, token.beginColumn);
+            sett.setType(DeferrableForeignKeySett.Type.NOT_DEFERRABLE);
         }
         "DEFERRABLE"
     |   "DEFERRABLE" {
-            block.setBegin(token.beginLine, token.beginColumn);
-            type = DeferrableForeignKeySett.Type.DEFERRABLE;
+            sett.setBegin(token.beginLine, token.beginColumn);
+            sett.setType(DeferrableForeignKeySett.Type.DEFERRABLE);
         }
     )
     [
         "INITIALLY"
         (
             "DEFERRED" {
-                mode = DeferrableForeignKeySett.Mode.DEFERRED;
+                sett.setMode(DeferrableForeignKeySett.Mode.DEFERRED);
             }
         |   "IMMEDIATE" {
-                mode = DeferrableForeignKeySett.Mode.IMMEDIATE;
+                sett.setMode(DeferrableForeignKeySett.Mode.IMMEDIATE);
             }
         )
     ] {
-        block.setEnd(token.endLine, token.endColumn);
-        return new DeferrableForeignKeySett(block, type, mode);
+        sett.setEnd(token.endLine, token.endColumn);
+        return sett;
     }
 }
 
 ConflictClause conflictClause() :
 {
-    Block block = new Block();
-    ConflictClause.Action action;}
+}
 {
     [   
         "ON" {
-            block.setBegin(token.beginLine, token.beginColumn);
+            ConflictClause clause = new ConflictClause();
+            clause.setBegin(token.beginLine, token.beginColumn);
         }
         "CONFLICT"
         (
             "ROLLBACK" {
-                action = ConflictClause.Action.ROLLBACK;
+                clause.setAction(ConflictClause.Action.ROLLBACK);
             }
         |   "ABORT" {
-                action = ConflictClause.Action.ABORT;
+                clause.setAction(ConflictClause.Action.ABORT);
             }
         |   "FAIL" {
-                action = ConflictClause.Action.FAIL;
+                clause.setAction(ConflictClause.Action.FAIL);
             }
         |   "IGNORE" {
-                action = ConflictClause.Action.IGNORE;
+                clause.setAction(ConflictClause.Action.IGNORE);
             }
         |   "REPLACE" {
-                action = ConflictClause.Action.REPLACE;
+                clause.setAction(ConflictClause.Action.REPLACE);
             }
         ) {
-            block.setEnd(token.endLine, token.endColumn);
-            return new ConflictClause(block, action);
+            clause.setEnd(token.endLine, token.endColumn);
+            return clause;
         }
     ] {
         return null;
     }}
 
-SqlStatement createTriggerStmt(Block block) :
+SqlStatement createTriggerStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1012,7 +1071,7 @@ SqlStatement createTriggerStmt(Block block) :
     }
 }
 
-SqlStatement createViewStmt(Block block) :
+SqlStatement createViewStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1023,7 +1082,7 @@ SqlStatement createViewStmt(Block block) :
     }
 }
 
-SqlStatement createVirtualTableStmt(Block block) :
+SqlStatement createVirtualTableStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1034,7 +1093,7 @@ SqlStatement createVirtualTableStmt(Block block) :
     }
 }
 
-SqlStatement deleteStmt(Block block) :
+SqlStatement deleteStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1045,7 +1104,7 @@ SqlStatement deleteStmt(Block block) :
     }
 }
 
-SqlStatement deleteStmtLimited(Block block) :
+SqlStatement deleteStmtLimited() :
 {
     SqlStatement stmt = null;
 }
@@ -1056,7 +1115,7 @@ SqlStatement deleteStmtLimited(Block block) :
     }
 }
 
-SqlStatement detachStmt(Block block) :
+SqlStatement detachStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1067,7 +1126,7 @@ SqlStatement detachStmt(Block block) :
     }
 }
 
-SqlStatement dropIndexStmt(Block block) :
+SqlStatement dropIndexStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1078,7 +1137,7 @@ SqlStatement dropIndexStmt(Block block) :
     }
 }
 
-SqlStatement dropTableStmt(Block block) :
+SqlStatement dropTableStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1089,7 +1148,7 @@ SqlStatement dropTableStmt(Block block) :
     }
 }
 
-SqlStatement dropTriggerStmt(Block block) :
+SqlStatement dropTriggerStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1100,7 +1159,7 @@ SqlStatement dropTriggerStmt(Block block) :
     }
 }
 
-SqlStatement dropViewStmt(Block block) :
+SqlStatement dropViewStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1137,7 +1196,7 @@ NumericLiteral numericLiteral() :
         return null;
     }}
 
-SqlStatement insertStmt(Block block) :
+SqlStatement insertStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1148,7 +1207,7 @@ SqlStatement insertStmt(Block block) :
     }
 }
 
-SqlStatement pragmaStmt(Block block) :
+SqlStatement pragmaStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1164,7 +1223,7 @@ void pragmaValue() :
 {
     "q"}
 
-SqlStatement reindexStmt(Block block) :
+SqlStatement reindexStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1175,37 +1234,61 @@ SqlStatement reindexStmt(Block block) :
     }
 }
 
-SelectStmt selectStmt(Block block) :
+SelectStmt selectStmt() :
 {
-    SelectStmt stmt = null;
+    SelectStmt stmt = new SelectStmt();
+    SelectUnit unit;
+    SelectCompound.Operator op;
+    SelectUnit core;
 }
 {
-    selectCore()
+    unit = selectCore() {
+        stmt.setBegin(unit.beginLine, unit.beginColumn);
+    }
     (
-        compoundOperation()
-    )*
+        op = compoundOperator()
+        core = selectCore() {
+            unit = new SelectCompound(new Block(unit.beginLine, 
+                unit.beginColumn, token.endLine, token.endColumn), unit, core, op);
+        }
+    )* {
+        stmt.setUnit(unit);
+    }
     [
-        "ORDER" "BY"
-        orderingTerm()
+        "ORDER" "BY" {
+            OrderingTerm term;
+        }
+        term = orderingTerm() {
+            stmt.addTerm(term);
+        }
         (
             ","
-            orderingTerm()
+            term = orderingTerm() {
+                stmt.addTerm(term);
+            }
         )*
     ]
     [
-        "LIMIT"
-        expr()
+        "LIMIT" {
+            Expression expr;
+        }
+        expr = expr() {
+            stmt.setLimit(expr);
+        }
         [
             ( "OFFSET" | "," )
-            expr()
+            expr = expr() {
+                stmt.setOffset(expr);
+            }
         ]
     ] {
+        stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
     }
 }
 
 
-void selectCore() :
+SelectCore selectCore() :
 {}
 {
     "SELECT"
@@ -1239,15 +1322,9 @@ void selectCore() :
             "HAVING"
             expr()
         ]
-    ]
-}
-
-void compoundOperation() :
-{
-}
-{
-    // Operator
-    selectCore()
+    ] {
+        return null;
+    }
 }
 
 void resultColumn() :
@@ -1275,17 +1352,27 @@ void joinConstraint() :
 {
     "j"}
 
-void orderingTerm() :
+OrderingTerm orderingTerm() :
 {}
 {
-    "k"}
+    "k" {
+        return null;
+    }}
 
-void compoundOperator() :
-{}
+SelectCompound.Operator compoundOperator() :
 {
-    "l"}
+}
+{
+    (
+        "UNION" [ "ALL" ]
+    |   "INTERSECT"
+    |   "EXCEPT"
+    ) {
+        return null;
+    }
+}
 
-SqlStatement updateStmt(Block block) :
+SqlStatement updateStmt() :
 {
     SqlStatement stmt = null;
 }
@@ -1296,7 +1383,7 @@ SqlStatement updateStmt(Block block) :
     }
 }
 
-SqlStatement updateStmtLimited(Block block) :
+SqlStatement updateStmtLimited() :
 {
     SqlStatement stmt = null;
 }
@@ -1312,7 +1399,7 @@ void qualifiedTableName() :
 {
     "m"}
 
-SqlStatement vacuumStmt(Block block) :
+SqlStatement vacuumStmt() :
 {
     SqlStatement stmt = null;
 }

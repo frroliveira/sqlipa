@@ -8,9 +8,8 @@ public class ForeignKeyColumnConstraint extends ColumnConstraint {
 
     private ForeignKeyClause clause;
     
-    public ForeignKeyColumnConstraint(ForeignKeyClause clause) {
+    public ForeignKeyColumnConstraint() {
         super();
-        this.clause = clause;
     }
     
     public ForeignKeyColumnConstraint(Block block, ConstraintName name, 

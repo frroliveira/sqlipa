@@ -21,6 +21,10 @@ public class OnForeignKeySett extends ForeignKeySetting {
     
     private Action action;
     
+    public OnForeignKeySett() {
+        super();
+    }
+    
     public OnForeignKeySett(Block block, Event event, Action action) {
         super(block);
         this.event = event;
