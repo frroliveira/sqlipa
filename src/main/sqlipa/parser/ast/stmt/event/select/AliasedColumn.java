@@ -8,6 +8,10 @@ public class AliasedColumn extends ExpressionColumn {
 
     private ColumnAlias alias;
     
+    public AliasedColumn() {
+        super();
+    }
+    
     public AliasedColumn(Block block, Expression expr, ColumnAlias alias) {
         super(block, expr);
         this.alias = alias;

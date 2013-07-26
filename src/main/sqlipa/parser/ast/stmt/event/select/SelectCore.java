@@ -1,5 +1,6 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
@@ -18,6 +19,12 @@ public class SelectCore extends SelectUnit {
     private List<ResultColumn> columns;
     
     private List<Expression> groupBy;
+    
+    public SelectCore() {
+        super();
+        this.columns = new LinkedList<ResultColumn>();
+        this.groupBy = new LinkedList<Expression>();
+    }
     
     public SelectCore(Block block, boolean returnsDistinct, JoinSrc from,
             Expression where, Expression having, List<ResultColumn> columns,
@@ -79,4 +86,20 @@ public class SelectCore extends SelectUnit {
         this.groupBy = groupBy;
     }
     
+    public void addColumn(ResultColumn column) {
+        columns.add(column);
+    }
+    
+    public void addGroupByExpression(Expression expr) {
+        groupBy.add(expr);
+    }
+    
+    public boolean removeColumn(ResultColumn column) {
+        return columns.remove(column);
+    }
+    
+    public boolean removeGroupByExpression(Expression expr) {
+        return groupBy.remove(expr);
+    }
+
 }

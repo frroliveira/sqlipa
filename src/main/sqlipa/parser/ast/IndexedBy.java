@@ -1,15 +1,17 @@
 package main.sqlipa.parser.ast;
 
-import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.IndexName;
-import main.sqlipa.parser.ast.name.TableName;
 
-public class IndexedTableName extends QualifiedTableName {
-
+public class IndexedBy extends Node {
+    
     private IndexName ind;
     
-    public IndexedTableName(Block block, DatabaseName db, TableName tab, IndexName ind) {
-        super(block, db, tab);
+    public IndexedBy() {
+        super();
+    }
+    
+    public IndexedBy(Block block, IndexName ind) {
+        super(block);
         this.ind = ind;
     }
     

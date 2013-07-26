@@ -7,6 +7,10 @@ public class UniversalColumn extends ResultColumn {
 
     private TableName tab;
     
+    public UniversalColumn() {
+        super();
+    }
+    
     public UniversalColumn(Block block, TableName tab) {
         super(block);
         this.tab = tab;

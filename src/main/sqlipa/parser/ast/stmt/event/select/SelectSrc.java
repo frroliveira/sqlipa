@@ -9,6 +9,10 @@ public class SelectSrc extends SingleSrc {
     
     private TableAlias alias;
     
+    public SelectSrc() {
+        super();
+    }
+    
     public SelectSrc(Block block, SelectStmt stmt, TableAlias alias) {
         super(block);
         this.stmt = stmt;

@@ -1249,7 +1249,8 @@ SelectStmt selectStmt() :
         op = compoundOperator()
         core = selectCore() {
             unit = new SelectCompound(new Block(unit.beginLine, 
-                unit.beginColumn, token.endLine, token.endColumn), unit, core, op);
+                unit.beginColumn, token.endLine, token.endColumn), unit, core,
+                op);
         }
     )* {
         stmt.setUnit(unit);
@@ -1289,58 +1290,231 @@ SelectStmt selectStmt() :
 
 
 SelectCore selectCore() :
-{}
 {
-    "SELECT"
+    SelectCore core = new SelectCore();
+    ResultColumn column;}
+{
+    "SELECT" {
+        core.setBegin(token.beginLine, token.beginColumn);
+    }
     [
         (
-            "DISTINCT"
+            "DISTINCT" {
+                core.setDistinct(true);
+            }
         |   "ALL"
         )
     ]
-    resultColumn()
+    column = resultColumn() {
+        core.addColumn(column);
+    }
     (
         ","
-        resultColumn()
+        resultColumn() {
+	        core.addColumn(column);
+	    }
     )*
     [
-        "FROM"
-        joinSource()
+        "FROM" {
+            JoinSrc src;
+        }
+        src = joinSource() {
+            core.setFrom(src);
+        }
     ]
     [
-        "WHERE"
-        expr()
+        "WHERE" {
+            Expression expr;
+        }
+        expr = expr() {
+            core.setWhere(expr);
+        }
     ]
     [
-        "GROUP" "BY"
-        expr()
+        "GROUP" "BY" {
+            Expression expr;
+        }
+        expr = expr() {
+            core.addGroupByExpression(expr);
+        }
         (
             ","
-            expr()
-        )
+            expr = expr() {
+                core.addGroupByExpression(expr);
+            }
+        )*
         [
             "HAVING"
-            expr()
+            expr = expr() {
+                core.setHaving(expr);
+            }
         ]
     ] {
-        return null;
+        core.setEnd(token.endLine, token.endColumn);
+        return core;
     }
 }
 
-void resultColumn() :
-{}
+ResultColumn resultColumn() :
 {
-    "d"}
+    ResultColumn column;}
+{
+    (
+        column = universalColumn()
+    |   column = expressionColumn()
+    ) {
+        return column;
+    }}
 
-void joinSource() :
-{}
+UniversalColumn universalColumn() :
 {
-    "f"}
+    UniversalColumn column = new UniversalColumn();
+    TableName tab;
+}
+{
+    (
+        "*" {
+            column.setBeginEnd(token.beginLine, token.beginColumn,
+                token.endLine, token.endColumn);
+        }
+    |   tab = tableName() {
+            column.setTable(tab);
+        }
+        "." 
+        "*" {
+            column.setBeginEnd(tab.beginLine, tab.beginColumn, token.endLine,
+                token.endColumn);
+        }
+    ) {
+        return column;
+    }
+}
 
-void singleSource() :
-{}
+ExpressionColumn expressionColumn() :
 {
-    "g"}
+    ExpressionColumn column;
+    Expression expr;
+    ColumnAlias alias;
+}
+{
+    expr = expr()
+    [
+        [ "AS" ]
+        alias = columnAlias() {
+            // TODO: line numbers.
+            column = new AliasedColumn();
+            column.setExpression(expr);
+            column.setAlias(alias);
+            return column;
+        }
+    ] {
+        column = new ExpressionColumn();
+        column.setExpression(expr);
+        return column;
+    }
+}
+
+JoinSrc joinSource() :
+{
+    JoinSrc src;
+    JoinCompound.Operator op;
+    JoinSrc right;
+    JoinConstraint constraint;}
+{
+    src = singleSource()
+    (
+        op = joinOp()
+        right = singleSource()
+        constraint = joinConstraint() {
+            src = new JoinCompound(new Block(src.beginLine, src.beginColumn,
+                token.endLine, token.endColumn), src, right, op, constraint);
+        }
+    )* {
+        return src;
+    }}
+
+JoinSrc singleSource() :
+{
+    JoinSrc src;
+    int line = 0;
+    int column = 0;}
+{
+    (
+        src = tableSource()
+    |   src = selectSource()
+    |   "(" {
+            line = token.beginLine;
+            column = token.beginColumn;
+        }
+        src = joinSource()
+        ")" {
+            src.setBeginEnd(line, column, token.endLine, token.endColumn);
+        }
+    ) {
+        return src;
+    }}
+
+TableSrc tableSource() :
+{
+    TableSrc src = new TableSrc();
+    DatabaseName db = null;
+    TableName tab;
+    IndexedBy indexed;
+}
+{
+    [
+        db = databaseName() {
+            src.setDatabase(db);
+            src.setBegin(db.beginLine, db.beginColumn);
+        }
+        "."
+    ]
+    tab = tableName() {
+        src.setTable(tab);
+        if (db == null) {
+            src.setBegin(tab.beginLine, tab.beginColumn);
+        }
+    }
+    [
+        [ "AS" ] {
+            TableAlias alias;
+        }
+        alias = tableAlias() {
+            src.setAlias(alias);
+        }
+    ]
+    indexed = indexedBy() {
+        src.setIndexed(indexed);
+        src.setEnd(token.endLine, token.endColumn);
+        return src;
+    }
+}
+
+SelectSrc selectSource() :
+{
+    SelectSrc src = new SelectSrc();
+    SelectStmt stmt;
+}
+{
+    "(" {
+        src.setBegin(token.beginLine, token.beginColumn);
+    }
+    stmt = selectStmt() {
+        src.setStatement(stmt);
+    }
+    ")"
+    [
+        [ "AS" ] {
+            TableAlias alias;
+        }
+        alias = tableAlias() {
+            src.setAlias(alias);
+        }
+    ] {
+        src.setEnd(token.endLine, token.endColumn);
+        return src;
+    }
+}
 
 void joinOp() :
 {}
@@ -1398,6 +1572,35 @@ void qualifiedTableName() :
 {}
 {
     "m"}
+
+IndexedBy indexedBy() :
+{
+    IndexedBy indexed = new IndexedBy();
+}
+{
+    [
+	    (
+	        "INDEXED" {
+	            IndexName ind;
+	            indexed.setBegin(token.beginLine, token.beginColumn);
+            }
+            "BY"
+	        ind = indexName() {
+	            indexed.setIndex(ind);
+	        }
+	    |   "NOT" {
+                indexed.setBegin(token.beginLine, token.beginColumn);
+            }
+            "INDEXED" {
+            }
+	    ) {
+            indexed.setEnd(token.endLine, token.endColumn);
+            return indexed;
+        }
+    ] {
+        return null;
+    }
+}
 
 SqlStatement vacuumStmt() :
 {

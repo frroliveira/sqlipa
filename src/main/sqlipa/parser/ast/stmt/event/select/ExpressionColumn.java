@@ -7,6 +7,10 @@ public class ExpressionColumn extends ResultColumn {
 
     private Expression expr;
     
+    public ExpressionColumn() {
+        super();
+    }
+    
     public ExpressionColumn(Block block, Expression expr) {
         super(block);
         this.expr = expr;

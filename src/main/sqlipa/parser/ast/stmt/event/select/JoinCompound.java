@@ -1,9 +1,8 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.Node;
 
-public class JoinOperation extends Node {
+public class JoinCompound extends JoinSrc {
     
     public enum Operator {
         COMMA,
@@ -19,38 +18,53 @@ public class JoinOperation extends Node {
         NATURAL_CROSS_JOIN
     }
     
-    private Operator op;
+    private JoinSrc left;
     
-    private SingleSrc src;
+    private JoinSrc right;
+    
+    private Operator op;
     
     private JoinConstraint constraint;
     
-    public JoinOperation(Block block, Operator op, SingleSrc src,
+    public JoinCompound() {
+        super();
+    }
+    
+    public JoinCompound(Block block, JoinSrc left, JoinSrc right, Operator op,
             JoinConstraint constraint) {
         super(block);
+        this.left = left;
+        this.right = right;
         this.op = op;
-        this.src = src;
         this.constraint = constraint;
+    }
+
+    public JoinSrc getLeft() {
+        return left;
+    }
+    
+    public JoinSrc getRight() {
+        return right;
     }
     
     public Operator getOperator() {
         return op;
     }
-    
-    public SingleSrc getSource() {
-        return src;
-    }
-    
+
     public JoinConstraint getConstraint() {
         return constraint;
     }
     
-    public void setOperator(Operator op) {
-        this.op = op;
+    public void setLeft(JoinSrc left) {
+        this.left = left;
     }
     
-    public void setSource(SingleSrc src) {
-        this.src = src;
+    public void setRight(JoinSrc right) {
+        this.right = right;
+    }
+    
+    public void setOperator(Operator op) {
+        this.op = op;
     }
     
     public void setConstraint(JoinConstraint constraint) {
