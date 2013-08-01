@@ -10,8 +10,9 @@ public class JoinConstraintUsing extends JoinConstraint {
 
     private List<ColumnName> columns;
     
-    public JoinConstraintUsing(Block block) {
-        this(block, new LinkedList<ColumnName>());
+    public JoinConstraintUsing() {
+        super();
+        this.columns = new LinkedList<ColumnName>();
     }
 
     public JoinConstraintUsing(Block block, List<ColumnName> columns) {
@@ -25,6 +26,14 @@ public class JoinConstraintUsing extends JoinConstraint {
     
     public void setColumns(List<ColumnName> columns) {
         this.columns = columns;
+    }
+    
+    public void addColumn(ColumnName column) {
+        columns.add(column);
+    }
+    
+    public boolean removeColumn(ColumnName column) {
+        return columns.remove(column);
     }
     
 }

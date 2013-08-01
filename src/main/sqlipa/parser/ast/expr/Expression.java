@@ -5,6 +5,10 @@ import main.sqlipa.parser.ast.Node;
 
 public abstract class Expression extends Node {
 
+    public Expression() {
+        super();
+    }
+    
     public Expression(Block block) {
         super(block);
     }

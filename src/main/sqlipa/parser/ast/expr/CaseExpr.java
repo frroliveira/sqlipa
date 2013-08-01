@@ -11,18 +11,19 @@ public class CaseExpr extends Expression {
     
     private Expression elseExpr;
     
-    private List<WhenThenExpr> whenThen;
+    private List<WhenExpr> whens;
 
-    public CaseExpr(Block block, Expression caseExpr, Expression elseExpr) {
-        this(block, caseExpr, elseExpr, new LinkedList<WhenThenExpr>());
+    public CaseExpr() {
+        super();
+        this.whens = new LinkedList<WhenExpr>();
     }
     
     public CaseExpr(Block block, Expression caseExpr, Expression elseExpr,
-            List<WhenThenExpr> whenThen) {
+            List<WhenExpr> when) {
         super(block);
         this.caseExpr = caseExpr;
         this.elseExpr = elseExpr;
-        this.whenThen = whenThen;
+        this.whens = when;
     }
     
     public Expression getCase() {
@@ -33,8 +34,8 @@ public class CaseExpr extends Expression {
         return elseExpr;
     }
     
-    public List<WhenThenExpr> getWhenThen() {
-        return whenThen;
+    public List<WhenExpr> getWhens() {
+        return whens;
     }
     
     public void setCase(Expression caseExpr) {
@@ -45,8 +46,16 @@ public class CaseExpr extends Expression {
         this.elseExpr = elseExpr;
     }
     
-    public void setWhenThen(List<WhenThenExpr> whenThen) {
-        this.whenThen = whenThen;
+    public void setWhens(List<WhenExpr> whens) {
+        this.whens = whens;
+    }
+    
+    public void addWhen(WhenExpr when) {
+        whens.add(when);
+    }
+    
+    public boolean removeWhen(WhenExpr when) {
+        return whens.remove(when);
     }
     
 }

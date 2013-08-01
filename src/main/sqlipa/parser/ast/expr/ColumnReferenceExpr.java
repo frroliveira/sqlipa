@@ -13,6 +13,10 @@ public class ColumnReferenceExpr extends Expression {
     
     private ColumnName column;
     
+    public ColumnReferenceExpr() {
+        super();
+    }
+    
     public ColumnReferenceExpr(Block block, DatabaseName db, TableName tab,
             ColumnName column) {
         super(block);

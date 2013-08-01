@@ -9,6 +9,10 @@ public class CollateExpr extends Expression {
     
     private CollationName collation;
     
+    public CollateExpr() {
+        super();
+    }
+    
     public CollateExpr(Block block, Expression expr, CollationName collation) {
         super(block);
         this.expr = expr;

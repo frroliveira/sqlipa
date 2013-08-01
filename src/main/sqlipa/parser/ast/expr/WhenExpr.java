@@ -3,13 +3,17 @@ package main.sqlipa.parser.ast.expr;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 
-public class WhenThenExpr extends Node {
+public class WhenExpr extends Node {
     
     private Expression when;
     
     private Expression then;
     
-    public WhenThenExpr(Block block, Expression when, Expression then) {
+    public WhenExpr() {
+        super();
+    }
+    
+    public WhenExpr(Block block, Expression when, Expression then) {
         super(block);
         this.when = when;
         this.then = then;

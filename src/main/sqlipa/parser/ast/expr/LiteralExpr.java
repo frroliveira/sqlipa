@@ -7,6 +7,10 @@ public class LiteralExpr extends Expression {
 
     private Literal literal;
     
+    public LiteralExpr() {
+        super();
+    }
+    
     public LiteralExpr(Block block, Literal literal) {
         super(block);
         this.literal = literal;

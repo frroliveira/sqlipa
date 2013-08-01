@@ -13,6 +13,10 @@ public class InExpr extends Expression {
     
     private Expression expr;
     
+    public InExpr() {
+        super();
+    }
+    
     public InExpr(Block block, Operator op, Expression expr) {
         super(block);
         this.op = op;

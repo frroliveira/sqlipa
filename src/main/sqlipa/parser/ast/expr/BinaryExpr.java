@@ -15,6 +15,7 @@ public class BinaryExpr extends Expression {
         SHIFT_LOW,
         BITWISE_AND,
         BITWISE_OR,
+        ESCAPE,
         LESS,
         LESS_OR_EQUAL,
         GREATER,
@@ -23,11 +24,14 @@ public class BinaryExpr extends Expression {
         NOT_EQUAL,
         IS,
         IS_NOT,
-        IN,
         LIKE,
         GLOB,
-        MATCH,
         REGEXP,
+        MATCH,
+        NOT_LIKE,
+        NOT_GLOB,
+        NOT_REGEXP,
+        NOT_MATCH,
         AND,
         OR
     }
@@ -37,6 +41,10 @@ public class BinaryExpr extends Expression {
     private Expression right;
     
     private Operator op;
+    
+    public BinaryExpr() {
+        super();
+    }
     
     public BinaryExpr(Block block, Expression left, Expression right,
             Operator op) {

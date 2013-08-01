@@ -17,6 +17,10 @@ public class BetweenExpr extends Expression {
     
     private Operator op;
     
+    public BetweenExpr() {
+        super();
+    }
+    
     public BetweenExpr(Block block, Expression expr, Expression lower,
             Expression upper, Operator op) {
         super(block);

@@ -7,6 +7,10 @@ public class JoinConstraintOn extends JoinConstraint {
 
     private Expression expr;
     
+    public JoinConstraintOn() {
+        super();
+    }
+    
     public JoinConstraintOn(Block block, Expression expr) {
         super(block);
         this.expr = expr;

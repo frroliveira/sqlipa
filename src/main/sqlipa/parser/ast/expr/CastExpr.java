@@ -9,6 +9,10 @@ public class CastExpr extends Expression {
     
     private TypeName type;
     
+    public CastExpr() {
+        super();
+    }
+    
     public CastExpr(Block block, Expression expr, TypeName type) {
         super(block);
         this.expr = expr;

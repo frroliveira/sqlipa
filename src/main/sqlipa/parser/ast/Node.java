@@ -6,11 +6,11 @@ public abstract class Node extends Block {
     private Object data;
     
     public Node() {
+        super();
     }
     
     public Node(Block block) {
-        if (block != null)
-            setBeginEnd(block);
+        super(block);
     }
     
     public Object getData() {

@@ -8,12 +8,19 @@ public class UnaryExpr extends Expression {
         POSITIVE,
         NEGATIVE,
         BITWISE_NOT,
-        LOGICAL_NOT
+        LOGICAL_NOT,
+        EXISTS,
+        IS_NULL,
+        NOT_NULL
     }
     
     private Operator op;
     
     private Expression expr;
+    
+    public UnaryExpr() {
+        super();
+    }
     
     public UnaryExpr(Block block, Operator op, Expression expr) {
         super(block);

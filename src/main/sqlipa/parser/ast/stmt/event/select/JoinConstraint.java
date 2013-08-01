@@ -5,6 +5,10 @@ import main.sqlipa.parser.ast.Node;
 
 public class JoinConstraint extends Node {
     
+    public JoinConstraint() {
+        super();
+    }
+
     public JoinConstraint(Block block) {
         super(block);
     }

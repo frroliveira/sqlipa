@@ -10,6 +10,10 @@ public class InTableExpr extends InExpr {
     
     private TableName tab;
     
+    public InTableExpr() {
+        super();
+    }
+    
     public InTableExpr(Block block, Operator op, Expression expr,
             DatabaseName db, TableName tab) {
         super(block, op, expr);

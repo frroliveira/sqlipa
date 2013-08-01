@@ -9,8 +9,9 @@ public class InSetExpr extends InExpr {
 
     private List<Expression> set;
     
-    public InSetExpr(Block block, Operator op, Expression expr) {
-        this(block, op, expr, new LinkedList<Expression>());
+    public InSetExpr() {
+        super();
+        this.set = new LinkedList<Expression>();
     }
 
     public InSetExpr(Block block, Operator op, Expression expr,
@@ -25,6 +26,14 @@ public class InSetExpr extends InExpr {
     
     public void setSet(List<Expression> set) {
         this.set = set;
+    }
+    
+    public void addExpression(Expression expr) {
+        set.add(expr);
+    }
+    
+    public boolean removeExpression(Expression expr) {
+        return set.remove(expr);
     }
     
 }

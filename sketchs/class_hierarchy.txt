@@ -152,12 +152,12 @@ namespace stmt {
             EventStmt {
                 DeleteStmt {
                     QualifiedTableName tab;
-                    Expression whereExpr;
+                    Expression where;
                 
                     DeleteStmtLimited {
                         List<OrderingTerm> terms;
-                        Expression limitExpr;
-                        Expression offsetExpr;
+                        Expression limit;
+                        Expression offset;
                     }
                 }
 
@@ -250,8 +250,10 @@ namespace stmt {
                         }
 
                         TableSrc {
-                            QualifiedTableName tab;
+                            DatabaseName db;
+                            TableName tab;
                             TableAlias alias;
+                            IndexedBy indexed;
                         }
                     }
 
@@ -302,12 +304,12 @@ namespace stmt {
                         Type type;
                         QualifiedTableName tab;
                         List<ColumnAssign> assigns;
-                        Expression whereExpr;
+                        Expression where;
 
                         UpdateStmtLimiteed {
                             List<OrderingTerm> terms;
-                            Expression limitExpr;
-                            Expression offsetExpr;
+                            Expression limit;
+                            Expression offset;
                         }
                     }
 
@@ -326,7 +328,6 @@ namespace stmt {
                 }
 
                 Expression expr;
-                CollationName collation;
                 Order order;
             }
         }
@@ -337,7 +338,6 @@ namespace stmt {
                 PragmaName pragma;
                 PragmaValue value;
             }
-
 
             PragmaValue {
                 NumberPragmaValue {
@@ -570,7 +570,10 @@ namespace expr {
                 POSITIVE,
                 NEGATIVE,
                 BITWISE_NOT,
-                LOGICAL_NOT
+                LOGICAL_NOT,
+                EXISTS,
+                IS_NULL,
+                NOT_NULL
             }
 
             Operator op;
@@ -579,7 +582,35 @@ namespace expr {
 
         BinaryExpr {
             enum Operator {
-                // To be defined.
+                CONCATENATION,
+                MULTIPLICATION,
+                DIVISION,
+                MODULO,
+                ADDITION,
+                SUBTRACTION,
+                SHIFT_HIGH,
+                SHIFT_LOW,
+                BITWISE_AND,
+                BITWISE_OR,
+                ESCAPE,
+                LESS,
+                LESS_OR_EQUAL,
+                GREATER,
+                GREATER_OR_EQUAL,
+                EQUAL,
+                NOT_EQUAL,
+                IS,
+                IS_NOT,
+                LIKE,
+                GLOB,
+                REGEXP,
+                MATCH,
+                NOT_LIKE,
+                NOT_GLOB,
+                NOT_REGEXP,
+                NOT_MATCH,
+                AND,
+                OR
             }
 
             Expression left;
@@ -601,24 +632,6 @@ namespace expr {
         CollateExpr {
             Expression expr;
             CollationName collation;
-        }
-
-        EscapableExpr {
-            enum Operator {
-                LIKE,
-                GLOB,
-                REGEXP,
-                MATCH,
-                NOT_LIKE,
-                NOT_GLOB,
-                NOT_REGEXP,
-                NOT_MATCH
-            }
-
-            Operator op;
-            Expression left;
-            Expression right;
-            Expression escape;
         }
 
         BetweenExpr {
@@ -655,10 +668,6 @@ namespace expr {
                 TableName tab;
             }
         }
-
-        ExistsExpr {
-            SelectStmt stmt;
-        }
         
         SelectExpr {
             SelectStmt stmt;
@@ -670,13 +679,21 @@ namespace expr {
             List<WhenThenExpr> whenThen;
         }
 
-        WhenThenExpr {
+        WhenExpr {
             Expression when;
             Expression then;
         }
 
         RaiseFunctionExpr {
-            RaiseFunction function;
+            enum Type {
+                IGNORE,
+                ROLLBACK,
+                ABORT,
+                FAIL
+            }
+
+            Type type;
+            String error;
         }
     }
 }
@@ -721,28 +738,14 @@ SignedNumber {
     NumericLiteral literal;
 }
 
-RaiseFunction {
-    enum Type {
-        IGNORE,
-        ROLLBACK,
-        ABORT,
-        FAIL
-    }
-
-    Type type;
-    String errorMsg;
-}
-
 QualifiedTableName {
     DatabaseName db;
     TableName tab;
+    IndexedBy indexed;
+}
 
-    IndexedTableName {
-        IndexName ind;
-    }
-
-    NotIndexedTableName {
-    }
+IndexedBy {
+    IndexName ind;
 }
 
 ModuleArgument {

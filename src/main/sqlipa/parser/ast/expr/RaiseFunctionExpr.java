@@ -1,23 +1,44 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.RaiseFunction;
 
 public class RaiseFunctionExpr extends Expression {
 
-    private RaiseFunction function;
+    public enum Type {
+        IGNORE,
+        ROLLBACK,
+        ABORT,
+        FAIL
+    }
     
-    public RaiseFunctionExpr(Block block, RaiseFunction function) {
+    private Type type;
+    
+    private String error;
+    
+    public RaiseFunctionExpr() {
+        super();
+    }
+    
+    public RaiseFunctionExpr(Block block, Type type, String error) {
         super(block);
-        this.function = function;
+        this.type = type;
+        this.error = error;
     }
     
-    public RaiseFunction getFunction() {
-        return function;
+    public Type getType() {
+        return type;
     }
     
-    public void setFunction(RaiseFunction function) {
-        this.function = function;
+    public String getError() {
+        return error;
+    }
+    
+    public void setType(Type type) {
+        this.type = type;
+    }
+    
+    public void setError(String error) {
+        this.error = error;
     }
     
 }

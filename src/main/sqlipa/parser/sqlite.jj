@@ -1,5 +1,4 @@
 options {
-    LOOKAHEAD = 1;
     STATIC = false;
     COMMON_TOKEN_ACTION = true;
     JDK_VERSION = "1.5";
@@ -18,11 +17,8 @@ import main.sqlipa.parser.ast.literal.*;
 import main.sqlipa.parser.ast.name.*;
 import main.sqlipa.parser.ast.stmt.*;
 import main.sqlipa.parser.ast.stmt.create.*;
-import main.sqlipa.parser.ast.stmt.drop.*;
 import main.sqlipa.parser.ast.stmt.event.*;
 import main.sqlipa.parser.ast.stmt.event.select.*;
-import main.sqlipa.parser.ast.stmt.event.update.*;
-import main.sqlipa.parser.ast.stmt.pragma.*;
 
 final class ASTParser {
 
@@ -188,6 +184,26 @@ TOKEN:
 |   <K_WHERE: "WHERE">
 }
 
+/*TOKEN:
+{
+    <O_CONCATENATION: "||">
+|   <O_MULTIPLICATION: "*">
+|   <O_DIVISION: "/">
+|   <O_MODULO: "%">
+|   <O_ADDITION: "+">
+|   <O_SUBTRACTION: "-">
+|   <O_SHIFT_HIGH: "<<">
+|   <O_SHIFT_LOW: ">>">
+|   <O_BITWISE_AND: "&">
+|   <O_BITWISE_OR: "|">
+|   <O_LESS: "<">
+|   <O_LESS_OR_EQUAL: "<=">
+|   <O_GREATER: ">">
+|   <O_GREATER_OR_EQUAL: ">=">
+|   <O_EQUAL: "=" | "==">
+|   <O_NOT_EQUAL: "!=" | "<>">
+}*/
+
 void sqlStmtList() :{}
 {
     (sqlStmt())*
@@ -210,14 +226,14 @@ SqlStatement sqlStmt() :
             explain = SqlStatement.Explain.PLAN;
         }
     ]
-    (
+    (/*
         stmt = alterTableStmt()
     |   stmt = analyzeStmt()
     |   stmt = attachStmt()
 	|   stmt = beginStmt()
 	|   stmt = commitStmt()
 	|   stmt = createIndexStmt()
-	|   stmt = createTableStmt()
+	|*/   stmt = createTableStmt() /*
 	|   stmt = createTriggerStmt()
 	|   stmt = createViewStmt()
 	|   stmt = createVirtualTableStmt()	|   stmt = deleteStmt()
@@ -233,114 +249,16 @@ SqlStatement sqlStmt() :
 	|   stmt = releaseStmt()
 	|   stmt = rollbackStmt()
 	|   stmt = savepointStmt()
-	|   stmt = selectStmt()
+	|*/   stmt = selectStmt() /*
 	|   stmt = updateStmt()
 	|   stmt = updateStmtLimited()
-	|   stmt = vacuumStmt()
+	|   stmt = vacuumStmt()*/
 	) {
         if (explain != null) {
             // If statement starts by EXPLAIN.
             stmt.setBegin(line, column);
             stmt.setExplain(explain);
         }
-        return stmt;
-    }
-}
-
-SqlStatement alterTableStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "ALTER"
-    {
-        return stmt;
-    }}
-
-SqlStatement analyzeStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "ANALYZE"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement attachStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "ATTACH"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement beginStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "BEGIN"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement commitStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "COMMIT"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement rollbackStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "ROLLBACK"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement savepointStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "SAVEPOINT"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement releaseStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "RELEASE"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement createIndexStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "CREATE INDEX"
-    {
         return stmt;
     }
 }
@@ -353,7 +271,7 @@ IndexedColumn indexedColumn() :
 {
     column = columnName() {
         indColumn.setColumn(column);
-        indColumn.setBegin(column.beginLine, column.beginColumn);
+        indColumn.setBegin(column);
     }
     [
         "COLLATE" {
@@ -364,14 +282,12 @@ IndexedColumn indexedColumn() :
         }
     ]
     [
-        (
-            "ASC" {
-                indColumn.setOrder(IndexedColumn.Order.ASC);
-            }
-        |   "DESC" {
-                indColumn.setOrder(IndexedColumn.Order.DESC);
-            }
-        )
+        "ASC" {
+            indColumn.setOrder(IndexedColumn.Order.ASC);
+        }
+    |   "DESC" {
+            indColumn.setOrder(IndexedColumn.Order.DESC);
+        }
     ] {
         indColumn.setEnd(token.endLine, token.endColumn);
         return indColumn;
@@ -472,7 +388,7 @@ ColumnDef columnDef() :
 {
     column = columnName() {
         columnDef.setColumn(column);
-        columnDef.setBegin(column.beginLine, column.beginColumn);
+        columnDef.setBegin(column);
     }
     [
         type = typeName() {
@@ -567,14 +483,12 @@ PrimaryKeyColumnConstraint primaryKeyColumnConstraint() :
     }
     "KEY" 
     [
-        (
-            "ASC" {
-                constraint.setOrder(PrimaryKeyColumnConstraint.Order.ASC);
-            }
-        |   "DESC" {
-                constraint.setOrder(PrimaryKeyColumnConstraint.Order.DESC);
-            }
-        )
+        "ASC" {
+            constraint.setOrder(PrimaryKeyColumnConstraint.Order.ASC);
+        }
+    |   "DESC" {
+            constraint.setOrder(PrimaryKeyColumnConstraint.Order.DESC);
+        }
     ]
     clause = conflictClause() {
         constraint.setClause(clause);
@@ -1059,180 +973,751 @@ ConflictClause conflictClause() :
     ] {
         return null;
     }}
+/*
+%right BITNOT.*/
 
-SqlStatement createTriggerStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "CREATE TRIGGER"
-    {
-        return stmt;
-    }
-}
 
-SqlStatement createViewStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "CREATE VIEW"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement createVirtualTableStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "CREATE VIRTUAL"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement deleteStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DELETE"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement deleteStmtLimited() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DELETE limited"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement detachStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DETACH"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement dropIndexStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DROP INDEX"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement dropTableStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DROP TABLE"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement dropTriggerStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DROP TRIGGER"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement dropViewStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "DROP VIEW"
-    {
-        return stmt;
-    }
-}
-
+// Expression is built to ensure that precedences are maintained as specified
+// from the lowest precedence operator "OR" to the highest "COLLATE".
 Expression expr() :
-{}
 {
-    "c" {
-        return null;
-    }}
+    Expression left;
+    Expression right;
+}
+{
+    left = andExpr()   
+    (
+        "OR"
+        right = andExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right,
+                BinaryExpr.Operator.OR);
+        }
+    )* {
+        return left;
+    }
+}
 
-void raiseFunction() :
-{}
+Expression andExpr() :
 {
-    "d"}
+    Expression left;
+    Expression right;
+}
+{
+    left = notExpr()
+    (
+        "AND"
+        right = notExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right,
+                BinaryExpr.Operator.AND);
+        }
+    )* {
+        return left;
+    }
+}
+
+Expression notExpr() :
+{
+    Expression expr;
+}
+{
+    (
+        "NOT" {
+            int line = token.beginLine;
+            int column = token.beginColumn;
+        }
+        expr = notExpr() {
+            expr = new UnaryExpr(new Block(line, column, token.endLine,
+                token.endColumn), UnaryExpr.Operator.LOGICAL_NOT, expr);
+        }
+    |   expr = equalityExpr() 
+    ) {
+        return expr;
+    }
+}
+
+Expression equalityExpr() :
+{
+    Expression expr;
+}
+{
+    expr = relationalExpr()
+    // All types of expressions in choice point can start by "NOT". LOOKAHEAD
+    // removes ambiguity in the grammar rule decision.
+    (
+        LOOKAHEAD(2)
+        expr = unaryEqualityExpr(expr)
+    |   LOOKAHEAD(2)
+        expr = betweenExpr(expr)
+    |   LOOKAHEAD(2)
+        expr = inExpr(expr)
+    |   expr = binaryEqualityExpr(expr)
+    )* {
+        return expr;
+    }
+}
+
+Expression unaryEqualityExpr(Expression expr) :
+{
+    UnaryExpr.Operator op;
+}
+{
+    (
+        "ISNULL" {
+            op = UnaryExpr.Operator.IS_NULL;
+        }
+    |   "NOTNULL" {
+            op = UnaryExpr.Operator.NOT_NULL;
+        }
+    |   "NOT" "NULL" {
+            op = UnaryExpr.Operator.NOT_NULL;
+        }
+    ) {
+        return new UnaryExpr(new Block(expr.beginLine, expr.beginColumn,
+            token.endLine, token.endColumn), op, expr);
+    }
+}
+
+Expression binaryEqualityExpr(Expression left) :
+{
+    Expression right;
+    BinaryExpr.Operator op;
+}
+{
+    op = binaryEqualityOperator()
+    right = relationalExpr() {
+        return new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+            token.endLine, token.endColumn), left, right, op);
+    }
+}
+
+BinaryExpr.Operator binaryEqualityOperator() :
+{
+}
+{
+    "=" {
+        return BinaryExpr.Operator.EQUAL;
+    }
+|   "==" {
+        return BinaryExpr.Operator.EQUAL;
+    }
+|   "!=" {
+        return BinaryExpr.Operator.NOT_EQUAL;
+    }
+|   "<>" {
+        return BinaryExpr.Operator.NOT_EQUAL;
+    }
+|   "IS"
+    [
+        "NOT" {
+            return BinaryExpr.Operator.IS_NOT;
+        }
+    ] {
+        return BinaryExpr.Operator.IS;
+    }
+|   "NOT"
+    (
+        "LIKE" {
+            return BinaryExpr.Operator.NOT_LIKE;
+        }
+    |   "GLOB" {
+            return BinaryExpr.Operator.NOT_GLOB;
+        }
+    |   "REGEXP" {
+            return BinaryExpr.Operator.NOT_REGEXP;
+        }
+    |   "MATCH" {
+            return BinaryExpr.Operator.NOT_MATCH;
+        }
+    )
+|   "LIKE" {
+        return BinaryExpr.Operator.LIKE;
+    }
+|   "GLOB" {
+        return BinaryExpr.Operator.GLOB;
+    }
+|   "REGEXP" {
+        return BinaryExpr.Operator.REGEXP;
+    }
+|   "MATCH" {
+        return BinaryExpr.Operator.MATCH;
+    }
+}
+
+BetweenExpr betweenExpr(Expression expr) :
+{
+    BetweenExpr between = new BetweenExpr();
+    
+    between.setExpression(expr);
+    between.setBegin(expr);
+}
+{
+    (
+        "NOT" "BETWEEN" {
+            between.setOperator(BetweenExpr.Operator.NOT_BETWEEN);
+        }
+    |   "BETWEEN" {
+            between.setOperator(BetweenExpr.Operator.BETWEEN);
+        }
+    )
+    expr = relationalExpr() {
+        between.setLower(expr);
+    }
+    "AND"
+    expr = relationalExpr() {
+        between.setUpper(expr);
+        between.setEnd(token.endLine, token.endColumn);
+        return between;
+    }
+}
+
+InExpr inExpr(Expression expr) :
+{
+    InExpr in = null;
+    InExpr.Operator op;
+}
+{
+    (
+        "NOT" "IN" {
+            op = InExpr.Operator.NOT_IN;
+        }
+    |   "IN" {
+            op = InExpr.Operator.IN;
+        }
+    )
+    (
+        "("
+        [
+            in = inSelectExpr()
+        |   in = inSetExpr()
+        ] {
+            if (in == null) {
+                in = new InSetExpr();
+            }
+        }
+        ")"
+    |   in = inTableExpr()
+    ) {
+        in.setExpression(expr);
+        in.setOperator(op);
+        in.setBegin(expr);
+        in.setEnd(token.endLine, token.endColumn);
+        return in;
+    }
+}
+
+InSelectExpr inSelectExpr() :
+{
+    SelectStmt stmt;
+}
+{
+    stmt = selectStmt() {
+        InSelectExpr in = new InSelectExpr();
+        in.setStatement(stmt);
+        return in;
+    }
+}
+
+InSetExpr inSetExpr() :
+{
+    InSetExpr in = new InSetExpr();
+    Expression expr;
+}
+{
+    expr = expr() {
+        in.addExpression(expr);
+    }
+    (
+        ","
+        expr = expr() {
+            in.addExpression(expr);
+        }
+    )* {
+        return in;
+    }
+}
+
+InTableExpr inTableExpr() :
+{
+    InTableExpr in = new InTableExpr();
+    DatabaseName db = null;
+    TableName tab;
+}
+{
+    [
+        db = databaseName() {
+            in.setDatabase(db);
+        }
+        "."
+    ]
+    tab = tableName() {
+        in.setTable(tab);
+        return in;
+    }
+}
+
+Expression relationalExpr() :
+{
+    Expression left;
+    Expression right;
+    BinaryExpr.Operator op;
+}
+{
+    left = escapeExpr()
+    (
+        (
+            "<" {
+                op = BinaryExpr.Operator.LESS;
+            }
+        |   "<=" {
+                op = BinaryExpr.Operator.LESS_OR_EQUAL;
+            }
+        |   ">" {
+                op = BinaryExpr.Operator.GREATER;
+            }
+        |   ">=" {
+                op = BinaryExpr.Operator.GREATER_OR_EQUAL;
+            }
+        )
+        right = escapeExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right, op);
+        }
+    )* {
+        return left;
+    }
+}
+
+Expression escapeExpr() :
+{
+    Expression left;
+    Expression right;
+}
+{
+    left = bitwiseExpr()
+    [
+        "ESCAPE"
+        right = bitwiseExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right,
+                BinaryExpr.Operator.ESCAPE);
+        }
+    ] {
+        return left;
+    }
+}
+
+Expression bitwiseExpr() :
+{
+    Expression left;
+    Expression right;
+    BinaryExpr.Operator op;
+}
+{
+    left = additiveExpr()
+    (
+        op = bitwiseOperator()
+        right = additiveExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right, op);
+        }
+    )* {
+        return left;
+    }
+}
+
+BinaryExpr.Operator bitwiseOperator() :
+{
+}
+{
+    ">>" {
+        return BinaryExpr.Operator.SHIFT_HIGH;
+    }
+|   "<<" {
+        return BinaryExpr.Operator.SHIFT_LOW;
+    }
+|   "&" {
+        return BinaryExpr.Operator.BITWISE_AND;
+    }
+|   "|" {
+        return BinaryExpr.Operator.BITWISE_OR;
+    }
+}
+
+Expression additiveExpr() :
+{
+    Expression left;
+    Expression right;
+    BinaryExpr.Operator op;
+}
+{
+    left = multiplicativeExpr()
+    (
+        (
+            "+" {
+                op = BinaryExpr.Operator.ADDITION;
+            }
+        |   "-" {
+                op = BinaryExpr.Operator.SUBTRACTION;
+            }
+        )
+        right = multiplicativeExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right, op);
+        }
+    )* {
+        return left;
+    }
+}
+
+Expression multiplicativeExpr() :
+{
+    Expression left;
+    Expression right;
+    BinaryExpr.Operator op;
+}
+{
+    left = concatenateExpr()
+    (
+        (
+            "*" {
+                op = BinaryExpr.Operator.MULTIPLICATION;
+            }
+        |   "/" {
+                op = BinaryExpr.Operator.DIVISION;
+            }
+        |   "%" {
+                op = BinaryExpr.Operator.MODULO;
+            }
+        )
+        right = concatenateExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right, op);
+        }
+    )* {
+        return left;
+    }
+}
+
+Expression concatenateExpr() :
+{
+    Expression left;
+    Expression right;
+}
+{
+    left = collateExpr()
+    (
+        "||"
+        right = collateExpr() {
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
+                token.endLine, token.endColumn), left, right,
+                BinaryExpr.Operator.CONCATENATION);
+        }
+    )* {
+        return left;
+    }
+}
+
+Expression collateExpr() :
+{
+    Expression expr;
+    CollationName collation;
+}
+{
+    expr = unaryExpr()
+    (
+        "COLLATE"
+        collation = collationName() {
+            expr = new CollateExpr(new Block(expr.beginLine, expr.beginColumn,
+                token.endLine, token.endColumn), expr, collation);
+        }
+    )* {
+        return expr;
+    }
+}
+
+Expression unaryExpr() :
+{
+    Expression expr;
+    UnaryExpr.Operator op;
+}
+{
+    (   
+	    op = unaryOperator() {
+	        int line = token.beginLine;
+	        int column = token.beginColumn;
+	    }
+        expr = unaryExpr() {
+            expr = new UnaryExpr(new Block(line, column, token.endLine,
+                token.endColumn), op, expr);
+        }
+    |   expr = nonLeftRecursiveExpr()
+    ) {
+        return expr;
+    }
+}
+
+UnaryExpr.Operator unaryOperator() :
+{
+}
+{
+    "-" {
+        return UnaryExpr.Operator.NEGATIVE;
+    }
+|   "+" {
+        return UnaryExpr.Operator.POSITIVE;
+    }
+|   "~" {
+        return UnaryExpr.Operator.BITWISE_NOT;
+    }
+}
+
+Expression nonLeftRecursiveExpr() :
+{
+    Expression expr;
+}
+{
+    (
+        expr = literalExpr()
+    |   expr = bindParameterExpr()
+    |   expr = columnReferenceExpr()
+    //|   expr = functionExpr()
+    |   expr = castExpr()
+    |   LOOKAHEAD(3)
+        expr = existsExpr()
+    |   "(" expr = expr() ")"
+    |   expr = caseExpr()
+    |   expr = raiseFunctionExpr()
+    ) {
+        return expr;
+    }
+}
+
+LiteralExpr literalExpr() :
+{
+    Literal literal;
+}
+{
+    literal = literalValue() {
+        return new LiteralExpr(new Block(literal), literal);
+    }
+}
+
+BindParameterExpr bindParameterExpr() :
+{
+}
+{
+    "bindParameter"//bindParameter()
+    {
+        return null;
+    }
+}
+
+ColumnReferenceExpr columnReferenceExpr() :
+{
+    ColumnReferenceExpr reference = new ColumnReferenceExpr();
+    DatabaseName db = null;
+    TableName tab = null;
+    ColumnName column;
+}
+{
+    [
+        [
+            db = databaseName() {
+                reference.setDatabase(db);
+                reference.setBegin(db);
+            }
+            "."
+        ]
+        tab = tableName() {
+            reference.setTable(tab);
+            if (db == null) {
+                reference.setBegin(tab);
+            }
+        }
+        "."
+    ]
+    column = columnName() {
+        reference.setColumn(column);
+        if (column == null) {
+            reference.setBegin(column);
+        }
+        reference.setEnd(token.endLine, token.endColumn);
+        return reference;
+    }
+}
+
+
+FunctionExpr functionExpr() :
+{
+}
+{
+    functionName()
+    "("
+    // TODO: see better.
+    [
+        (
+            "*"
+        |   [ "DISTINCT" ]
+            expr()
+            (
+                ","
+                expr()
+            )*
+        )
+    ]
+    ")" {
+        return null;
+    }
+}
+
+CastExpr castExpr() :
+{
+    CastExpr cast = new CastExpr();
+    Expression expr;
+    TypeName type;
+}
+{
+    "CAST" {
+        cast.setBegin(token.beginLine, token.beginColumn);
+    }
+    "("
+    expr = expr() {
+        cast.setExpression(expr);
+    }
+    "AS"
+    type = typeName() {
+        cast.setType(type);
+    }
+    ")" {
+        cast.setEnd(token.endLine, token.endColumn);
+        return cast;
+    }
+}
+
+
+UnaryExpr existsExpr() :
+{
+}
+{
+    [
+        "EXISTS"
+    ]
+    selectExpr() {
+        return null;
+    }
+}
+
+SelectExpr selectExpr() :
+{
+}
+{
+    "("
+    selectStmt()
+    ")" {
+        return null;
+    }
+}
+
+CaseExpr caseExpr() :
+{
+    CaseExpr caseExpr = new CaseExpr();
+    Expression expr;
+    WhenExpr when;
+}
+{
+    "CASE" {
+        caseExpr.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        expr = expr() {
+            caseExpr.setCase(expr);
+        }
+    ]
+    (
+        when = whenExpr() {
+            caseExpr.addWhen(when);
+        }
+    )+
+    [
+        "ELSE"
+        expr = expr() {
+            caseExpr.setElse(expr);
+        }
+    ]
+    "END" {
+        caseExpr.setEnd(token.endLine, token.endColumn);
+        return caseExpr;
+    }
+}
+
+WhenExpr whenExpr() :
+{
+    WhenExpr when = new WhenExpr();
+    Expression expr;
+}
+{
+    "WHEN" {
+        when.setBegin(token.beginLine, token.beginColumn);
+    }
+    expr = expr() {
+        when.setWhen(expr);
+    }
+    "THEN"
+    expr = expr() {
+        when.setThen(expr);
+        when.setEnd(token.endLine, token.endColumn);
+        return when;
+    }
+}
+
+RaiseFunctionExpr raiseFunctionExpr() :
+{
+    RaiseFunctionExpr expr = new RaiseFunctionExpr();
+}
+{
+    "RAISE" {
+        expr.setBegin(token.beginLine, token.beginColumn);
+    }
+    "("
+    (
+        "IGNORE" {
+            expr.setType(RaiseFunctionExpr.Type.IGNORE);
+        }
+    |   (
+            "ROLLBACK" {
+                expr.setType(RaiseFunctionExpr.Type.ROLLBACK);
+            }
+        |   "ABORT" {
+                expr.setType(RaiseFunctionExpr.Type.ABORT);
+            }
+        |   "FAIL" {
+                expr.setType(RaiseFunctionExpr.Type.FAIL);
+            }
+        )
+        ","
+        //errorMessage()
+    )
+    ")" {
+        expr.setEnd(token.endLine, token.endColumn);
+        return expr;
+    }
+}
 
 Literal literalValue() :
 {}
 {
-    "a" {
+    "literalVa" {
         return null;
     }}
 
 NumericLiteral numericLiteral() :
 {}
 {
-    "e" {
+    "numericLi" {
         return null;
     }}
-
-SqlStatement insertStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "INSERT"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement pragmaStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "PRAGMA"
-    {
-        return stmt;
-    }
-}
-
-void pragmaValue() :
-{}
-{
-    "q"}
-
-SqlStatement reindexStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "REINDEX"
-    {
-        return stmt;
-    }
-}
 
 SelectStmt selectStmt() :
 {
@@ -1243,7 +1728,7 @@ SelectStmt selectStmt() :
 }
 {
     unit = selectCore() {
-        stmt.setBegin(unit.beginLine, unit.beginColumn);
+        stmt.setBegin(unit);
     }
     (
         op = compoundOperator()
@@ -1298,12 +1783,10 @@ SelectCore selectCore() :
         core.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        (
-            "DISTINCT" {
-                core.setDistinct(true);
-            }
-        |   "ALL"
-        )
+        "DISTINCT" {
+            core.setDistinct(true);
+        }
+    |   "ALL"
     ]
     column = resultColumn() {
         core.addColumn(column);
@@ -1392,26 +1875,35 @@ UniversalColumn universalColumn() :
 
 ExpressionColumn expressionColumn() :
 {
-    ExpressionColumn column;
+    ExpressionColumn column = null;
     Expression expr;
-    ColumnAlias alias;
 }
 {
     expr = expr()
     [
-        [ "AS" ]
-        alias = columnAlias() {
-            // TODO: line numbers.
-            column = new AliasedColumn();
-            column.setExpression(expr);
-            column.setAlias(alias);
-            return column;
-        }
+        column = aliasedColumn()
     ] {
-        column = new ExpressionColumn();
+        if (column == null) {
+            column = new ExpressionColumn();
+        }
         column.setExpression(expr);
+        column.setBeginEnd(expr.beginLine, expr.beginColumn, token.endLine,
+            token.endColumn);
         return column;
     }
+}
+
+AliasedColumn aliasedColumn() :
+{
+    AliasedColumn column = new AliasedColumn();
+    ColumnAlias alias;
+}
+{
+	[ "AS" ]
+	alias = columnAlias() {
+	    column.setAlias(alias);
+	    return column;
+	}
 }
 
 JoinSrc joinSource() :
@@ -1441,7 +1933,10 @@ JoinSrc singleSource() :
 {
     (
         src = tableSource()
-    |   src = selectSource()
+    |   // To remove ambiguity between selectSource and the joinSource because 
+        // both start by "(".
+        LOOKAHEAD(2)
+        src = selectSource()
     |   "(" {
             line = token.beginLine;
             column = token.beginColumn;
@@ -1465,14 +1960,14 @@ TableSrc tableSource() :
     [
         db = databaseName() {
             src.setDatabase(db);
-            src.setBegin(db.beginLine, db.beginColumn);
+            src.setBegin(db);
         }
         "."
     ]
     tab = tableName() {
         src.setTable(tab);
         if (db == null) {
-            src.setBegin(tab.beginLine, tab.beginColumn);
+            src.setBegin(tab);
         }
     }
     [
@@ -1516,62 +2011,144 @@ SelectSrc selectSource() :
     }
 }
 
-void joinOp() :
+JoinCompound.Operator joinOp() :
 {}
 {
-    "h"}
+    "," {
+        return JoinCompound.Operator.COMMA;
+    }
+|   "NATURAL" 
+    (
+        "LEFT" 
+        (
+            "OUTER" "JOIN" {
+	            return JoinCompound.Operator.NATURAL_LEFT_OUTER_JOIN;	        }
+	    |   "JOIN" {
+	            return JoinCompound.Operator.NATURAL_LEFT_JOIN;
+	        }
+        )
+    |   "INNER" "JOIN" {
+            return JoinCompound.Operator.NATURAL_INNER_JOIN;
+        }
+    |   "CROSS" "JOIN" {
+            return JoinCompound.Operator.NATURAL_CROSS_JOIN;
+        }
+    |   "JOIN" {
+            return JoinCompound.Operator.NATURAL_JOIN;
+        }
+    )
+|   "LEFT" 
+    (
+        "OUTER" "JOIN" {
+            return JoinCompound.Operator.LEFT_OUTER_JOIN;
+        }
+    |   "JOIN" {
+            return JoinCompound.Operator.LEFT_JOIN;
+        }
+    )
+|   "INNER" "JOIN" {
+        return JoinCompound.Operator.INNER_JOIN;
+    }
+|   "CROSS" "JOIN" {
+        return JoinCompound.Operator.CROSS_JOIN;
+    }
+|   "JOIN" {
+        return JoinCompound.Operator.JOIN;
+    }
+}
 
-void joinConstraint() :
-{}
+JoinConstraint joinConstraint() :
 {
-    "j"}
+    JoinConstraint constraint = null;}
+{
+    [
+        constraint = joinConstraintOn()
+    |   constraint = joinConstraintUsing()
+    ] {
+        return constraint;
+    }}
+
+JoinConstraintOn joinConstraintOn() :
+{
+    JoinConstraintOn constraint = new JoinConstraintOn();
+    Expression expr;
+}
+{
+    "ON" {
+        constraint.setBegin(token.beginLine, token.beginColumn);
+    }
+    expr = expr() {
+        constraint.setExpression(expr);
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
+    }
+}
+
+JoinConstraintUsing joinConstraintUsing():
+{
+    JoinConstraintUsing constraint = new JoinConstraintUsing();
+    ColumnName column;
+}
+{
+    "USING" {
+        constraint.setBegin(token.beginLine, token.beginColumn);
+    }
+	"("
+	column = columnName() {
+        constraint.addColumn(column);
+    }
+    (
+        ","
+        column = columnName() {
+            constraint.addColumn(column);
+        }
+    )*
+    ")" {
+        constraint.setEnd(token.endLine, token.endColumn);
+        return constraint;
+    }
+}
 
 OrderingTerm orderingTerm() :
-{}
 {
-    "k" {
-        return null;
+    OrderingTerm term = new OrderingTerm();
+    Expression expr;}
+{
+    expr = expr() {
+        term.setBegin(expr);
+        term.setExpression(expr);
+    }
+    [
+        "ASC" {
+            term.setOrder(OrderingTerm.Order.ASC);
+        }
+    |   "DESC" {
+            term.setOrder(OrderingTerm.Order.DESC);
+        }
+    ] {
+        term.setEnd(token.endLine, token.endColumn);
+        return term;
     }}
 
 SelectCompound.Operator compoundOperator() :
 {
 }
 {
-    (
-        "UNION" [ "ALL" ]
-    |   "INTERSECT"
-    |   "EXCEPT"
-    ) {
-        return null;
+    "UNION" 
+    [ 
+        "ALL" {
+            return SelectCompound.Operator.UNION_ALL;
+        }
+    ] {
+        return SelectCompound.Operator.UNION;
+    }
+|   "INTERSECT" {
+        return SelectCompound.Operator.INTERSECT;
+    }
+|   "EXCEPT" {
+        return SelectCompound.Operator.EXCEPT;
     }
 }
-
-SqlStatement updateStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "UPDATE"
-    {
-        return stmt;
-    }
-}
-
-SqlStatement updateStmtLimited() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "UPDATE limi"
-    {
-        return stmt;
-    }
-}
-
-void qualifiedTableName() :
-{}
-{
-    "m"}
 
 IndexedBy indexedBy() :
 {
@@ -1591,8 +2168,7 @@ IndexedBy indexedBy() :
 	    |   "NOT" {
                 indexed.setBegin(token.beginLine, token.beginColumn);
             }
-            "INDEXED" {
-            }
+            "INDEXED"
 	    ) {
             indexed.setEnd(token.endLine, token.endColumn);
             return indexed;
@@ -1602,23 +2178,12 @@ IndexedBy indexedBy() :
     }
 }
 
-SqlStatement vacuumStmt() :
-{
-    SqlStatement stmt = null;
-}
-{
-    "VACUUM"
-    {
-        return stmt;
-    }
-}
-
-// Functions not mentioned in the specification.
+// Names
 DatabaseName databaseName() :
 {
 }
 {
-    "w"
+    "wasd"
     {
         return null;
     }
@@ -1628,7 +2193,7 @@ TableName tableName() :
 {
 }
 {
-    "e"
+    "kad"
     {
         return null;
     }
@@ -1638,7 +2203,7 @@ ConstraintName name() :
 {
 }
 {
-    "r" {
+    "rads" {
         return null;
     }
 }
@@ -1648,7 +2213,16 @@ ColumnName columnName() :
     
 }
 {
-    "v" {
+    "vdsa" {
+        return null;
+    }
+}
+
+IndexName indexName() :
+{
+}
+{
+    "ew2" {
         return null;
     }
 }
@@ -1666,7 +2240,7 @@ CollationName collationName() :
 {
 }
 {
-    "y" {
+    "DEFAULTs" {
         return null;
     }
 }
@@ -1675,7 +2249,34 @@ ConstraintName constraintName() :
 {
 }
 {
-    {
+    "sd" {
+        return null;
+    }
+}
+
+ColumnAlias columnAlias() :
+{
+}
+{
+    "se" {
+        return null;
+    }
+}
+
+TableAlias tableAlias() :
+{
+}
+{
+    "esa" {
+        return null;
+    }
+}
+
+FunctionName functionName() :
+{
+}
+{
+    "asfd" {
         return null;
     }
 }

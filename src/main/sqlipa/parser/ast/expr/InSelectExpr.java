@@ -7,6 +7,10 @@ public class InSelectExpr extends InExpr {
 
     private SelectStmt stmt;
     
+    public InSelectExpr() {
+        super();
+    }
+    
     public InSelectExpr(Block block, Operator op, Expression expr,
             SelectStmt stmt) {
         super(block, op, expr);
