@@ -1,38 +1,37 @@
 package main.sqlipa.parser.ast.name;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.SignedNumber;
+import main.sqlipa.parser.ast.expr.UnaryExpr;
 
 public class TypeName extends Name {
     
-    private SignedNumber xDim;
+    private UnaryExpr xDim;
     
-    private SignedNumber yDim;
+    private UnaryExpr yDim;
     
     public TypeName() {
         super();
     }
     
-    public TypeName(Block block, String name, SignedNumber xDim,
-            SignedNumber yDim) {
+    public TypeName(Block block, String name, UnaryExpr xDim, UnaryExpr yDim) {
         super(block, name);
         this.xDim = xDim;
         this.yDim = yDim;
     }
     
-    public SignedNumber getDimensionInX() {
+    public UnaryExpr getDimensionInX() {
         return xDim;
     }
     
-    public SignedNumber getDimensionInY() {
+    public UnaryExpr getDimensionInY() {
         return yDim;
     }
     
-    public void setDimensionInX(SignedNumber xDim) {
+    public void setDimensionInX(UnaryExpr xDim) {
         this.xDim = xDim;
     }
     
-    public void setDimensionInY(SignedNumber yDim) {
+    public void setDimensionInY(UnaryExpr yDim) {
         this.yDim = yDim;
     }
 

@@ -7,7 +7,7 @@ public class UnaryExpr extends Expression {
     public enum Operator {
         POSITIVE,
         NEGATIVE,
-        BITWISE_NOT,
+        BIT_NOT,
         LOGICAL_NOT,
         EXISTS,
         IS_NULL,

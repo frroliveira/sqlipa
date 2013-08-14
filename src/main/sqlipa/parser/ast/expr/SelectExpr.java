@@ -7,6 +7,10 @@ public class SelectExpr extends Expression {
 
     private SelectStmt stmt;
     
+    public SelectExpr() {
+        super();
+    }
+    
     public SelectExpr(Block block, SelectStmt stmt) {
         super(block);
         this.stmt = stmt;

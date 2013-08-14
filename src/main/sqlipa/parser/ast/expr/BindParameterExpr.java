@@ -4,10 +4,23 @@ import main.sqlipa.parser.ast.Block;
 
 public class BindParameterExpr extends Expression {
 
-    public BindParameterExpr(Block block) {
-        super(block);
+    private String parameter;
+    
+    public BindParameterExpr() {
+        super();
     }
     
-    // TODO: As in reference 'see better'.
+    public BindParameterExpr(Block block, String parameter) {
+        super(block);
+        this.parameter = parameter;
+    }
+    
+    public String getParameter() {
+        return parameter;
+    }
+    
+    public void setParameter(String parameter) {
+        this.parameter = parameter;
+    }
     
 }

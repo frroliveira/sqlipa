@@ -8,6 +8,9 @@ options {
 PARSER_BEGIN(ASTParser)
 package main.sqlipa.parser;
 
+import java.util.List;
+import java.util.LinkedList;
+
 import main.sqlipa.parser.ast.*;
 import main.sqlipa.parser.ast.constraint.*;
 import main.sqlipa.parser.ast.constraint.table.*;
@@ -35,8 +38,6 @@ final class ASTParser {
 } 
 PARSER_END(ASTParser)
 
-/* WHITE SPACE */
-
 SKIP :
 {
     " "
@@ -46,8 +47,7 @@ SKIP :
 |   "\f"
 }
 
-/* COMMENTS */
-
+/* Comments */
 TOKEN_MGR_DECLS :
 {
     private void CommonTokenAction(Token token) {
@@ -55,158 +55,220 @@ TOKEN_MGR_DECLS :
     }
 }
 
-// Prefixed tokens avoid name collisions.
-//
-// K_ - Keyword, O_ - Operator, S_ - Substitutes
-
+/* Keywords */
 TOKEN:
 {
-    <K_ABORT: "ABORT">
-|   <K_ACTION: "ACTION">
-|   <K_ADD: "ADD">
-|   <K_AFTER: "AFTER">
-|   <K_ALL: "ALL">
-|   <K_ALTER: "ALTER">
-|   <K_ANALYZE: "ANALYZE">
-|   <K_AND: "AND">
-|   <K_AS: "AS">
-|   <K_ASC: "ASC">
-|   <K_ATTACH: "ATTACH">
-|   <K_AUTOINCREMENT: "AUTOINCREMENT">
-|   <K_BEFORE: "BEFORE">
-|   <K_BEGIN: "BEGIN">
-|   <K_BETWEEN: "BETWEEN">
-|   <K_BY: "BY">
-|   <K_CASCADE: "CASCADE">
-|   <K_CASE: "CASE">
-|   <K_CAST: "CAST">
-|   <K_CHECK: "CHECK">
-|   <K_COLLATE: "COLLATE">
-|   <K_COLUMN: "COLUMN">
-|   <K_COMMIT: "COMMIT">
-|   <K_CONFLICT: "CONFLICT">
-|   <K_CONSTRAINT: "CONSTRAINT">
-|   <K_CREATE: "CREATE">
-|   <K_CROSS: "CROSS">
-|   <K_CURRENT_DATE: "CURRENT_DATE">
-|   <K_CURRENT_TIME: "CURRENT_TIME">
-|   <K_CURRENT_TIMESTAMP: "CURRENT_TIMESTAMP">
-|   <K_DATABASE: "DATABASE">
-|   <K_DEFAULT: "DEFAULT">
-|   <K_DEFERRABLE: "DEFERRABLE">
-|   <K_DEFERRED: "DEFERRED">
-|   <K_DELETE: "DELETE">
-|   <K_DESC: "DESC">
-|   <K_DETACH: "DETACH">
-|   <K_DISTINCT: "DISTINCT">
-|   <K_DROP: "DROP">
-|   <K_EACH: "EACH">
-|   <K_ELSE: "ELSE">
-|   <K_END: "END">
-|   <K_ESCAPE: "ESCAPE">
-|   <K_EXCEPT: "EXCEPT">
-|   <K_EXCLUSIVE: "EXCLUSIVE">
-|   <K_EXISTS: "EXISTS">
-|   <K_EXPLAIN: "EXPLAIN">
-|   <K_FAIL: "FAIL">
-|   <K_FOR: "FOR">
-|   <K_FOREIGN: "FOREIGN">
-|   <K_FROM: "FROM">
-|   <K_FULL: "FULL">
-|   <K_GLOB: "GLOB">
-|   <K_GROUP: "GROUP">
-|   <K_HAVING: "HAVING">
-|   <K_IF: "IF">
-|   <K_IGNORE: "IGNORE">
-|   <K_IMMEDIATE: "IMMEDIATE">
-|   <K_IN: "IN">
-|   <K_INDEX: "INDEX">
-|   <K_INDEXED: "INDEXED">
-|   <K_INITIALLY: "INITIALLY">
-|   <K_INNER: "INNER">
-|   <K_INSERT: "INSERT">
-|   <K_INSTEAD: "INSTEAD">
-|   <K_INTERSECT: "INTERSECT">
-|   <K_INTO: "INTO">
-|   <K_IS: "IS">
-|   <K_ISNULL: "ISNULL">
-|   <K_JOIN: "JOIN">
-|   <K_KEY: "KEY">
-|   <K_LEFT: "LEFT">
-|   <K_LIKE: "LIKE">
-|   <K_LIMIT: "LIMIT">
-|   <K_MATCH: "MATCH">
-|   <K_NATURAL: "NATURAL">
-|   <K_NO: "NO">
-|   <K_NOT: "NOT">
-|   <K_NOTNULL: "NOTNULL">
-|   <K_NULL: "NULL">
-|   <K_OF: "OF">
-|   <K_OFFSET: "OFFSET">
-|   <K_ON: "ON">
-|   <K_OR: "OR">
-|   <K_ORDER: "ORDER">
-|   <K_OUTER: "OUTER">
-|   <K_PLAN: "PLAN">
-|   <K_PRAGMA: "PRAGMA">
-|   <K_PRIMARY: "PRIMARY">
-|   <K_QUERY: "QUERY">
-|   <K_RAISE: "RAISE">
-|   <K_REFERENCES: "REFERENCES">
-|   <K_REGEXP: "REGEXP">
-|   <K_REINDEX: "REINDEX">
-|   <K_RELEASE: "RELEASE">
-|   <K_RENAME: "RENAME">
-|   <K_REPLACE: "REPLACE">
-|   <K_RESTRICT: "RESTRICT">
-|   <K_RIGHT: "RIGHT">
-|   <K_ROLLBACK: "ROLLBACK">
-|   <K_ROW: "ROW">
-|   <K_SAVEPOINT: "SAVEPOINT">
-|   <K_SELECT: "SELECT">
-|   <K_SET: "SET">
-|   <K_TABLE: "TABLE">
-|   <K_TEMP: "TEMP">
-|   <K_TEMPORARY: "TEMPORARY">
-|   <K_THEN: "THEN">
-|   <K_TO: "TO">
-|   <K_TRANSACTION: "TRANSACTION">
-|   <K_TRIGGER: "TRIGGER">
-|   <K_UNION: "UNION">
-|   <K_UNIQUE: "UNIQUE">
-|   <K_UPDATE: "UPDATE">
-|   <K_USING: "USING">
-|   <K_VACUUM: "VACUUM">
-|   <K_VALUES: "VALUES">
-|   <K_VIEW: "VIEW">
-|   <K_VIRTUAL: "VIRTUAL">
-|   <K_WHEN: "WHEN">
-|   <K_WHERE: "WHERE">
+    <ABORT: "ABORT">
+|   <ACTION: "ACTION">
+|   <ADD: "ADD">
+|   <AFTER: "AFTER">
+|   <ALL: "ALL">
+|   <ALTER: "ALTER">
+|   <ANALYZE: "ANALYZE">
+|   <AND: "AND">
+|   <AS: "AS">
+|   <ASC: "ASC">
+|   <ATTACH: "ATTACH">
+|   <AUTOINCREMENT: "AUTOINCREMENT">
+|   <BEFORE: "BEFORE">
+|   <BEGIN: "BEGIN">
+|   <BETWEEN: "BETWEEN">
+|   <BY: "BY">
+|   <CASCADE: "CASCADE">
+|   <CASE: "CASE">
+|   <CAST: "CAST">
+|   <CHECK: "CHECK">
+|   <COLLATE: "COLLATE">
+|   <COLUMN: "COLUMN">
+|   <COMMIT: "COMMIT">
+|   <CONFLICT: "CONFLICT">
+|   <CONSTRAINT: "CONSTRAINT">
+|   <CREATE: "CREATE">
+|   <CROSS: "CROSS">
+|   <CURRENT_DATE: "CURRENT_DATE">
+|   <CURRENT_TIME: "CURRENT_TIME">
+|   <CURRENT_TIMESTAMP: "CURRENT_TIMESTAMP">
+|   <DATABASE: "DATABASE">
+|   <DEFAULT_: "DEFAULT">
+|   <DEFERRABLE: "DEFERRABLE">
+|   <DEFERRED: "DEFERRED">
+|   <DELETE: "DELETE">
+|   <DESC: "DESC">
+|   <DETACH: "DETACH">
+|   <DISTINCT: "DISTINCT">
+|   <DROP: "DROP">
+|   <EACH: "EACH">
+|   <ELSE: "ELSE">
+|   <END: "END">
+|   <ESCAPE: "ESCAPE">
+|   <EXCEPT: "EXCEPT">
+|   <EXCLUSIVE: "EXCLUSIVE">
+|   <EXISTS: "EXISTS">
+|   <EXPLAIN: "EXPLAIN">
+|   <FAIL: "FAIL">
+|   <FOR: "FOR">
+|   <FOREIGN: "FOREIGN">
+|   <FROM: "FROM">
+|   <FULL: "FULL">
+|   <GLOB: "GLOB">
+|   <GROUP: "GROUP">
+|   <HAVING: "HAVING">
+|   <IF: "IF">
+|   <IGNORE: "IGNORE">
+|   <IMMEDIATE: "IMMEDIATE">
+|   <IN: "IN">
+|   <INDEX: "INDEX">
+|   <INDEXED: "INDEXED">
+|   <INITIALLY: "INITIALLY">
+|   <INNER: "INNER">
+|   <INSERT: "INSERT">
+|   <INSTEAD: "INSTEAD">
+|   <INTERSECT: "INTERSECT">
+|   <INTO: "INTO">
+|   <IS: "IS">
+|   <ISNULL: "ISNULL">
+|   <JOIN: "JOIN">
+|   <KEY: "KEY">
+|   <LEFT: "LEFT">
+|   <LIKE: "LIKE">
+|   <LIMIT: "LIMIT">
+|   <MATCH: "MATCH">
+|   <NATURAL: "NATURAL">
+|   <NO: "NO">
+|   <NOT: "NOT">
+|   <NOTNULL: "NOTNULL">
+|   <NULL: "NULL">
+|   <OF: "OF">
+|   <OFFSET: "OFFSET">
+|   <ON: "ON">
+|   <OR: "OR">
+|   <ORDER: "ORDER">
+|   <OUTER: "OUTER">
+|   <PLAN: "PLAN">
+|   <PRAGMA: "PRAGMA">
+|   <PRIMARY: "PRIMARY">
+|   <QUERY: "QUERY">
+|   <RAISE: "RAISE">
+|   <REFERENCES: "REFERENCES">
+|   <REGEXP: "REGEXP">
+|   <REINDEX: "REINDEX">
+|   <RELEASE: "RELEASE">
+|   <RENAME: "RENAME">
+|   <REPLACE: "REPLACE">
+|   <RESTRICT: "RESTRICT">
+|   <RIGHT: "RIGHT">
+|   <ROLLBACK: "ROLLBACK">
+|   <ROW: "ROW">
+|   <SAVEPOINT: "SAVEPOINT">
+|   <SELECT: "SELECT">
+|   <SET: "SET">
+|   <TABLE: "TABLE">
+|   <TEMP: "TEMP">
+|   <TEMPORARY: "TEMPORARY">
+|   <THEN: "THEN">
+|   <TO: "TO">
+|   <TRANSACTION: "TRANSACTION">
+|   <TRIGGER: "TRIGGER">
+|   <UNION: "UNION">
+|   <UNIQUE: "UNIQUE">
+|   <UPDATE: "UPDATE">
+|   <USING: "USING">
+|   <VACUUM: "VACUUM">
+|   <VALUES: "VALUES">
+|   <VIEW: "VIEW">
+|   <VIRTUAL: "VIRTUAL">
+|   <WHEN: "WHEN">
+|   <WHERE: "WHERE">
 }
 
-/*TOKEN:
+/* Operators */
+TOKEN:
 {
-    <O_CONCATENATION: "||">
-|   <O_MULTIPLICATION: "*">
-|   <O_DIVISION: "/">
-|   <O_MODULO: "%">
-|   <O_ADDITION: "+">
-|   <O_SUBTRACTION: "-">
-|   <O_SHIFT_HIGH: "<<">
-|   <O_SHIFT_LOW: ">>">
-|   <O_BITWISE_AND: "&">
-|   <O_BITWISE_OR: "|">
-|   <O_LESS: "<">
-|   <O_LESS_OR_EQUAL: "<=">
-|   <O_GREATER: ">">
-|   <O_GREATER_OR_EQUAL: ">=">
-|   <O_EQUAL: "=" | "==">
-|   <O_NOT_EQUAL: "!=" | "<>">
-}*/
+    <CONCATENATION: "||">
+|   <STAR: "*">
+|   <SLASH: "/">
+|   <MODULO: "%">
+|   <PLUS: "+">
+|   <MINUS: "-">
+|   <SHIFT_HIGH: "<<">
+|   <SHIFT_LOW: ">>">
+|   <BIT_AND: "&">
+|   <BIT_OR: "|">
+|   <BIT_NOT: "~">
+|   <LESS: "<">
+|   <LESS_OR_EQUAL: "<=">
+|   <GREATER: ">">
+|   <GREATER_OR_EQUAL: ">=">
+|   <EQUAL_1: "=">
+|   <EQUAL_2: "==">
+|   <NOT_EQUAL_1: "!=">
+|   <NOT_EQUAL_2: "<>">
+}
 
-void sqlStmtList() :{}
+/* Separators */
+TOKEN :
 {
-    (sqlStmt())*
+  < LP: "(" >
+| < RP: ")" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+/* Char Sets */
+TOKEN :
+{
+    <DIGIT: ["0" - "9"]>
+    // Has mentioned in sqlite implementation '$' is not documented but is
+    // implemented for compatibility.
+|   <CHAR: ["A" - "Z", "_", "$"]>
+|   <HEX_CHAR: ["0" - "9", "A" - "F"]>
+}
+
+/* Literals && Identifiers */
+TOKEN:
+{
+    <NUMERIC:
+        (
+            (<DIGIT>)+ (<DOT> (<DIGIT>)*)?
+        |   <DOT> (<DIGIT>)+
+        )
+        (<EXPONENT>)?
+    >
+|   <EXPONENT: "E" (["+", "-"])? (<DIGIT>)+>
+|   <STRING: "'" (~["'"])* ("''" (~["'"])*)* "'">
+|   <BLOB: "X'" (<HEX_CHAR> <HEX_CHAR>)* "'">
+|   <PARAMETER: 
+        "?" (<DIGIT>)*
+    |   (":" | "@" | "$") // sqlite implementation also allows '#'.
+        ("::")?
+        <CHAR>
+        (<CHAR> | "::")*
+        (
+            "("
+            (~[")", "\u0009", "\n", "\u000b", "\u000c", "\r", "\u0020"])*
+            ")"
+        )?
+    >
+|   <ID: 
+        <CHAR> (<CHAR> | <DIGIT>)*
+    |   "\"" (~["\""])* ("\"\"" (~["\""])*)* "\""
+    |   "`" (~["`"])* ("``" (~["`"])*)* "`"
+    |   "[" (~["]"])* "]"
+    >
+}
+
+List<SqlStatement> sqlStmtList() :{
+    List<SqlStatement> stmts = new LinkedList<SqlStatement>();    SqlStatement stmt;
+}
+{
+    (
+        stmt = sqlStmt() {
+            stmts.add(stmt);
+        }
+    )* {
+        return stmts;
+    }
 }
 
 SqlStatement sqlStmt() :
@@ -320,6 +382,7 @@ CreateTableStmt createTableStmt() :
         }
     ]
     [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
         db = databaseName() "."
     ]
     tab = tableName()
@@ -412,7 +475,6 @@ TypeName typeName() :
     type.setName(name);}
 {
     name() {
-        // TODO: name must return.
         type.setBegin(token.beginLine, token.beginColumn);
         name += token.image;
     }
@@ -423,14 +485,14 @@ TypeName typeName() :
     )*
     [
         "(" {
-            SignedNumber xDim;
+            UnaryExpr xDim;
         }
         xDim = signedNumber() {
             type.setDimensionInX(xDim);
         }
         [
             "," {
-                SignedNumber yDim;
+                UnaryExpr yDim;
             }
             yDim = signedNumber() {
                 type.setDimensionInY(yDim);
@@ -556,62 +618,26 @@ CheckColumnConstraint checkColumnConstraint() :
 
 DefaultColumnConstraint defaultColumnConstraint() :
 {
-    DefaultColumnConstraint constraint;
-    int line;
-    int column;
-}
-{
-    "DEFAULT" {
-        line = token.beginLine;
-        column = token.beginColumn;
-    }
-    (
-        constraint = numberColumnConstraint()
-    |   constraint = literalColumnConstraint()
-    |   constraint = expressionColumnConstraint()
-    ) {
-        constraint.setBegin(line, column);
-        return constraint;
-    }
-}
-
-NumberColumnConstraint numberColumnConstraint():
-{
-    NumberColumnConstraint constraint = new NumberColumnConstraint();
-    SignedNumber number;
-}
-{
-    number = signedNumber() {
-        constraint.setBeginEnd(number);
-        constraint.setNumber(number);
-        return constraint;
-    }
-}
-
-LiteralColumnConstraint literalColumnConstraint() :
-{
-    LiteralColumnConstraint constraint = new LiteralColumnConstraint();
+    DefaultColumnConstraint constraint = new DefaultColumnConstraint();
+    Expression expr;
     Literal literal;
 }
 {
-    literal = literalValue() {
-        constraint.setBeginEnd(literal);
-        constraint.setLiteral(literal);
-        return constraint;
-    }
-}
-
-ExpressionColumnConstraint expressionColumnConstraint() :
-{
-    ExpressionColumnConstraint constraint = new ExpressionColumnConstraint();
-    Expression expr;
-}
-{
-    "(" {
+    "DEFAULT" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
-    expr = expr()
-    ")" {
+    (
+        // As signedNumber and literalValue match a numericLiteral() it is only
+        // consider to exist a signedNumber if actually there is sign.
+        LOOKAHEAD("+" | "-")
+        expr = signedNumber()
+    |   literal = literalValue() {
+            expr = new LiteralExpr(literal, literal);
+        }
+    |   "("
+        expr = expr()
+        ")"
+    ) {
         constraint.setEnd(token.endLine, token.endColumn);
         constraint.setExpression(expr);
         return constraint;
@@ -647,30 +673,30 @@ ForeignKeyColumnConstraint foreignKeyColumnConstraint() :
     }
 }
 
-SignedNumber signedNumber() :
+UnaryExpr signedNumber() :
 {
-    SignedNumber number = new SignedNumber();
+    UnaryExpr number = new UnaryExpr();
     NumericLiteral literal;}
 {
     [
         (
             "+" {
-                number.setSign(SignedNumber.Sign.PLUS);
+                number.setOperator(UnaryExpr.Operator.POSITIVE);
             }
         |   "-" {
-                number.setSign(SignedNumber.Sign.MINUS);
+                number.setOperator(UnaryExpr.Operator.NEGATIVE);
             }
         ) {
             number.setBegin(token.beginLine, token.beginColumn);
         }
     ]
     literal = numericLiteral() {
-        if (number.getSign() == null) {
+        if (number.getOperator() == null) {
             number.setBeginEnd(literal);
         } else {
             number.setEnd(token.endLine, token.endColumn);
         }
-        number.setLiteral(literal);
+        number.setExpression(new LiteralExpr(literal, literal));
         return number;
     }}
 
@@ -814,7 +840,7 @@ ForeignKeyClause foreignKeyClause() :
     "REFERENCES" {
         clause.setBegin(token.beginLine, token.beginColumn);
     }
-    tab = foreignTable() {
+    tab = tableName() {
         clause.setTable(tab);
     }
     [
@@ -868,7 +894,7 @@ OnForeignKeySett onForeignKeySett() :
         }
     )
     (
-        "SET" // SET merged to remove ambiguity.
+        "SET"
         (
             "NULL" {
                 sett.setAction(OnForeignKeySett.Action.SET_NULL);
@@ -895,14 +921,14 @@ OnForeignKeySett onForeignKeySett() :
 MatchForeignKeySett matchForeignKeySett() :
 {
     MatchForeignKeySett sett = new MatchForeignKeySett();
-    Name name;
 }
 {
     "MATCH" {
         sett.setBegin(token.beginLine, token.beginColumn);
     }
-    name = name() {
-        sett.setName(name);
+    name() {
+        sett.setName(new Name(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image));
         sett.setEnd(token.endLine, token.endColumn);
         return sett;
     }
@@ -973,12 +999,9 @@ ConflictClause conflictClause() :
     ] {
         return null;
     }}
-/*
-%right BITNOT.*/
 
-
-// Expression is built to ensure that precedences are maintained as specified
-// from the lowest precedence operator "OR" to the highest "COLLATE".
+// Expression is built by parts recursively to ensure operator precedences are
+// to avoid left recursion.
 Expression expr() :
 {
     Expression left;
@@ -1043,8 +1066,8 @@ Expression equalityExpr() :
 }
 {
     expr = relationalExpr()
-    // All types of expressions in choice point can start by "NOT". LOOKAHEAD
-    // removes ambiguity in the grammar rule decision.
+    // All types of expressions in this choice point can start by "NOT". 
+    // LOOKAHEAD removes ambiguity which one to choose.
     (
         LOOKAHEAD(2)
         expr = unaryEqualityExpr(expr)
@@ -1246,6 +1269,7 @@ InTableExpr inTableExpr() :
 }
 {
     [
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
         db = databaseName() {
             in.setDatabase(db);
         }
@@ -1338,10 +1362,10 @@ BinaryExpr.Operator bitwiseOperator() :
         return BinaryExpr.Operator.SHIFT_LOW;
     }
 |   "&" {
-        return BinaryExpr.Operator.BITWISE_AND;
+        return BinaryExpr.Operator.BIT_AND;
     }
 |   "|" {
-        return BinaryExpr.Operator.BITWISE_OR;
+        return BinaryExpr.Operator.BIT_OR;
     }
 }
 
@@ -1452,7 +1476,7 @@ Expression unaryExpr() :
             expr = new UnaryExpr(new Block(line, column, token.endLine,
                 token.endColumn), op, expr);
         }
-    |   expr = nonLeftRecursiveExpr()
+    |   expr = terminalExpr()
     ) {
         return expr;
     }
@@ -1469,11 +1493,11 @@ UnaryExpr.Operator unaryOperator() :
         return UnaryExpr.Operator.POSITIVE;
     }
 |   "~" {
-        return UnaryExpr.Operator.BITWISE_NOT;
+        return UnaryExpr.Operator.BIT_NOT;
     }
 }
 
-Expression nonLeftRecursiveExpr() :
+Expression terminalExpr() :
 {
     Expression expr;
 }
@@ -1481,12 +1505,14 @@ Expression nonLeftRecursiveExpr() :
     (
         expr = literalExpr()
     |   expr = bindParameterExpr()
-    |   expr = columnReferenceExpr()
-    //|   expr = functionExpr()
+    |   LOOKAHEAD(2) // columnExpr also starts with a name.
+        expr = functionExpr()
+    |   expr = columnExpr()
     |   expr = castExpr()
-    |   LOOKAHEAD(3)
-        expr = existsExpr()
-    |   "(" expr = expr() ")"
+    |   expr = existsExpr()
+    |   LOOKAHEAD(2) // selectExpr also starts by "(".
+        "(" expr = expr() ")"
+    |   expr = selectExpr()
     |   expr = caseExpr()
     |   expr = raiseFunctionExpr()
     ) {
@@ -1504,26 +1530,18 @@ LiteralExpr literalExpr() :
     }
 }
 
-BindParameterExpr bindParameterExpr() :
+ColumnExpr columnExpr() :
 {
-}
-{
-    "bindParameter"//bindParameter()
-    {
-        return null;
-    }
-}
-
-ColumnReferenceExpr columnReferenceExpr() :
-{
-    ColumnReferenceExpr reference = new ColumnReferenceExpr();
+    ColumnExpr reference = new ColumnExpr();
     DatabaseName db = null;
     TableName tab = null;
     ColumnName column;
 }
 {
     [
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
         [
+            LOOKAHEAD(4) // Anticipate the occurrence of a dot.
             db = databaseName() {
                 reference.setDatabase(db);
                 reference.setBegin(db);
@@ -1545,30 +1563,6 @@ ColumnReferenceExpr columnReferenceExpr() :
         }
         reference.setEnd(token.endLine, token.endColumn);
         return reference;
-    }
-}
-
-
-FunctionExpr functionExpr() :
-{
-}
-{
-    functionName()
-    "("
-    // TODO: see better.
-    [
-        (
-            "*"
-        |   [ "DISTINCT" ]
-            expr()
-            (
-                ","
-                expr()
-            )*
-        )
-    ]
-    ")" {
-        return null;
     }
 }
 
@@ -1596,27 +1590,37 @@ CastExpr castExpr() :
     }
 }
 
-
 UnaryExpr existsExpr() :
 {
+    UnaryExpr exists = new UnaryExpr();
+    Expression expr;
 }
 {
-    [
-        "EXISTS"
-    ]
-    selectExpr() {
-        return null;
+    "EXISTS" {
+        exists.setBegin(token.beginLine, token.beginColumn);
+    }
+    expr = selectExpr() {
+        exists.setExpression(expr);
+        exists.setOperator(UnaryExpr.Operator.EXISTS);
+        exists.setEnd(token.endLine, token.endColumn);
+        return exists;
     }
 }
 
 SelectExpr selectExpr() :
 {
+    SelectExpr expr = new SelectExpr();
+    SelectStmt stmt;
 }
 {
-    "("
-    selectStmt()
+    "(" {
+        expr.setBegin(token.beginLine, token.beginColumn);
+    }
+    stmt = selectStmt()
     ")" {
-        return null;
+        expr.setStatement(stmt);
+        expr.setEnd(token.endLine, token.endColumn);
+        return expr;
     }
 }
 
@@ -1697,7 +1701,12 @@ RaiseFunctionExpr raiseFunctionExpr() :
             }
         )
         ","
-        //errorMessage()
+        (
+            <ID>
+        |   <STRING>
+        ) {
+            expr.setError(token.image);
+        }
     )
     ")" {
         expr.setEnd(token.endLine, token.endColumn);
@@ -1705,19 +1714,42 @@ RaiseFunctionExpr raiseFunctionExpr() :
     }
 }
 
-Literal literalValue() :
-{}
+FunctionExpr functionExpr() :
 {
-    "literalVa" {
-        return null;
-    }}
-
-NumericLiteral numericLiteral() :
-{}
+    FunctionExpr function = new FunctionExpr();
+    FunctionName name;
+    Expression expr;
+}
 {
-    "numericLi" {
-        return null;
-    }}
+    name = functionName() {
+        function.setFunction(name);
+        function.setBegin(name);
+    }
+    "("
+    [
+        "*" {
+            function.setOperator(FunctionExpr.Operator.UNIVERSAL);
+        }
+    |   [
+            "DISTINCT" {
+                function.setOperator(FunctionExpr.Operator.DISTINCT);
+            }
+        ]
+        expr = expr() {
+            function.addExpression(expr);
+        }
+        (
+            ","
+            expr = expr() {
+                function.addExpression(expr);
+            }
+        )* // TODO: create expression list
+    ]
+    ")" {
+        function.setEnd(token.endLine, token.endColumn);
+        return function;
+    }
+}
 
 SelectStmt selectStmt() :
 {
@@ -1772,7 +1804,6 @@ SelectStmt selectStmt() :
         return stmt;
     }
 }
-
 
 SelectCore selectCore() :
 {
@@ -1843,6 +1874,7 @@ ResultColumn resultColumn() :
     ResultColumn column;}
 {
     (
+        LOOKAHEAD(3) // Removes ambiguity between "tab.*" and "tab.column".
         column = universalColumn()
     |   column = expressionColumn()
     ) {
@@ -1958,6 +1990,7 @@ TableSrc tableSource() :
 }
 {
     [
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
         db = databaseName() {
             src.setDatabase(db);
             src.setBegin(db);
@@ -2178,14 +2211,87 @@ IndexedBy indexedBy() :
     }
 }
 
+Literal literalValue() :
+{
+    Literal literal;
+}
+{
+    (
+        literal = numericLiteral()
+    |   literal = stringLiteral()
+    |   literal = blobLiteral()
+    |   (
+            "NULL"
+	    |   "CURRENT_TIME"
+	    |   "CURRENT_DATE"
+	    |   "CURRENT_TIMESTAMP"
+	    ) {
+	       literal = new Literal(new Block(token.beginLine, token.beginColumn,
+	           token.endLine, token.endColumn), token.image);
+	    }
+    ) {
+        return literal;
+    }
+}
+
+NumericLiteral numericLiteral() :
+{
+}
+{
+    <NUMERIC> {
+        return new NumericLiteral(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
+StringLiteral stringLiteral() :
+{
+}
+{
+    <STRING> {
+        return new StringLiteral(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
+BlobLiteral blobLiteral() :
+{
+}
+{
+    <BLOB> {
+        return new BlobLiteral(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
+BindParameterExpr bindParameterExpr() :
+{
+}
+{
+    <PARAMETER> {
+        return new BindParameterExpr(new Block(token.beginLine, 
+            token.beginColumn, token.endLine, token.endColumn), token.image);
+    }
+}
+
 // Names
+void name() :
+{
+}
+{
+    // sqlite implementation allows it to be a string also. That would
+    // introduce syntactic ambiguity in spite of not being semantically
+    // ambiguous.
+    <ID>
+}
+
 DatabaseName databaseName() :
 {
 }
 {
-    "wasd"
-    {
-        return null;
+    name() {
+        return new DatabaseName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2193,28 +2299,19 @@ TableName tableName() :
 {
 }
 {
-    "kad"
-    {
-        return null;
-    }
-}
-
-ConstraintName name() :
-{
-}
-{
-    "rads" {
-        return null;
+    name() {
+        return new TableName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
 ColumnName columnName() :
 {
-    
 }
 {
-    "vdsa" {
-        return null;
+    name() {
+        return new ColumnName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2222,17 +2319,9 @@ IndexName indexName() :
 {
 }
 {
-    "ew2" {
-        return null;
-    }
-}
-
-TableName foreignTable() :
-{
-}
-{
-    "t" {
-        return null;
+    name() {
+        return new IndexName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2240,8 +2329,9 @@ CollationName collationName() :
 {
 }
 {
-    "DEFAULTs" {
-        return null;
+    name() {
+        return new CollationName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2249,8 +2339,9 @@ ConstraintName constraintName() :
 {
 }
 {
-    "sd" {
-        return null;
+    name() {
+        return new ConstraintName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2258,8 +2349,9 @@ ColumnAlias columnAlias() :
 {
 }
 {
-    "se" {
-        return null;
+    name() {
+        return new ColumnAlias(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2267,8 +2359,9 @@ TableAlias tableAlias() :
 {
 }
 {
-    "esa" {
-        return null;
+    name() {
+        return new TableAlias(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }
 
@@ -2276,7 +2369,8 @@ FunctionName functionName() :
 {
 }
 {
-    "asfd" {
-        return null;
+    name() {
+        return new FunctionName(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
 }

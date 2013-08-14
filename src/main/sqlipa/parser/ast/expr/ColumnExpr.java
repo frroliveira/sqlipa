@@ -5,7 +5,7 @@ import main.sqlipa.parser.ast.name.ColumnName;
 import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.TableName;
 
-public class ColumnReferenceExpr extends Expression {
+public class ColumnExpr extends Expression {
 
     private DatabaseName db;
     
@@ -13,11 +13,11 @@ public class ColumnReferenceExpr extends Expression {
     
     private ColumnName column;
     
-    public ColumnReferenceExpr() {
+    public ColumnExpr() {
         super();
     }
     
-    public ColumnReferenceExpr(Block block, DatabaseName db, TableName tab,
+    public ColumnExpr(Block block, DatabaseName db, TableName tab,
             ColumnName column) {
         super(block);
         this.db = db;
