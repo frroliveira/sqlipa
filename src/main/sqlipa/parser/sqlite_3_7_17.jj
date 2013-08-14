@@ -47,16 +47,8 @@ SKIP :
 |   "\f"
 }
 
-/* Comments */
-TOKEN_MGR_DECLS :
-{
-    private void CommonTokenAction(Token token) {
-
-    }
-}
-
 /* Keywords */
-TOKEN:
+TOKEN :
 {
     <ABORT: "ABORT">
 |   <ACTION: "ACTION">
@@ -182,7 +174,7 @@ TOKEN:
 }
 
 /* Operators */
-TOKEN:
+TOKEN :
 {
     <CONCATENATION: "||">
 |   <STAR: "*">
@@ -226,7 +218,7 @@ TOKEN :
 }
 
 /* Literals && Identifiers */
-TOKEN:
+TOKEN :
 {
     <NUMERIC:
         (
@@ -258,6 +250,35 @@ TOKEN:
     >
 }
 
+/* Comments */
+SPECIAL_TOKEN :
+{
+    <SINGLE_LINE_COMMENT: "--" (~["\n"])* "\n">
+}
+
+MORE :
+{
+    "/*": IN_MULTI_LINE_COMMENT
+}
+
+<IN_MULTI_LINE_COMMENT> MORE :
+{
+    <~[]>
+}
+
+<IN_MULTI_LINE_COMMENT> SPECIAL_TOKEN :
+{
+    "*/": DEFAULT
+}
+
+TOKEN_MGR_DECLS :
+{
+    private void CommonTokenAction(Token token) {
+
+    }
+}
+
+/* Grammar */
 List<SqlStatement> sqlStmtList() :{
     List<SqlStatement> stmts = new LinkedList<SqlStatement>();    SqlStatement stmt;
 }
