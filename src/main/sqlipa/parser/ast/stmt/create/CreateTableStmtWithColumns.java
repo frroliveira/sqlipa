@@ -4,10 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.ColumnDef;
 import main.sqlipa.parser.ast.constraint.table.TableConstraint;
 import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.stmt.ColumnDef;
 
 public class CreateTableStmtWithColumns extends CreateTableStmt {
 

@@ -2,7 +2,7 @@ package main.sqlipa.parser.ast.constraint;
 
 import main.sqlipa.parser.ast.Block;
 
-public class OnForeignKeySett extends ForeignKeySetting {
+public class OnSetting extends ForeignKeySetting {
 
     public enum Event {
         DELETE,
@@ -21,11 +21,11 @@ public class OnForeignKeySett extends ForeignKeySetting {
     
     private Action action;
     
-    public OnForeignKeySett() {
+    public OnSetting() {
         super();
     }
     
-    public OnForeignKeySett(Block block, Event event, Action action) {
+    public OnSetting(Block block, Event event, Action action) {
         super(block);
         this.event = event;
         this.action = action;

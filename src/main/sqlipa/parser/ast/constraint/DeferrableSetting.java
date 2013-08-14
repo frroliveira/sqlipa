@@ -2,7 +2,7 @@ package main.sqlipa.parser.ast.constraint;
 
 import main.sqlipa.parser.ast.Block;
 
-public class DeferrableForeignKeySett extends ForeignKeySetting {
+public class DeferrableSetting extends ForeignKeySetting {
 
     public enum Type {
         DEFERRABLE,
@@ -18,11 +18,11 @@ public class DeferrableForeignKeySett extends ForeignKeySetting {
     
     private Mode mode;
     
-    public DeferrableForeignKeySett() {
+    public DeferrableSetting() {
         super();
     }
     
-    public DeferrableForeignKeySett(Block block, Type type, Mode mode) {
+    public DeferrableSetting(Block block, Type type, Mode mode) {
         super(block);
         this.type = type;
         this.mode = mode;

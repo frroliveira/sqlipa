@@ -1,7 +1,6 @@
 options {
     STATIC = false;
     COMMON_TOKEN_ACTION = true;
-    JDK_VERSION = "1.5";
     IGNORE_CASE = true ;
 }
 
@@ -24,27 +23,16 @@ import main.sqlipa.parser.ast.stmt.event.*;
 import main.sqlipa.parser.ast.stmt.event.select.*;
 
 final class ASTParser {
-
-    public static void main(String args[]) {
-        ASTParser parser = new ASTParser(System.in);
-        try {
-            parser.sqlStmt();
-            System.out.println("Accept");
-        } catch (ParseException e) {
-            System.out.println("Reject");
-        }
-    }
-
 } 
 PARSER_END(ASTParser)
 
 SKIP :
 {
-    " "
-|   "\t"
+    "\t"
 |   "\n"
-|   "\r"
 |   "\f"
+|   "\r"
+|   " "
 }
 
 /* Keywords */
@@ -238,7 +226,7 @@ TOKEN :
         (<CHAR> | "::")*
         (
             "("
-            (~[")", "\u0009", "\n", "\u000b", "\u000c", "\r", "\u0020"])*
+            (~[")", "\t", "\n", "\f", "\r", " "])*
             ")"
         )?
     >
@@ -906,17 +894,17 @@ ForeignKeyClause foreignKeyClause() :
         ")"
     ]
     (
-        sett = onForeignKeySett() {
+        sett = onSetting() {
             clause.addSetting(sett);
         }
-    |   sett = matchForeignKeySett() {
+    |   sett = matchSetting() {
             clause.addSetting(sett);
         }
     )*
     [
         LOOKAHEAD(2) // Ensures that is deferrable because first token can be 
                      // either NOT or DEFERRABLE.
-        sett = deferrableForeignKeySett() {
+        sett = deferrableSetting() {
             clause.addSetting(sett);
         }
     ] {
@@ -924,9 +912,9 @@ ForeignKeyClause foreignKeyClause() :
         return clause;
     }}
 
-OnForeignKeySett onForeignKeySett() :
+OnSetting onSetting() :
 {
-    OnForeignKeySett sett = new OnForeignKeySett();
+    OnSetting sett = new OnSetting();
 }
 {
     "ON" {
@@ -934,30 +922,30 @@ OnForeignKeySett onForeignKeySett() :
     }
     (
         "DELETE" {
-            sett.setEvent(OnForeignKeySett.Event.DELETE);
+            sett.setEvent(OnSetting.Event.DELETE);
         }
     |   "UPDATE" {
-            sett.setEvent(OnForeignKeySett.Event.UPDATE);
+            sett.setEvent(OnSetting.Event.UPDATE);
         }
     )
     (
         "SET"
         (
             "NULL" {
-                sett.setAction(OnForeignKeySett.Action.SET_NULL);
+                sett.setAction(OnSetting.Action.SET_NULL);
             }
         |   "DEFAULT" {
-                sett.setAction(OnForeignKeySett.Action.SET_DEFAULT);
+                sett.setAction(OnSetting.Action.SET_DEFAULT);
             }
         )
     |   "CASCADE" {
-            sett.setAction(OnForeignKeySett.Action.CASCADE);
+            sett.setAction(OnSetting.Action.CASCADE);
         }
     |   "RESTRICT" {
-            sett.setAction(OnForeignKeySett.Action.RESTRICT);
+            sett.setAction(OnSetting.Action.RESTRICT);
         }
     |   "NO" "ACTION" {
-            sett.setAction(OnForeignKeySett.Action.NO_ACTION);
+            sett.setAction(OnSetting.Action.NO_ACTION);
         }
     ) {
         sett.setEnd(token.endLine, token.endColumn);
@@ -965,9 +953,9 @@ OnForeignKeySett onForeignKeySett() :
     }
 }
 
-MatchForeignKeySett matchForeignKeySett() :
+MatchSetting matchSetting() :
 {
-    MatchForeignKeySett sett = new MatchForeignKeySett();
+    MatchSetting sett = new MatchSetting();
 }
 {
     "MATCH" {
@@ -981,30 +969,30 @@ MatchForeignKeySett matchForeignKeySett() :
     }
 }
 
-DeferrableForeignKeySett deferrableForeignKeySett() :
+DeferrableSetting deferrableSetting() :
 {
-    DeferrableForeignKeySett sett = new DeferrableForeignKeySett();
+    DeferrableSetting sett = new DeferrableSetting();
 }
 {
     (
         "NOT" {
             sett.setBegin(token.beginLine, token.beginColumn);
-            sett.setType(DeferrableForeignKeySett.Type.NOT_DEFERRABLE);
+            sett.setType(DeferrableSetting.Type.NOT_DEFERRABLE);
         }
         "DEFERRABLE"
     |   "DEFERRABLE" {
             sett.setBegin(token.beginLine, token.beginColumn);
-            sett.setType(DeferrableForeignKeySett.Type.DEFERRABLE);
+            sett.setType(DeferrableSetting.Type.DEFERRABLE);
         }
     )
     [
         "INITIALLY"
         (
             "DEFERRED" {
-                sett.setMode(DeferrableForeignKeySett.Mode.DEFERRED);
+                sett.setMode(DeferrableSetting.Mode.DEFERRED);
             }
         |   "IMMEDIATE" {
-                sett.setMode(DeferrableForeignKeySett.Mode.IMMEDIATE);
+                sett.setMode(DeferrableSetting.Mode.IMMEDIATE);
             }
         )
     ] {

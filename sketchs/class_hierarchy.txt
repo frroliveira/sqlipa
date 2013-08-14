@@ -728,16 +728,6 @@ ColumnDef {
     List<ColumnConstraint> constraints;
 }
 
-SignedNumber {
-    enum Sign {
-        PLUS,
-        MINUS
-    }
-
-    Sign sign;
-    NumericLiteral literal;
-}
-
 QualifiedTableName {
     DatabaseName db;
     TableName tab;
