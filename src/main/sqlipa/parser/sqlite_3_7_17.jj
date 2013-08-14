@@ -253,28 +253,54 @@ TOKEN :
 /* Comments */
 SPECIAL_TOKEN :
 {
-    <SINGLE_LINE_COMMENT: "--" (~["\n"])* "\n">
+    <LINE_COMMENT: "--" (~["\n"])* "\n">
 }
 
 MORE :
 {
-    "/*": IN_MULTI_LINE_COMMENT
+    "/*": IN_BLOCK_COMMENT
 }
 
-<IN_MULTI_LINE_COMMENT> MORE :
+<IN_BLOCK_COMMENT> MORE :
 {
     <~[]>
 }
 
-<IN_MULTI_LINE_COMMENT> SPECIAL_TOKEN :
+<IN_BLOCK_COMMENT> SPECIAL_TOKEN :
 {
-    "*/": DEFAULT
+    <BLOCK_COMMENT: "*/">: DEFAULT
 }
 
 TOKEN_MGR_DECLS :
 {
+    private List<Comment> comments = new LinkedList<Comment>();
+    
     private void CommonTokenAction(Token token) {
-
+        token = token.specialToken;
+        while (token != null) {
+            if (token.kind == LINE_COMMENT) {
+                comments.add(new LineComment(new Block(token.beginLine,
+                    token.beginColumn, token.endLine, token.endColumn), 
+                    token.image));
+            } else if (token.kind == BLOCK_COMMENT) {
+                comments.add(new BlockComment(new Block(token.beginLine,
+                    token.beginColumn, token.endLine, token.endColumn), 
+                    token.image));
+            } else {
+                break;
+            }
+            token = token.specialToken;
+        }
+    }
+    
+    public List<Comment> popComments() {
+        List<Comment> ret = comments;
+        comments = new LinkedList<Comment>();
+        return ret;
+    }
+    
+    public List<Comment> peekComments() {
+        return comments;
     }
 }
 
