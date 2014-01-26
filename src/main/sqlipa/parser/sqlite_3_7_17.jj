@@ -350,14 +350,14 @@ SqlStatement sqlStmt() :
             explain = SqlStatement.Explain.PLAN;
         }
     ]
-    (/*
+    (
         stmt = alterTableStmt()
     |   stmt = analyzeStmt()
     |   stmt = attachStmt()
 	|   stmt = beginStmt()
-	|   stmt = commitStmt()
-	|   stmt = createIndexStmt()
-	|*/   stmt = createTableStmt() /*
+	|   stmt = commitStmt()/*
+	|   stmt = createIndexStmt()*/
+	|   stmt = createTableStmt() /*
 	|   stmt = createTriggerStmt()
 	|   stmt = createViewStmt()
 	|   stmt = createVirtualTableStmt()	|   stmt = deleteStmt()
@@ -439,6 +439,104 @@ AlterTableStmt addColumnStmt() :
     "ADD" [ "COLUMN" ]
     column = columnDef() {
         stmt.setColumn(column);
+        return stmt;
+    }
+}
+
+SqlStatement analyzeStmt() :
+{
+    AnalyzeStmt stmt = new AnalyzeStmt();
+    DatabaseName db = null;
+    Name name = null;
+}
+{
+    "ANALYZE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        (
+            db = databaseName()
+            [
+                "."
+                name = name()
+            ]
+        |   name = name()
+        )
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setDatabase(db);
+        stmt.setTableOrIndex(name);
+        return stmt;
+    }
+}
+
+SqlStatement attachStmt() :
+{
+    AttachStmt stmt = new AttachStmt();
+    Expression expr;
+    DatabaseName db;
+}
+{
+    "ATTACH" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        "DATABASE"
+    ]
+    expr = expr()
+    "AS"
+    db = databaseName() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setExpression(expr);
+        stmt.setDatabase(db);
+        return stmt;
+    }
+}
+
+SqlStatement beginStmt() :
+{
+    BeginStmt stmt = new BeginStmt();
+}
+{
+    "BEGIN" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        (
+            "DEFERRED" {
+                stmt.setType(BeginStmt.Type.DEFERRED);
+            }
+        |   "IMMEDIATE" {
+                stmt.setType(BeginStmt.Type.IMMEDIATE);
+            }
+        |   "EXCLUSIVE" {
+                stmt.setType(BeginStmt.Type.EXCLUSIVE);
+            }
+        )
+    ]
+    [
+        "TRANSACTION"
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
+        return stmt;
+    }
+}
+
+SqlStatement commitStmt() :
+{
+    CommitStmt stmt = new CommitStmt();
+}
+{
+    (
+        "COMMIT"
+    |   "END"
+    ) {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        "TRANSACTION"
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
     }
 }

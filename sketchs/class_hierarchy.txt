@@ -114,12 +114,12 @@ namespace stmt {
 
                 CreateViewStmt {
                     boolean temp;
-                    SelectStmt stmt;
+                    SelectStmt select;
                 }
 
                 CreateVirtualTableStmt {
                     ModuleName module;
-                    List<ModuleArgument> moduleArgs;
+                    List<ModuleArgument> args;
                 }
             }
         }
