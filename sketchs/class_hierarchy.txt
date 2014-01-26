@@ -31,7 +31,7 @@ namespace stmt {
 
         AnalyzeStmt {
             DatabaseName db;
-            TableOrIndexName tabOrInd;
+            Name name;
         }
 
         AttachStmt {

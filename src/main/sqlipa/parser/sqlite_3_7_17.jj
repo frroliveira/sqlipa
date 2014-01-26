@@ -1,5 +1,7 @@
 options {
     STATIC = false;
+      JAVA_UNICODE_ESCAPE=true;
+    
     COMMON_TOKEN_ACTION = true;
     IGNORE_CASE = true ;
 }
@@ -7,6 +9,8 @@ options {
 PARSER_BEGIN(ASTParser)
 package main.sqlipa.parser;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -23,16 +27,87 @@ import main.sqlipa.parser.ast.stmt.event.*;
 import main.sqlipa.parser.ast.stmt.event.select.*;
 
 final class ASTParser {
+
+    public static void main(String[] args) {
+        String str =
+            "CREATE TABLE IF NOT EXISTS lyrics(" +
+            "lyric_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "title TEXT," +
+            "subtitle TEXT);";
+ 
+        InputStream is = new ByteArrayInputStream(str.getBytes());
+        ASTParser parser = new ASTParser(is);
+        try {
+            parser.sqlStmtList();
+            System.out.println("Ok.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 } 
 PARSER_END(ASTParser)
 
 SKIP :
 {
-    "\t"
+    " "
+|   "\t"
 |   "\n"
 |   "\f"
 |   "\r"
-|   " "
+}
+
+/* Comments */
+SPECIAL_TOKEN :
+{
+    <LINE_COMMENT: "--" (~["\n"])* "\n">
+}
+
+MORE :
+{
+    "/*": IN_BLOCK_COMMENT
+}
+
+<IN_BLOCK_COMMENT> MORE :
+{
+    <~[]>
+}
+
+<IN_BLOCK_COMMENT> SPECIAL_TOKEN :
+{
+    <BLOCK_COMMENT: "*/">: DEFAULT
+}
+
+TOKEN_MGR_DECLS :
+{
+    private List<Comment> comments = new LinkedList<Comment>();
+    
+    private void CommonTokenAction(Token token) {
+        token = token.specialToken;
+        while (token != null) {
+            if (token.kind == LINE_COMMENT) {
+                comments.add(new LineComment(new Block(token.beginLine,
+                    token.beginColumn, token.endLine, token.endColumn), 
+                    token.image));
+            } else if (token.kind == BLOCK_COMMENT) {
+                comments.add(new BlockComment(new Block(token.beginLine,
+                    token.beginColumn, token.endLine, token.endColumn), 
+                    token.image));
+            } else {
+                break;
+            }
+            token = token.specialToken;
+        }
+    }
+    
+    public List<Comment> popComments() {
+        List<Comment> ret = comments;
+        comments = new LinkedList<Comment>();
+        return ret;
+    }
+    
+    public List<Comment> peekComments() {
+        return comments;
+    }
 }
 
 /* Keywords */
@@ -185,26 +260,6 @@ TOKEN :
 |   <NOT_EQUAL_2: "<>">
 }
 
-/* Separators */
-TOKEN :
-{
-  < LP: "(" >
-| < RP: ")" >
-| < SEMICOLON: ";" >
-| < COMMA: "," >
-| < DOT: "." >
-}
-
-/* Char Sets */
-TOKEN :
-{
-    <DIGIT: ["0" - "9"]>
-    // Has mentioned in sqlite implementation '$' is not documented but is
-    // implemented for compatibility.
-|   <CHAR: ["A" - "Z", "_", "$"]>
-|   <HEX_CHAR: ["0" - "9", "A" - "F"]>
-}
-
 /* Literals && Identifiers */
 TOKEN :
 {
@@ -215,7 +270,7 @@ TOKEN :
         )
         (<EXPONENT>)?
     >
-|   <EXPONENT: "E" (["+", "-"])? (<DIGIT>)+>
+|   <#EXPONENT: "E" (["+", "-"])? (<DIGIT>)+>
 |   <STRING: "'" (~["'"])* ("''" (~["'"])*)* "'">
 |   <BLOB: "X'" (<HEX_CHAR> <HEX_CHAR>)* "'">
 |   <PARAMETER: 
@@ -238,58 +293,24 @@ TOKEN :
     >
 }
 
-/* Comments */
-SPECIAL_TOKEN :
+/* Separators */
+TOKEN :
 {
-    <LINE_COMMENT: "--" (~["\n"])* "\n">
+    <LP: "(">
+|   <RP: ")">
+|   <SEMICOLON: ";">
+|   <COMMA: ",">
+|   <DOT: ".">
 }
 
-MORE :
+/* Char Sets */
+TOKEN :
 {
-    "/*": IN_BLOCK_COMMENT
-}
-
-<IN_BLOCK_COMMENT> MORE :
-{
-    <~[]>
-}
-
-<IN_BLOCK_COMMENT> SPECIAL_TOKEN :
-{
-    <BLOCK_COMMENT: "*/">: DEFAULT
-}
-
-TOKEN_MGR_DECLS :
-{
-    private List<Comment> comments = new LinkedList<Comment>();
-    
-    private void CommonTokenAction(Token token) {
-        token = token.specialToken;
-        while (token != null) {
-            if (token.kind == LINE_COMMENT) {
-                comments.add(new LineComment(new Block(token.beginLine,
-                    token.beginColumn, token.endLine, token.endColumn), 
-                    token.image));
-            } else if (token.kind == BLOCK_COMMENT) {
-                comments.add(new BlockComment(new Block(token.beginLine,
-                    token.beginColumn, token.endLine, token.endColumn), 
-                    token.image));
-            } else {
-                break;
-            }
-            token = token.specialToken;
-        }
-    }
-    
-    public List<Comment> popComments() {
-        List<Comment> ret = comments;
-        comments = new LinkedList<Comment>();
-        return ret;
-    }
-    
-    public List<Comment> peekComments() {
-        return comments;
-    }
+    <#DIGIT: ["0" - "9"]>
+    // Has mentioned in sqlite implementation '$' is not documented but is
+    // implemented for compatibility.
+|   <#CHAR: ["A" - "Z", "_", "$"]>
+|   <#HEX_CHAR: ["0" - "9", "A" - "F"]>
 }
 
 /* Grammar */
@@ -297,11 +318,17 @@ List<SqlStatement> sqlStmtList() :{
     List<SqlStatement> stmts = new LinkedList<SqlStatement>();    SqlStatement stmt;
 }
 {
-    (
-        stmt = sqlStmt() {
-            stmts.add(stmt);
-        }
-    )* {
+    [
+	    stmt = sqlStmt() {
+	        stmts.add(stmt);
+	    }
+	    (
+	        ";"
+	        stmt = sqlStmt() {
+	            stmts.add(stmt);
+	        }
+	    )*
+    ] {
         return stmts;
     }
 }
@@ -345,8 +372,8 @@ SqlStatement sqlStmt() :
 	|   stmt = reindexStmt()
 	|   stmt = releaseStmt()
 	|   stmt = rollbackStmt()
-	|   stmt = savepointStmt()
-	|*/   stmt = selectStmt() /*
+	|   stmt = savepointStmt()*/
+	|   stmt = selectStmt() /*
 	|   stmt = updateStmt()
 	|   stmt = updateStmtLimited()
 	|   stmt = vacuumStmt()*/
@@ -356,6 +383,62 @@ SqlStatement sqlStmt() :
             stmt.setBegin(line, column);
             stmt.setExplain(explain);
         }
+        return stmt;
+    }
+}
+
+SqlStatement alterTableStmt() :
+{
+    AlterTableStmt stmt;
+    int line;
+    int column;
+    DatabaseName db = null;
+    TableName tab;
+}
+{
+    "ALTER" {
+        line = token.beginLine;
+        column = token.beginColumn; 
+    }
+    "TABLE"
+    [
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    tab = tableName()
+    (
+        stmt = renameTableStmt()
+    |   stmt = addColumnStmt()
+    ) {
+        stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
+        stmt.setDatabase(db);
+        stmt.setTable(tab);
+        return stmt;
+    }
+}
+
+AlterTableStmt renameTableStmt() :
+{
+    RenameTableStmt stmt = new RenameTableStmt();
+    TableName tab;
+}
+{
+    "RENAME" "TO"
+    tab = tableName() {
+        stmt.setNewTable(tab);
+        return stmt;
+    }
+}
+
+AlterTableStmt addColumnStmt() :
+{
+    AddColumnStmt stmt = new AddColumnStmt();
+    ColumnDef column;
+}
+{
+    "ADD" [ "COLUMN" ]
+    column = columnDef() {
+        stmt.setColumn(column);
         return stmt;
     }
 }
@@ -441,14 +524,14 @@ CreateTableStmt createTableStmtWithColumns() :
 {
     "("
     column = columnDef() { 
-        stmt.addColumn(columnDef());
+        stmt.addColumn(column);
     }
     // As the two next expressions start by "," it's necessary to use 
-    // LOOKAHAED(2) to decide if we're seeing a column definition or a table
+    // LOOKAHEAD(2) to decide if we're seeing a column definition or a table
     // constraint.
     (
         LOOKAHEAD(2)
-        "," 
+        ","
         column = columnDef() {
             stmt.addColumn(column);
         }
