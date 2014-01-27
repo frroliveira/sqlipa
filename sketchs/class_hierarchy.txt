@@ -1,7 +1,5 @@
 // Abstract for all classes that can't be used.
 // All classes extend except Node.
-// Create 'add' and 'remove' methods for lists.
-// Constructors without line and column numbers?
 // Add 'final' where necessary.
 namespace stmt {
     SqlStatementList {

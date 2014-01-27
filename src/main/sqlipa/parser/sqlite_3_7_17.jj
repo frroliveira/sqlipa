@@ -369,10 +369,10 @@ SqlStatement sqlStmt() :
 	|   stmt = dropViewStmt()
 	|   stmt = insertStmt()
 	|   stmt = pragmaStmt()
-	|   stmt = reindexStmt()
+	|   stmt = reindexStmt()*/
 	|   stmt = releaseStmt()
 	|   stmt = rollbackStmt()
-	|   stmt = savepointStmt()*/
+	|   stmt = savepointStmt()
 	|   stmt = selectStmt() /*
 	|   stmt = updateStmt()
 	|   stmt = updateStmtLimited()
@@ -534,6 +534,111 @@ SqlStatement commitStmt() :
         "TRANSACTION"
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
+        return stmt;
+    }
+}
+
+SqlStatement rollbackStmt() :
+{
+    RollbackStmt stmt = new RollbackStmt();
+}
+{
+    "ROLLBACK"  {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [ "TRANSACTION" ]
+    [
+        "TO" {
+            SavepointName savepoint;
+        }
+        [ "SAVEPOINT" ]
+        savepoint = savepointName() {
+            stmt.setSavepoint(savepoint);
+        }
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
+        return stmt;
+    }
+}
+
+SqlStatement savepointStmt() :
+{
+    SavepointStmt stmt = new SavepointStmt();
+    SavepointName savepoint;
+}
+{
+    "SAVEPOINT"  {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    savepoint = savepointName() {
+        stmt.setSavepoint(savepoint);
+        stmt.setEnd(token.endLine, token.endColumn);
+        return stmt;
+    }
+}
+
+SqlStatement releaseStmt() :
+{
+    ReleaseStmt stmt = new ReleaseStmt();
+    SavepointName savepoint;
+}
+{
+    "RELEASE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [ "SAVEPOINT" ]
+    savepoint = savepointName() {
+        stmt.setSavepoint(savepoint);
+        stmt.setEnd(token.endLine, token.endColumn);
+        return stmt;
+    }
+}
+
+SqlStatement createIndexStmt() :
+{
+    CreateIndexStmt stmt = new CreateIndexStmt();
+    DatabaseName db = null;
+    IndexName ind;
+    TableName tab;
+    IndexedColumn column;
+}
+{
+    "CREATE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        "UNIQUE" { 
+            stmt.setUnique(true);
+        }
+    ]
+    "INDEX"
+    [
+        "IF" "NOT" "EXISTS" { 
+            stmt.setIfNotExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    ind = indexName()
+    "ON"
+    tab = tableName()
+    "("
+    column = indexedColumn() {
+        stmt.addColumn(column);
+    }
+    (
+        ","
+	    column = indexedColumn() {
+	        stmt.addColumn(column);
+	    }
+    )*
+    ")" {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(ind);
+        stmt.setDatabase(db);
+        stmt.setTable(tab);
         return stmt;
     }
 }
@@ -2610,5 +2715,15 @@ FunctionName functionName() :
 {
     name = name() {
         return new FunctionName(name);
+    }
+}
+
+SavepointName savepointName() :
+{
+    Name name;
+}
+{
+    name = name() {
+        return new SavepointName(name);
     }
 }
