@@ -4,10 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.QualifiedTableName;
+import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
 
-public class DeleteStmtLimited extends DeleteStmt {
+public class EventConstraint extends Node {
     
     private List<OrderingTerm> terms;
     
@@ -15,15 +15,14 @@ public class DeleteStmtLimited extends DeleteStmt {
     
     private Expression offset;
     
-    public DeleteStmtLimited() {
+    public EventConstraint() {
         super();
         terms = new LinkedList<OrderingTerm>();
     }
     
-    public DeleteStmtLimited(Block block, Explain explain,
-            QualifiedTableName qualifiedTab, Expression where,
-            List<OrderingTerm> terms, Expression limit, Expression offset) {
-        super(block, explain, qualifiedTab, where);
+    public EventConstraint(Block block, List<OrderingTerm> terms,
+            Expression limit, Expression offset) {
+        super(block);
         this.terms = terms;
         this.limit = limit;
         this.offset = offset;

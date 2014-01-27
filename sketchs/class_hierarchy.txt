@@ -30,8 +30,8 @@ namespace stmt {
         }
 
         AnalyzeStmt {
-            DatabaseName db;
-            Name name;
+            Name first;
+            Name second;
         }
 
         AttachStmt {
@@ -153,12 +153,7 @@ namespace stmt {
                 DeleteStmt {
                     QualifiedTableName tab;
                     Expression where;
-                
-                    DeleteStmtLimited {
-                        List<OrderingTerm> terms;
-                        Expression limit;
-                        Expression offset;
-                    }
+                    EventResultConstraint constraint;
                 }
 
                 InsertStmt {
@@ -193,9 +188,7 @@ namespace stmt {
                 namespace select {
                     SelectStmt {
                         SelectUnit unit;
-                        List<OrderingTerm> terms;
-                        Expression limit;
-                        Expression offset;
+                        EventResultConstraint constraint;
                     }
 
                     SelectUnit {
@@ -217,7 +210,7 @@ namespace stmt {
                             }
     
                             SelectUnit left;
-                            Operator op
+                            Operator op;
                             SelectUnit right;
                         }
                     }
@@ -299,22 +292,22 @@ namespace stmt {
                         QualifiedTableName tab;
                         List<ColumnAssign> assigns;
                         Expression where;
-
-                        UpdateStmtLimiteed {
-                            List<OrderingTerm> terms;
-                            Expression limit;
-                            Expression offset;
-                        }
+                        EventResultConstraint constraint;
                     }
 
-                    // Doesn't extend.
                     ColumnAssign {
                         ColumnName column;
                         Expression expr;
                     }
                 }
             }
-        
+            
+            EventResultConstraint {
+                List<OrderingTerm> terms;
+                Expression limit;
+                Expression offset;
+            }
+            
             OrderingTerm {
                 enum Order {
                     ASC, 
@@ -347,15 +340,8 @@ namespace stmt {
         }
 
         ReindexStmt {
-
-            ReindexCollationStmt {
-                CollationName collation;
-            }
-
-            ReindexTableOrIndexStmt {
-                DatabaseName db;
-                TableOrIndexName tabOrInd;
-            }
+            Name first;
+            Name second;
         }
 
         VacuumStmt {        
@@ -377,9 +363,6 @@ namespace name {
         }
 
         IndexName {
-        }
-
-        TableOrIndexName {
         }
 
         SavepointName {

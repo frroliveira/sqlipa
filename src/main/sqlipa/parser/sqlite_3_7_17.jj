@@ -1970,6 +1970,7 @@ SelectStmt selectStmt() :
     SelectUnit unit;
     SelectCompound.Operator op;
     SelectUnit core;
+    EventConstraint constraint = null;
 }
 {
     unit = selectCore() {
@@ -1983,38 +1984,59 @@ SelectStmt selectStmt() :
                 core);
         }
     )* {
-        stmt.setUnit(unit);
     }
+    constraint = eventConstraint() {
+        stmt.setUnit(unit);
+        stmt.setConstraint(constraint);
+        stmt.setEnd(token.endLine, token.endColumn);
+        return stmt;
+    }
+}
+
+EventConstraint eventConstraint() :
+{
+    EventConstraint constraint = null;
+}
+{
     [
-        "ORDER" "BY" {
+        "ORDER" {
+            constraint = new EventConstraint();
+            constraint.setBegin(token.beginLine, token.beginColumn);
             OrderingTerm term;
         }
+        "BY"
         term = orderingTerm() {
-            stmt.addTerm(term);
+            constraint.addTerm(term);
         }
         (
             ","
             term = orderingTerm() {
-                stmt.addTerm(term);
+                constraint.addTerm(term);
             }
         )*
     ]
     [
         "LIMIT" {
+            if (constraint == null) {
+                constraint = new EventConstraint();
+                constraint.setBegin(token.beginLine, token.beginColumn);
+            }
             Expression expr;
         }
         expr = expr() {
-            stmt.setLimit(expr);
+            constraint.setLimit(expr);
         }
         [
             ( "OFFSET" | "," )
             expr = expr() {
-                stmt.setOffset(expr);
+                constraint.setOffset(expr);
             }
         ]
     ] {
-        stmt.setEnd(token.endLine, token.endColumn);
-        return stmt;
+        if (constraint != null) {
+            constraint.setEnd(token.endLine, token.endColumn);
+        }
+        return constraint;
     }
 }
 
