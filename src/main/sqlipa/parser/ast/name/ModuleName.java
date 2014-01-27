@@ -8,6 +8,10 @@ public class ModuleName extends Name {
         super();
     }
     
+    public ModuleName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public ModuleName(Block block, String name) {
         super(block, name);
     }

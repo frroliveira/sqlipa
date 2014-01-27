@@ -1,40 +1,38 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
 import main.sqlipa.parser.ast.name.Name;
 
 public class AnalyzeStmt extends SqlStatement {
     
-    private DatabaseName db;
-    
-    private Name tabOrInd;
+    private Name first;
+
+    private Name second;    
     
     public AnalyzeStmt() {
         super();
     }
     
-    public AnalyzeStmt(Block block, Explain explain, DatabaseName db,
-            Name tabOrInd) {
+    public AnalyzeStmt(Block block, Explain explain, Name first, Name second) {
         super(block, explain);
-        this.db = db;
-        this.tabOrInd = tabOrInd;
+        this.first = first;
+        this.second = second;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getFirstName() {
+        return first;
     }
     
-    public Name getTableOrIndex() {
-        return tabOrInd;
+    public Name getSecondName() {
+        return second;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setFirstName(Name first) {
+        this.first = first;
     }
     
-    public void setTableOrIndex(Name tabOrInd) {
-        this.tabOrInd = tabOrInd;
+    public void setSecondName(Name second) {
+        this.second = second;
     }
 
 }

@@ -8,6 +8,10 @@ public class SavepointName extends Name {
         super();
     }
     
+    public SavepointName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public SavepointName(Block block, String name) {
         super(block, name);
     }

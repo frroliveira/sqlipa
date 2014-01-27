@@ -2,7 +2,7 @@ package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
 
-public abstract class BeginStmt extends SqlStatement {
+public class BeginStmt extends SqlStatement {
     
     public enum Type {
         DEFERRED,

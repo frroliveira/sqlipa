@@ -12,45 +12,45 @@ public class SelectCompound extends SelectUnit {
     }
     
     private SelectUnit left;
+
+    private Operator op;
     
     private SelectUnit right;
-    
-    private Operator op;
     
     public SelectCompound() {
         super();
     }
     
-    public SelectCompound(Block block, SelectUnit left, SelectUnit right,
-            Operator op) {
+    public SelectCompound(Block block, SelectUnit left, Operator op,
+            SelectUnit right) {
         super(block);
         this.left = left;
-        this.right = right;
         this.op = op;
+        this.right = right;
     }
     
     public SelectUnit getLeft() {
         return left;
     }
     
-    public SelectUnit getRight() {
-        return right;
-    }
-    
     public Operator getOperator() {
         return op;
+    }
+    
+    public SelectUnit getRight() {
+        return right;
     }
     
     public void setLeft(SelectUnit left) {
         this.left = left;
     }
     
-    public void setRight(SelectUnit right) {
-        this.right = right;
-    }
-    
     public void setOperator(Operator op) {
         this.op = op;
+    }
+    
+    public void setRight(SelectUnit right) {
+        this.right = right;
     }
     
 }

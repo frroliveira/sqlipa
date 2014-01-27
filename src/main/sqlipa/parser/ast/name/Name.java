@@ -22,5 +22,5 @@ public class Name extends Node {
     public void setName(String name) {
         this.name = name;
     }
-    
+
 }

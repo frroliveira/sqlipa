@@ -8,6 +8,10 @@ public class IndexName extends Name {
         super();
     }
     
+    public IndexName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public IndexName(Block block, String name) {
         super(block, name);
     }

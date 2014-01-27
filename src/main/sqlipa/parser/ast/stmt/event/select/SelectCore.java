@@ -10,15 +10,15 @@ public class SelectCore extends SelectUnit {
     
     private boolean distinct;
     
+    private List<ResultColumn> columns;
+    
     private JoinSrc from;
     
     private Expression where;
     
-    private Expression having;
-    
-    private List<ResultColumn> columns;
-    
     private List<Expression> groupBy;
+    
+    private Expression having;
     
     public SelectCore() {
         super();
@@ -26,20 +26,24 @@ public class SelectCore extends SelectUnit {
         this.groupBy = new LinkedList<Expression>();
     }
     
-    public SelectCore(Block block, boolean returnsDistinct, JoinSrc from,
-            Expression where, Expression having, List<ResultColumn> columns,
-            List<Expression> groupBy) {
+    public SelectCore(Block block, boolean hasDistinct,
+            List<ResultColumn> columns, JoinSrc from, Expression where,
+            List<Expression> groupBy, Expression having) {
         super(block);
-        this.distinct = returnsDistinct;
+        this.distinct = hasDistinct;
+        this.columns = columns;
         this.from = from;
         this.where = where;
-        this.having = having;
-        this.columns = columns;
         this.groupBy = groupBy;
+        this.having = having;
     }
     
-    public boolean returnsDistinct() {
+    public boolean hasDistinct() {
         return distinct;
+    }
+
+    public List<ResultColumn> getColumns() {
+        return columns;
     }
     
     public JoinSrc getFrom() {
@@ -50,22 +54,22 @@ public class SelectCore extends SelectUnit {
         return where;
     }
     
-    public Expression getHaving() {
-        return having;
-    }
-    
-    public List<ResultColumn> getColumns() {
-        return columns;
-    }
-    
     public List<Expression> getGroupBy() {
         return groupBy;
     }
     
-    public void setDistinct(boolean returnsDistinct) {
-        this.distinct = returnsDistinct;
+    public Expression getHaving() {
+        return having;
     }
     
+    public void setDistinct(boolean hasDistinct) {
+        this.distinct = hasDistinct;
+    }
+
+    public void setColumns(List<ResultColumn> columns) {
+        this.columns = columns;
+    }
+
     public void setFrom(JoinSrc from) {
         this.from = from;
     }
@@ -73,17 +77,13 @@ public class SelectCore extends SelectUnit {
     public void setWhere(Expression where) {
         this.where = where;
     }
+
+    public void setGroupBy(List<Expression> groupBy) {
+        this.groupBy = groupBy;
+    }
     
     public void setHaving(Expression having) {
         this.having = having;
-    }
-    
-    public void setColumns(List<ResultColumn> columns) {
-        this.columns = columns;
-    }
-    
-    public void setGroupBy(List<Expression> groupBy) {
-        this.groupBy = groupBy;
     }
     
     public void addColumn(ResultColumn column) {

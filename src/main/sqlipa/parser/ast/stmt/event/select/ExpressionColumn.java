@@ -23,5 +23,5 @@ public class ExpressionColumn extends ResultColumn {
     public void setExpression(Expression expr) {
         this.expr = expr;
     }
-    
+
 }

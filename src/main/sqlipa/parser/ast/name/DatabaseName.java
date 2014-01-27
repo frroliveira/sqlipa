@@ -8,6 +8,10 @@ public class DatabaseName extends Name {
         super();
     }
     
+    public DatabaseName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public DatabaseName(Block block, String name) {
         super(block, name);
     }

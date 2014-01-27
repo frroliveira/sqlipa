@@ -37,7 +37,7 @@ public class CreateTriggerStmt extends CreateStmt {
     
     private TableName tab;
     
-    private Expression whenExpr;
+    private Expression when;
     
     private List<EventStmt> stmts;
     
@@ -50,7 +50,7 @@ public class CreateTriggerStmt extends CreateStmt {
     public CreateTriggerStmt(Block block, Explain explain,
             boolean hasIfNotExists, DatabaseName db, Name name, boolean hasTemp,
             boolean hasForEachRow, Time time, Event event,
-            List<ColumnName> columns, TableName tab, Expression whenExpr,
+            List<ColumnName> columns, TableName tab, Expression when,
             List<EventStmt> stmts) {
         super(block, explain, hasIfNotExists, db, name);
         this.temp = hasTemp;
@@ -59,7 +59,7 @@ public class CreateTriggerStmt extends CreateStmt {
         this.event = event;
         this.columns = columns;
         this.tab = tab;
-        this.whenExpr = whenExpr;
+        this.when = when;
         this.stmts = stmts;
     }
     
@@ -87,8 +87,8 @@ public class CreateTriggerStmt extends CreateStmt {
         return tab;
     }
     
-    public Expression getWhenExpression() {
-        return whenExpr;
+    public Expression getWhen() {
+        return when;
     }
     
     public List<EventStmt> getStatements() {
@@ -119,8 +119,8 @@ public class CreateTriggerStmt extends CreateStmt {
         this.tab = tab;
     }
     
-    public void setWhenExpression(Expression whenExpr) {
-        this.whenExpr = whenExpr;
+    public void setWhen(Expression when) {
+        this.when = when;
     }
     
     public void setStatements(List<EventStmt> stmts) {

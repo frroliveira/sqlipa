@@ -8,6 +8,10 @@ public class TableName extends Name {
         super();
     }
     
+    public TableName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public TableName(Block block, String name) {
         super(block, name);
     }

@@ -8,6 +8,10 @@ public class ColumnAlias extends Alias {
         super();
     }
     
+    public ColumnAlias(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public ColumnAlias(Block block, String name) {
         super(block, name);
     }

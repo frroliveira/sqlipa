@@ -1,55 +1,44 @@
-package main.sqlipa.parser.ast.stmt.event.select;
+package main.sqlipa.parser.ast.stmt.event;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.QualifiedTableName;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.stmt.event.EventStmt;
-import main.sqlipa.parser.ast.stmt.event.OrderingTerm;
 
-public class SelectStmt extends EventStmt {
-
-    private SelectUnit unit;
-
+public class DeleteStmtLimited extends DeleteStmt {
+    
     private List<OrderingTerm> terms;
-
+    
     private Expression limit;
     
     private Expression offset;
     
-    public SelectStmt() {
+    public DeleteStmtLimited() {
         super();
-        this.terms = new LinkedList<OrderingTerm>();
+        terms = new LinkedList<OrderingTerm>();
     }
     
-    public SelectStmt(Block block, Explain explain, SelectUnit unit,
+    public DeleteStmtLimited(Block block, Explain explain,
+            QualifiedTableName qualifiedTab, Expression where,
             List<OrderingTerm> terms, Expression limit, Expression offset) {
-        super(block, explain);
-        this.unit = unit;
+        super(block, explain, qualifiedTab, where);
         this.terms = terms;
         this.limit = limit;
         this.offset = offset;
     }
     
-    public SelectUnit getUnit() {
-        return unit;
-    }
-    
     public List<OrderingTerm> getTerms() {
         return terms;
     }
-
+    
     public Expression getLimit() {
         return limit;
     }
     
     public Expression getOffset() {
         return offset;
-    }
-    
-    public void setUnit(SelectUnit unit) {
-        this.unit = unit;
     }
     
     public void setTerms(List<OrderingTerm> terms) {
@@ -71,5 +60,5 @@ public class SelectStmt extends EventStmt {
     public boolean removeTerm(OrderingTerm term) {
         return terms.remove(term);
     }
-    
+
 }

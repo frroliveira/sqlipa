@@ -8,6 +8,10 @@ public class FunctionName extends Name {
         super();
     }
     
+    public FunctionName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public FunctionName(Block block, String name) {
         super(block, name);
     }

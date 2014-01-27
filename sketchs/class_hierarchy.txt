@@ -108,7 +108,7 @@ namespace stmt {
                     Event event;
                     List<ColumnName> columns;
                     TableName tab;
-                    Expression whenExpr;
+                    Expression when;
                     List<EventStmt> stmts;
                 }
 
@@ -176,7 +176,7 @@ namespace stmt {
                     DatabaseName db;
                     TableName tab;
 
-                    InsertStmtWithDefault {
+                    InsertStmtDefault {
                     }
 
                     InsertStmtWithValues {
@@ -186,45 +186,44 @@ namespace stmt {
 
                     InsertStmtWithSelect {
                         List<ColumnName> columns;
-                        SelectStmt stmt;
+                        SelectStmt select;
                     }
                 }
 
                 namespace select {
                     SelectStmt {
-                        SelectCore core;
-                        List<CompoundOperation> ops;
+                        SelectUnit unit;
                         List<OrderingTerm> terms;
                         Expression limit;
                         Expression offset;
                     }
 
-                    // Doesn't extend.
-                    CompoundOperation {
-                        enum Operator {
-                            UNION,
-                            UNION_ALL,
-                            INTERSECT,
-                            EXCEPT
+                    SelectUnit {
+                        SelectCore {
+                            boolean distinct;
+                            List<ResultColumn> columns;
+                            JoinSrc from;
+                            Expression where;
+                            List<Expression> groupBy;
+                            Expression having;
                         }
-
-                        Operator op;
-                        SelectCore core;
+                        
+                        SelectCompund {
+                            enum Operator {
+                                UNION,
+                                UNION_ALL,
+                                INTERSECT,
+                                EXCEPT
+                            }
+    
+                            SelectUnit left;
+                            Operator op
+                            SelectUnit right;
+                        }
                     }
 
-                    // Doesn't extend.
-                    SelectCore {
-                        boolean distinct;
-                        List<ResultColumn> columns;
-                        JoinSrc from;
-                        Expression where;
-                        List<Expression> groupBy;
-                        Expression having;
-                    }
-
-                    // Doesn't extend.
                     ResultColumn {
-                        AllColumns {
+                        UniversalColumn {
                             TableName tab;
                         }
 
@@ -237,48 +236,43 @@ namespace stmt {
                         }
                     }
 
-                    // Doesn't extend.
-                    SingleSrc {
-                        JoinSrc {
-                            SingleSrc src;
-                            List<JoinOperation> ops;
+                    JoinSrc {
+                        SingleSrc {
+                            SelectSrc {
+                                SelectStmt select;
+                                TableAlias alias;
+                            }
+    
+                            TableSrc {
+                                DatabaseName db;
+                                TableName tab;
+                                TableAlias alias;
+                                IndexedBy indexed;
+                            }
                         }
 
-                        SelectSrc {
-                            SelectStmt stmt;
-                            TableAlias alias;
-                        }
-
-                        TableSrc {
-                            DatabaseName db;
-                            TableName tab;
-                            TableAlias alias;
-                            IndexedBy indexed;
+                        JoinCompound {
+                            enum Operator {
+                                COMMA,
+                                JOIN,
+                                LEFT_JOIN,
+                                LEFT_OUTER_JOIN,
+                                INNER_JOIN,
+                                CROSS_JOIN,
+                                NATURAL_JOIN,
+                                NATURAL_LEFT_JOIN,
+                                NATURAL_LEFT_OUTER_JOIN,
+                                NATURAL_INNER_JOIN,
+                                NATURAL_CROSS_JOIN
+                            }
+    
+                            JoinSrc left;
+                            Operator op;
+                            JoinSrc right;
+                            JoinConstraint constraint;
                         }
                     }
 
-                    // Doesn't extend.
-                    JoinOperation {
-                        enum Operator {
-                            COMMA,
-                            JOIN,
-                            LEFT_JOIN,
-                            LEFT_OUTER_JOIN,
-                            INNER_JOIN,
-                            CROSS_JOIN,
-                            NATURAL_JOIN,
-                            NATURAL_LEFT_JOIN,
-                            NATURAL_LEFT_OUTER_JOIN,
-                            NATURAL_INNER_JOIN,
-                            NATURAL_CROSS_JOIN
-                        }
-
-                        Operator op;
-                        SingleSrc src;
-                        JoinConstraint constraint;
-                    }
-
-                    // Doesn't extend.
                     JoinConstraint {
                         JoinConstraintOn {
                             Expression expr;

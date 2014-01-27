@@ -20,9 +20,9 @@ public class JoinCompound extends JoinSrc {
     
     private JoinSrc left;
     
-    private JoinSrc right;
-    
     private Operator op;
+
+    private JoinSrc right;
     
     private JoinConstraint constraint;
     
@@ -30,12 +30,12 @@ public class JoinCompound extends JoinSrc {
         super();
     }
     
-    public JoinCompound(Block block, JoinSrc left, JoinSrc right, Operator op,
+    public JoinCompound(Block block, JoinSrc left, Operator op, JoinSrc right,
             JoinConstraint constraint) {
         super(block);
         this.left = left;
-        this.right = right;
         this.op = op;
+        this.right = right;
         this.constraint = constraint;
     }
 
@@ -43,12 +43,12 @@ public class JoinCompound extends JoinSrc {
         return left;
     }
     
-    public JoinSrc getRight() {
-        return right;
-    }
-    
     public Operator getOperator() {
         return op;
+    }
+    
+    public JoinSrc getRight() {
+        return right;
     }
 
     public JoinConstraint getConstraint() {
@@ -59,12 +59,12 @@ public class JoinCompound extends JoinSrc {
         this.left = left;
     }
     
-    public void setRight(JoinSrc right) {
-        this.right = right;
-    }
-    
     public void setOperator(Operator op) {
         this.op = op;
+    }
+    
+    public void setRight(JoinSrc right) {
+        this.right = right;
     }
     
     public void setConstraint(JoinConstraint constraint) {

@@ -446,26 +446,23 @@ AlterTableStmt addColumnStmt() :
 SqlStatement analyzeStmt() :
 {
     AnalyzeStmt stmt = new AnalyzeStmt();
-    DatabaseName db = null;
-    Name name = null;
+    Name first = null;
+    Name second = null;
 }
 {
     "ANALYZE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        (
-            db = databaseName()
-            [
-                "."
-                name = name()
-            ]
-        |   name = name()
-        )
+        first = name()
+        [
+            "."
+            second = name()
+        ]
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(db);
-        stmt.setTableOrIndex(name);
+        stmt.setFirstName(first);
+        stmt.setSecondName(second);
         return stmt;
     }
 }
@@ -1982,8 +1979,8 @@ SelectStmt selectStmt() :
         op = compoundOperator()
         core = selectCore() {
             unit = new SelectCompound(new Block(unit.beginLine, 
-                unit.beginColumn, token.endLine, token.endColumn), unit, core,
-                op);
+                unit.beginColumn, token.endLine, token.endColumn), unit, op,
+                core);
         }
     )* {
         stmt.setUnit(unit);
@@ -2167,7 +2164,7 @@ JoinSrc joinSource() :
         right = singleSource()
         constraint = joinConstraint() {
             src = new JoinCompound(new Block(src.beginLine, src.beginColumn,
-                token.endLine, token.endColumn), src, right, op, constraint);
+                token.endLine, token.endColumn), src, op, right, constraint);
         }
     )* {
         return src;
@@ -2244,7 +2241,7 @@ SelectSrc selectSource() :
         src.setBegin(token.beginLine, token.beginColumn);
     }
     stmt = selectStmt() {
-        src.setStatement(stmt);
+        src.setSelect(stmt);
     }
     ")"
     [
@@ -2491,102 +2488,105 @@ BindParameterExpr bindParameterExpr() :
 }
 
 // Names
-void name() :
+Name name() :
 {
 }
 {
     // sqlite implementation allows it to be a string also. That would
     // introduce syntactic ambiguity in spite of not being semantically
     // ambiguous.
-    <ID>
+    <ID> {
+        return new Name(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
 }
 
 DatabaseName databaseName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new DatabaseName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new DatabaseName(name);
     }
 }
 
 TableName tableName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new TableName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new TableName(name);
     }
 }
 
 ColumnName columnName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new ColumnName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new ColumnName(name);
     }
 }
 
 IndexName indexName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new IndexName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new IndexName(name);
     }
 }
 
 CollationName collationName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new CollationName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new CollationName(name);
     }
 }
 
 ConstraintName constraintName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new ConstraintName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new ConstraintName(name);
     }
 }
 
 ColumnAlias columnAlias() :
 {
+    Name name;
 }
 {
-    name() {
-        return new ColumnAlias(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new ColumnAlias(name);
     }
 }
 
 TableAlias tableAlias() :
 {
+    Name name;
 }
 {
-    name() {
-        return new TableAlias(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new TableAlias(name);
     }
 }
 
 FunctionName functionName() :
 {
+    Name name;
 }
 {
-    name() {
-        return new FunctionName(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    name = name() {
+        return new FunctionName(name);
     }
 }

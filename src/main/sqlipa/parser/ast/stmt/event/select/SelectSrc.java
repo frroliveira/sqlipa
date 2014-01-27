@@ -5,7 +5,7 @@ import main.sqlipa.parser.ast.name.TableAlias;
 
 public class SelectSrc extends SingleSrc {
 
-    private SelectStmt stmt;
+    private SelectStmt select;
     
     private TableAlias alias;
     
@@ -13,22 +13,22 @@ public class SelectSrc extends SingleSrc {
         super();
     }
     
-    public SelectSrc(Block block, SelectStmt stmt, TableAlias alias) {
+    public SelectSrc(Block block, SelectStmt select, TableAlias alias) {
         super(block);
-        this.stmt = stmt;
+        this.select = select;
         this.alias = alias;
     }
     
-    public SelectStmt getStatement() {
-        return stmt;
+    public SelectStmt getSelect() {
+        return select;
     }
     
     public TableAlias getAlias() {
         return alias;
     }
     
-    public void setStatement(SelectStmt stmt) {
-        this.stmt = stmt;
+    public void setSelect(SelectStmt select) {
+        this.select = select;
     }
     
     public void setAlias(TableAlias alias) {

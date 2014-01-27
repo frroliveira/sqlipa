@@ -8,6 +8,10 @@ public class ColumnName extends Name {
         super();
     }
     
+    public ColumnName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public ColumnName(Block block, String name) {
         super(block, name);
     }

@@ -8,6 +8,10 @@ public class CollationName extends Name {
         super();
     }
     
+    public CollationName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public CollationName(Block block, String name) {
         super(block, name);
     }

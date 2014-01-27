@@ -8,6 +8,10 @@ public class ConstraintName extends Name {
         super();
     }
     
+    public ConstraintName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+    
     public ConstraintName(Block block, String name) {
         super(block, name);
     }

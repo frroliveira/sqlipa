@@ -13,6 +13,10 @@ public class TypeName extends Name {
         super();
     }
     
+    public TypeName(Name name) {
+        super(new Block(name), new String(name.getName()));
+    }
+     
     public TypeName(Block block, String name, UnaryExpr xDim, UnaryExpr yDim) {
         super(block, name);
         this.xDim = xDim;

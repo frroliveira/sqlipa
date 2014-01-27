@@ -23,5 +23,5 @@ public class UniversalColumn extends ResultColumn {
     public void setTable(TableName tab) {
         this.tab = tab;
     }
-    
+
 }
