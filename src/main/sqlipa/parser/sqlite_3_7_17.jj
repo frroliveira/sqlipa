@@ -673,7 +673,7 @@ IndexedColumn indexedColumn() :
         return indColumn;
     }}
 
-CreateTableStmt createTableStmt() :
+SqlStatement createTableStmt() :
 {
     CreateTableStmt stmt;
     int line;
@@ -749,7 +749,7 @@ CreateTableStmt createTableStmtWithColumns() :
     }
 }
 
-CreateTableStmtWithSelect createTableStmtWithSelect() :
+CreateTableStmt createTableStmtWithSelect() :
 {
     SelectStmt select;
 }
@@ -1317,6 +1317,109 @@ ConflictClause conflictClause() :
     ] {
         return null;
     }}
+
+SqlStatement createTriggerStmt() :
+{
+    CreateTriggerStmt stmt = new CreateTriggerStmt();
+    boolean hasIfNotExists = false;
+    DatabaseName db = null;
+    TriggerName trigger;
+    TableName tab;
+    SqlStatement eventStmt;
+}
+{
+    "CREATE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        ("TEMP" | "TEMPORARY") {
+            stmt.setTemporary(true);
+        }
+    ]
+    "TRIGGER"
+    [
+        "IF" "NOT" "EXISTS" {
+            stmt.setIfNotExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    trigger = triggerName()
+    [
+        (
+            "BEFORE" {
+                stmt.setTime(CreateTriggerStmt.Time.BEFORE);
+            }
+        |   "AFTER" {
+                stmt.setTime(CreateTriggerStmt.Time.AFTER);
+            }
+        |   "INSTEAD" "OF" {
+                stmt.setTime(CreateTriggerStmt.Time.INSTEAD_OF);
+            }
+        )
+    ]
+    (
+        "DELETE" {
+            stmt.setEvent(CreateTriggerStmt.Event.DELETE);
+        }
+    |   "INSERT"  {
+            stmt.setEvent(CreateTriggerStmt.Event.INSERT);
+        }
+    |   "UPDATE" {
+            stmt.setEvent(CreateTriggerStmt.Event.DELETE);
+        }
+        [
+            "OF" {
+                ColumnName column;
+            }
+            column = columnName() {
+                stmt.addColumn(column);
+            }
+            (
+                ","
+                column = columnName() {
+                    stmt.addColumn(column);
+                }
+            )*
+        ]
+    )
+    "ON"
+    tab = tableName()
+    [
+        "FOR" "EACH" "ROW" {
+            stmt.setForEachRow(true);
+        }
+    ]
+    [
+        "WHEN" {
+            Expression expr;
+        }
+        expr = expr() {
+            stmt.setWhen(expr);
+        }
+    ]
+    "BEGIN"
+    (
+        (
+            eventStmt = updateStmt()
+        |   eventStmt = insertStmt()
+        |   eventStmt = deleteStmt()
+        |   eventStmt = selectStmt()
+        ) {
+            stmt.addStatement(eventStmt);
+        }
+        ";"
+    )+
+    "END" {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(trigger);
+        stmt.setDatabase(db);
+        stmt.setTable(tab);
+        return stmt;
+    }
+}
 
 // Expression is built by parts recursively to ensure operator precedences are
 // to avoid left recursion.
@@ -2069,7 +2172,7 @@ FunctionExpr functionExpr() :
     }
 }
 
-SelectStmt selectStmt() :
+SqlStatement selectStmt() :
 {
     SelectStmt stmt = new SelectStmt();
     SelectUnit unit;

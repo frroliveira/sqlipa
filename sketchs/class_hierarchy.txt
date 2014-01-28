@@ -383,6 +383,9 @@ namespace name {
 
         PragmaName {
         }
+        
+        TriggerName {
+        }
 
         Alias {
             ColumnAlias {
