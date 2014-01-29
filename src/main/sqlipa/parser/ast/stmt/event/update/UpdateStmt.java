@@ -70,7 +70,7 @@ public class UpdateStmt extends EventStmt {
         this.type = type;
     }
     
-    public void setQualifiedTab(QualifiedTableName qualifiedTab) {
+    public void setQualifiedTable(QualifiedTableName qualifiedTab) {
         this.qualifiedTab = qualifiedTab;
     }
     

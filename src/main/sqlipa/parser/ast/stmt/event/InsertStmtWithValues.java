@@ -21,6 +21,12 @@ public class InsertStmtWithValues extends InsertStmt {
         rows = new LinkedList<List<Expression>>();
     }
     
+    public InsertStmtWithValues(InsertStmt stmt) {
+        super(stmt, stmt.getExplain(), stmt.getType(),
+                new DatabaseName(stmt.getDatabase()),
+                new TableName(stmt.getTable()));
+    }
+    
     public InsertStmtWithValues(Block block, Explain explain, Type type,
             DatabaseName db, TableName tab, List<ColumnName> columns,
             List<List<Expression>> rows) {
@@ -49,8 +55,19 @@ public class InsertStmtWithValues extends InsertStmt {
         columns.add(column);
     }
     
+    public void addRow() {
+        rows.add(new LinkedList<Expression>());
+    }
+    
     public void addRow(List<Expression> row) {
         rows.add(row);
+    }
+    
+    public void addValue(Expression expr) {
+        if (rows.size() == 0) {
+            addRow();
+        }
+        addValue(expr, rows.size() - 1);
     }
     
     public boolean addValue(Expression value, int index) {

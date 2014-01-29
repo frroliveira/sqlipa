@@ -10,6 +10,12 @@ public class InsertStmtDefault extends InsertStmt {
         super();
     }
     
+    public InsertStmtDefault(InsertStmt stmt) {
+        super(stmt, stmt.getExplain(), stmt.getType(),
+                new DatabaseName(stmt.getDatabase()),
+                new TableName(stmt.getTable()));
+    }
+    
     public InsertStmtDefault(Block block, Explain explain, Type type,
             DatabaseName db, TableName tab) {
         super(block, explain, type, db, tab);

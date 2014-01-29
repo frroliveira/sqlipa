@@ -20,6 +20,12 @@ public class InsertStmtWithSelect extends InsertStmt {
         columns = new LinkedList<ColumnName>();
     }
     
+    public InsertStmtWithSelect(InsertStmt stmt) {
+        super(stmt, stmt.getExplain(), stmt.getType(),
+                new DatabaseName(stmt.getDatabase()),
+                new TableName(stmt.getTable()));
+    }
+    
     public InsertStmtWithSelect(Block block, Explain explain, Type type,
             DatabaseName db, TableName tab, List<ColumnName> columns,
             SelectStmt select) {

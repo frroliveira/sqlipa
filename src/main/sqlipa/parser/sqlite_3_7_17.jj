@@ -23,8 +23,11 @@ import main.sqlipa.parser.ast.literal.*;
 import main.sqlipa.parser.ast.name.*;
 import main.sqlipa.parser.ast.stmt.*;
 import main.sqlipa.parser.ast.stmt.create.*;
+import main.sqlipa.parser.ast.stmt.drop.*;
 import main.sqlipa.parser.ast.stmt.event.*;
 import main.sqlipa.parser.ast.stmt.event.select.*;
+import main.sqlipa.parser.ast.stmt.event.update.*;
+import main.sqlipa.parser.ast.stmt.pragma.*;
 
 final class ASTParser {
 
@@ -355,28 +358,33 @@ SqlStatement sqlStmt() :
     |   stmt = analyzeStmt()
     |   stmt = attachStmt()
 	|   stmt = beginStmt()
-	|   stmt = commitStmt()/*
-	|   stmt = createIndexStmt()*/
-	|   stmt = createTableStmt() /*
-	|   stmt = createTriggerStmt()
-	|   stmt = createViewStmt()
+	|   stmt = commitStmt()
+	|   LOOKAHEAD(2) // Decide what type of CREATE is being parsed.
+        stmt = createIndexStmt()
+	|   LOOKAHEAD(2) // Decide what type of CREATE is being parsed.
+        stmt = createTableStmt()
+	|   LOOKAHEAD(2) // Decide what type of CREATE is being parsed.
+        stmt = createTriggerStmt()
+	|   LOOKAHEAD(2) // Decide what type of CREATE is being parsed.
+        stmt = createViewStmt()
 	|   stmt = createVirtualTableStmt()	|   stmt = deleteStmt()
-	|   stmt = deleteStmtLimited()
 	|   stmt = detachStmt()
-	|   stmt = dropIndexStmt()
-	|   stmt = dropTableStmt()
-	|   stmt = dropTriggerStmt()
+	|   LOOKAHEAD(2) // Decide what type of DROP is being parsed.
+	    stmt = dropIndexStmt()
+	|   LOOKAHEAD(2) // Decide what type of DROP is being parsed.
+        stmt = dropTableStmt()
+	|   LOOKAHEAD(2) // Decide what type of DROP is being parsed.
+        stmt = dropTriggerStmt()
 	|   stmt = dropViewStmt()
 	|   stmt = insertStmt()
 	|   stmt = pragmaStmt()
-	|   stmt = reindexStmt()*/
+	|   stmt = reindexStmt()
 	|   stmt = releaseStmt()
 	|   stmt = rollbackStmt()
 	|   stmt = savepointStmt()
-	|   stmt = selectStmt() /*
+	|   stmt = selectStmt()
 	|   stmt = updateStmt()
-	|   stmt = updateStmtLimited()
-	|   stmt = vacuumStmt()*/
+	|   stmt = vacuumStmt()
 	) {
         if (explain != null) {
             // If statement starts by EXPLAIN.
@@ -387,7 +395,7 @@ SqlStatement sqlStmt() :
     }
 }
 
-SqlStatement alterTableStmt() :
+AlterTableStmt alterTableStmt() :
 {
     AlterTableStmt stmt;
     int line;
@@ -443,7 +451,7 @@ AlterTableStmt addColumnStmt() :
     }
 }
 
-SqlStatement analyzeStmt() :
+AnalyzeStmt analyzeStmt() :
 {
     AnalyzeStmt stmt = new AnalyzeStmt();
     Name first = null;
@@ -467,7 +475,7 @@ SqlStatement analyzeStmt() :
     }
 }
 
-SqlStatement attachStmt() :
+AttachStmt attachStmt() :
 {
     AttachStmt stmt = new AttachStmt();
     Expression expr;
@@ -490,7 +498,7 @@ SqlStatement attachStmt() :
     }
 }
 
-SqlStatement beginStmt() :
+BeginStmt beginStmt() :
 {
     BeginStmt stmt = new BeginStmt();
 }
@@ -499,17 +507,15 @@ SqlStatement beginStmt() :
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        (
-            "DEFERRED" {
-                stmt.setType(BeginStmt.Type.DEFERRED);
-            }
-        |   "IMMEDIATE" {
-                stmt.setType(BeginStmt.Type.IMMEDIATE);
-            }
-        |   "EXCLUSIVE" {
-                stmt.setType(BeginStmt.Type.EXCLUSIVE);
-            }
-        )
+        "DEFERRED" {
+            stmt.setType(BeginStmt.Type.DEFERRED);
+        }
+    |   "IMMEDIATE" {
+            stmt.setType(BeginStmt.Type.IMMEDIATE);
+        }
+    |   "EXCLUSIVE" {
+            stmt.setType(BeginStmt.Type.EXCLUSIVE);
+        }
     ]
     [
         "TRANSACTION"
@@ -519,7 +525,7 @@ SqlStatement beginStmt() :
     }
 }
 
-SqlStatement commitStmt() :
+CommitStmt commitStmt() :
 {
     CommitStmt stmt = new CommitStmt();
 }
@@ -538,7 +544,7 @@ SqlStatement commitStmt() :
     }
 }
 
-SqlStatement rollbackStmt() :
+RollbackStmt rollbackStmt() :
 {
     RollbackStmt stmt = new RollbackStmt();
 }
@@ -561,7 +567,7 @@ SqlStatement rollbackStmt() :
     }
 }
 
-SqlStatement savepointStmt() :
+SavepointStmt savepointStmt() :
 {
     SavepointStmt stmt = new SavepointStmt();
     SavepointName savepoint;
@@ -577,7 +583,7 @@ SqlStatement savepointStmt() :
     }
 }
 
-SqlStatement releaseStmt() :
+ReleaseStmt releaseStmt() :
 {
     ReleaseStmt stmt = new ReleaseStmt();
     SavepointName savepoint;
@@ -594,7 +600,7 @@ SqlStatement releaseStmt() :
     }
 }
 
-SqlStatement createIndexStmt() :
+CreateIndexStmt createIndexStmt() :
 {
     CreateIndexStmt stmt = new CreateIndexStmt();
     DatabaseName db = null;
@@ -673,7 +679,7 @@ IndexedColumn indexedColumn() :
         return indColumn;
     }}
 
-SqlStatement createTableStmt() :
+CreateTableStmt createTableStmt() :
 {
     CreateTableStmt stmt;
     int line;
@@ -751,12 +757,14 @@ CreateTableStmt createTableStmtWithColumns() :
 
 CreateTableStmt createTableStmtWithSelect() :
 {
+    CreateTableStmtWithSelect stmt = new CreateTableStmtWithSelect();
     SelectStmt select;
 }
 {
     "AS"
     select = selectStmt() {
-        return new CreateTableStmtWithSelect(select);
+        stmt.setSelect(select);
+        return stmt;
     }
 }
 
@@ -1318,14 +1326,14 @@ ConflictClause conflictClause() :
         return null;
     }}
 
-SqlStatement createTriggerStmt() :
+CreateTriggerStmt createTriggerStmt() :
 {
     CreateTriggerStmt stmt = new CreateTriggerStmt();
     boolean hasIfNotExists = false;
     DatabaseName db = null;
     TriggerName trigger;
     TableName tab;
-    SqlStatement eventStmt;
+    EventStmt eventStmt;
 }
 {
     "CREATE" {
@@ -1348,17 +1356,15 @@ SqlStatement createTriggerStmt() :
     ]
     trigger = triggerName()
     [
-        (
-            "BEFORE" {
-                stmt.setTime(CreateTriggerStmt.Time.BEFORE);
-            }
-        |   "AFTER" {
-                stmt.setTime(CreateTriggerStmt.Time.AFTER);
-            }
-        |   "INSTEAD" "OF" {
-                stmt.setTime(CreateTriggerStmt.Time.INSTEAD_OF);
-            }
-        )
+        "BEFORE" {
+            stmt.setTime(CreateTriggerStmt.Time.BEFORE);
+        }
+    |   "AFTER" {
+            stmt.setTime(CreateTriggerStmt.Time.AFTER);
+        }
+    |   "INSTEAD" "OF" {
+            stmt.setTime(CreateTriggerStmt.Time.INSTEAD_OF);
+        }
     ]
     (
         "DELETE" {
@@ -1417,6 +1423,303 @@ SqlStatement createTriggerStmt() :
         stmt.setName(trigger);
         stmt.setDatabase(db);
         stmt.setTable(tab);
+        return stmt;
+    }
+}
+
+CreateViewStmt createViewStmt() :
+{
+    CreateViewStmt stmt = new CreateViewStmt();
+    DatabaseName db = null;
+    ViewName view;
+    SelectStmt select;
+}
+{
+    "CREATE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        ("TEMP" | "TEMPORARY") {
+            stmt.setTemporary(true);
+        }
+    ]
+    "VIEW"
+    [
+        "IF" "NOT" "EXISTS" {
+            stmt.setIfNotExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    view = viewName()
+    "AS"
+    select = selectStmt() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(view);
+        stmt.setDatabase(db);
+        stmt.setSelect(select);
+        return stmt;
+    }
+}
+
+CreateVirtualTableStmt createVirtualTableStmt() :
+{
+    CreateVirtualTableStmt stmt = new CreateVirtualTableStmt();
+    DatabaseName db = null;
+    TableName tab;
+    ModuleName module;
+}
+{
+    "CREATE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    "VIRTUAL" "TABLE"
+    [
+        "IF" "NOT" "EXISTS" {
+            stmt.setIfNotExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    tab = tableName()
+    "USING"
+    module = moduleName()
+    [
+        "(" {
+            ModuleArgument arg;
+        }
+        arg = moduleArgument() {
+            stmt.addModuleArgument(arg);
+        }
+        (
+            ","
+            arg = moduleArgument() {
+                stmt.addModuleArgument(arg);
+            }
+        )*
+        ")"
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(module);
+        stmt.setDatabase(db);
+        return stmt;
+    }
+}
+
+ModuleArgument moduleArgument() :
+{
+}
+{
+    // TODO:
+    {
+        return null;
+    }
+}
+
+DeleteStmt deleteStmt() :
+{
+    DeleteStmt stmt = new DeleteStmt();
+    QualifiedTableName qualifiedTab;
+    EventConstraint constraint = null;
+}
+{
+    "DELETE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    "FROM"
+    qualifiedTab = qualifiedTableName()
+    [
+        "WHERE" {
+            Expression expr;
+        }
+        expr = expr() {
+            stmt.setWhere(expr);
+        }
+    ]
+    constraint = eventConstraint() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setQualifiedTable(qualifiedTab);
+        stmt.setConstraint(constraint);
+        return stmt;
+    }
+}
+
+EventConstraint eventConstraint() :
+{
+    EventConstraint constraint = null;
+}
+{
+    [
+        "ORDER" {
+            constraint = new EventConstraint();
+            constraint.setBegin(token.beginLine, token.beginColumn);
+            OrderingTerm term;
+        }
+        "BY"
+        term = orderingTerm() {
+            constraint.addTerm(term);
+        }
+        (
+            ","
+            term = orderingTerm() {
+                constraint.addTerm(term);
+            }
+        )*
+    ]
+    [
+        "LIMIT" {
+            if (constraint == null) {
+                constraint = new EventConstraint();
+                constraint.setBegin(token.beginLine, token.beginColumn);
+            }
+            Expression expr;
+        }
+        expr = expr() {
+            constraint.setLimit(expr);
+        }
+        [
+            ( "OFFSET" | "," )
+            expr = expr() {
+                constraint.setOffset(expr);
+            }
+        ]
+    ] {
+        if (constraint != null) {
+            constraint.setEnd(token.endLine, token.endColumn);
+        }
+        return constraint;
+    }
+}
+
+DetachStmt detachStmt() :
+{
+    DetachStmt stmt = new DetachStmt();
+    DatabaseName db;
+}
+{
+    "DETACH" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [ "DATABASE" ]
+    db = databaseName() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setDatabase(db);
+        return stmt;
+    }
+}
+
+DropIndexStmt dropIndexStmt() :
+{
+    DropIndexStmt stmt = new DropIndexStmt();
+    DatabaseName db = null;
+    IndexName ind;
+}
+{
+    "DROP" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    "INDEX"
+    [
+        "IF" "EXISTS" {
+            stmt.setIfExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    ind = indexName() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(ind);
+        stmt.setDatabase(db);
+        return stmt;
+    }
+}
+
+DropTableStmt dropTableStmt() :
+{
+    DropTableStmt stmt = new DropTableStmt();
+    DatabaseName db = null;
+    TableName tab;
+}
+{
+    "DROP" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    "TABLE"
+    [
+        "IF" "EXISTS" {
+            stmt.setIfExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    tab = tableName() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(tab);
+        stmt.setDatabase(db);
+        return stmt;
+    }
+}
+
+DropTriggerStmt dropTriggerStmt() :
+{
+    DropTriggerStmt stmt = new DropTriggerStmt();
+    DatabaseName db = null;
+    TriggerName trigger;
+}
+{
+    "DROP" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    "TRIGGER"
+    [
+        "IF" "EXISTS" {
+            stmt.setIfExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    trigger = triggerName() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(trigger);
+        stmt.setDatabase(db);
+        return stmt;
+    }
+}
+
+DropViewStmt dropViewStmt() :
+{
+    DropViewStmt stmt = new DropViewStmt();
+    DatabaseName db = null;
+    ViewName view;
+}
+{
+    "DROP" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    "VIEW"
+    [
+        "IF" "EXISTS" {
+            stmt.setIfExists(true);
+        }
+    ]
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    view = viewName() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setName(view);
+        stmt.setDatabase(db);
         return stmt;
     }
 }
@@ -1951,6 +2254,53 @@ LiteralExpr literalExpr() :
     }
 }
 
+BindParameterExpr bindParameterExpr() :
+{
+}
+{
+    <PARAMETER> {
+        return new BindParameterExpr(new Block(token.beginLine, 
+            token.beginColumn, token.endLine, token.endColumn), token.image);
+    }
+}
+
+FunctionExpr functionExpr() :
+{
+    FunctionExpr function = new FunctionExpr();
+    FunctionName name;
+    Expression expr;
+}
+{
+    name = functionName() {
+        function.setFunction(name);
+        function.setBegin(name);
+    }
+    "("
+    [
+        "*" {
+            function.setOperator(FunctionExpr.Operator.UNIVERSAL);
+        }
+    |   [
+            "DISTINCT" {
+                function.setOperator(FunctionExpr.Operator.DISTINCT);
+            }
+        ]
+        expr = expr() {
+            function.addExpression(expr);
+        }
+        (
+            ","
+            expr = expr() {
+                function.addExpression(expr);
+            }
+        )*
+    ]
+    ")" {
+        function.setEnd(token.endLine, token.endColumn);
+        return function;
+    }
+}
+
 ColumnExpr columnExpr() :
 {
     ColumnExpr reference = new ColumnExpr();
@@ -2135,44 +2485,252 @@ RaiseFunctionExpr raiseFunctionExpr() :
     }
 }
 
-FunctionExpr functionExpr() :
+Literal literalValue() :
 {
-    FunctionExpr function = new FunctionExpr();
-    FunctionName name;
-    Expression expr;
+    Literal literal;
 }
 {
-    name = functionName() {
-        function.setFunction(name);
-        function.setBegin(name);
-    }
-    "("
-    [
-        "*" {
-            function.setOperator(FunctionExpr.Operator.UNIVERSAL);
+    (
+        literal = numericLiteral()
+    |   literal = stringLiteral()
+    |   literal = blobLiteral()
+    |   (
+            "NULL"
+        |   "CURRENT_TIME"
+        |   "CURRENT_DATE"
+        |   "CURRENT_TIMESTAMP"
+        ) {
+           literal = new Literal(new Block(token.beginLine, token.beginColumn,
+               token.endLine, token.endColumn), token.image);
         }
-    |   [
-            "DISTINCT" {
-                function.setOperator(FunctionExpr.Operator.DISTINCT);
-            }
-        ]
-        expr = expr() {
-            function.addExpression(expr);
-        }
-        (
-            ","
-            expr = expr() {
-                function.addExpression(expr);
-            }
-        )* // TODO: create expression list
-    ]
-    ")" {
-        function.setEnd(token.endLine, token.endColumn);
-        return function;
+    ) {
+        return literal;
     }
 }
 
-SqlStatement selectStmt() :
+NumericLiteral numericLiteral() :
+{
+}
+{
+    <NUMERIC> {
+        return new NumericLiteral(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
+StringLiteral stringLiteral() :
+{
+}
+{
+    <STRING> {
+        return new StringLiteral(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
+BlobLiteral blobLiteral() :
+{
+}
+{
+    <BLOB> {
+        return new BlobLiteral(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
+InsertStmt insertStmt() :
+{
+    InsertStmt stmt = new InsertStmtDefault();
+    DatabaseName db = null;
+    TableName tab;
+    List<ColumnName> columns = null;
+}
+{
+    (
+        "INSERT" {
+            stmt.setBegin(token.beginLine, token.beginColumn);
+            stmt.setType(InsertStmt.Type.INSERT);
+        }
+        [
+            "OR"
+            (
+                "ROLLBACK" {
+                    stmt.setType(InsertStmt.Type.INSERT_OR_ROLLBACK);
+                }
+            |   "ABORT" {
+                    stmt.setType(InsertStmt.Type.INSERT_OR_ABORT);
+                }
+            |   "REPLACE" {
+                    stmt.setType(InsertStmt.Type.INSERT_OR_REPLACE);
+                }
+            |   "FAIL" {
+                    stmt.setType(InsertStmt.Type.INSERT_OR_FAIL);
+                }
+            |   "IGNORE" {
+                    stmt.setType(InsertStmt.Type.INSERT_OR_IGNORE);
+                }
+            )
+        ]
+    |   "REPLACE" {
+            stmt.setBegin(token.beginLine, token.beginColumn);
+            stmt.setType(InsertStmt.Type.REPLACE);
+        }
+    )
+    "INTO"
+    [
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    tab = tableName()
+    (
+        "DEFAULT" "VALUES"
+    |   [
+            "(" {
+                ColumnName column;
+                columns = new LinkedList<ColumnName>();
+            }
+            column = columnName() {
+                columns.add(column);
+            }
+            (
+                ","
+	            column = columnName() {
+	                columns.add(column);
+	            }
+            )*
+            ")"
+        ]
+        (
+            stmt = insertStmtWithValues(stmt, columns)
+        |   stmt = insertStmtWithSelect(stmt, columns)
+        )
+    ) {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setDatabase(db);
+        stmt.setTable(tab);
+        return stmt;
+    }
+}
+
+InsertStmt insertStmtWithValues(InsertStmt stmt, List<ColumnName> columns) :
+{
+    InsertStmtWithValues stmtWValues = new InsertStmtWithValues(stmt);
+    Expression expr;
+
+    stmtWValues.setColumns(columns);
+}
+{
+    "VALUES"
+    "("
+    expr = expr() {
+        stmtWValues.addValue(expr);
+    }
+    (
+        ","
+	    expr = expr() {
+	        stmtWValues.addValue(expr);
+	    }
+    )*
+    ")"
+    (
+        "," {
+            stmtWValues.addRow();
+        }
+        "("
+        expr = expr() {
+	        stmtWValues.addValue(expr);
+	    }
+	    (
+	        ","
+	        expr = expr() {
+	            stmtWValues.addValue(expr);
+	        }
+	    )*
+        ")"
+    )* {
+        return stmtWValues;
+    }
+}
+        
+InsertStmt insertStmtWithSelect(InsertStmt stmt, List<ColumnName> columns) :
+{
+    SelectStmt select;
+}
+{
+    select = selectStmt() {
+        InsertStmtWithSelect stmtWSelect = new InsertStmtWithSelect(stmt);
+        stmtWSelect.setSelect(select);
+        stmtWSelect.setColumns(columns);
+        return stmtWSelect;
+    }
+}
+
+PragmaStmt pragmaStmt() :
+{
+    PragmaStmt stmt = new PragmaStmt();
+    DatabaseName db = null;
+    PragmaName pragma;
+    PragmaValue value = null;
+}
+{
+    "PRAGMA" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() "."
+    ]
+    pragma = pragmaName()
+    [
+        "="
+        value = pragmaValue()
+    |   "("
+        value = pragmaValue()
+        ")"
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setDatabase(db);
+        stmt.setPragma(pragma);
+        stmt.setValue(value);
+        return stmt;
+    }
+}
+
+PragmaValue pragmaValue() :
+{
+}
+{
+    {
+        // TODO:
+        return null;
+    }
+}
+
+ReindexStmt reindexStmt() :
+{
+    ReindexStmt stmt = new ReindexStmt();
+    Name first = null;
+    Name second = null;
+}
+{
+    "REINDEX" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+    }
+    [
+        first = name()
+        [
+            "."
+            second = name()
+        ]
+    ] {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setFirst(first);
+        stmt.setSecond(second);
+        return stmt;
+    }
+}
+
+SelectStmt selectStmt() :
 {
     SelectStmt stmt = new SelectStmt();
     SelectUnit unit;
@@ -2198,53 +2756,6 @@ SqlStatement selectStmt() :
         stmt.setConstraint(constraint);
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
-    }
-}
-
-EventConstraint eventConstraint() :
-{
-    EventConstraint constraint = null;
-}
-{
-    [
-        "ORDER" {
-            constraint = new EventConstraint();
-            constraint.setBegin(token.beginLine, token.beginColumn);
-            OrderingTerm term;
-        }
-        "BY"
-        term = orderingTerm() {
-            constraint.addTerm(term);
-        }
-        (
-            ","
-            term = orderingTerm() {
-                constraint.addTerm(term);
-            }
-        )*
-    ]
-    [
-        "LIMIT" {
-            if (constraint == null) {
-                constraint = new EventConstraint();
-                constraint.setBegin(token.beginLine, token.beginColumn);
-            }
-            Expression expr;
-        }
-        expr = expr() {
-            constraint.setLimit(expr);
-        }
-        [
-            ( "OFFSET" | "," )
-            expr = expr() {
-                constraint.setOffset(expr);
-            }
-        ]
-    ] {
-        if (constraint != null) {
-            constraint.setEnd(token.endLine, token.endColumn);
-        }
-        return constraint;
     }
 }
 
@@ -2654,66 +3165,118 @@ IndexedBy indexedBy() :
     }
 }
 
-Literal literalValue() :
+UpdateStmt updateStmt() :
 {
-    Literal literal;
+    UpdateStmt stmt = new UpdateStmt();
+    QualifiedTableName qualifiedTab;
+    ColumnAssign assign;
+    EventConstraint constraint = null;
 }
 {
+    "UPDATE" {
+        stmt.setBegin(token.beginLine, token.beginColumn);
+        stmt.setType(UpdateStmt.Type.UPDATE);
+    }
+    [
+        "OR"
+        (
+            "ROLLBACK" {
+                stmt.setType(UpdateStmt.Type.UPDATE_OR_ROLLBACK);
+            }
+        |   "ABORT" {
+                stmt.setType(UpdateStmt.Type.UPDATE_OR_ABORT);
+            }
+        |   "REPLACE" {
+                stmt.setType(UpdateStmt.Type.UPDATE_OR_REPLACE);
+            }
+        |   "FAIL" {
+                stmt.setType(UpdateStmt.Type.UPDATE_OR_FAIL);
+            }
+        |   "IGNORE" {
+                stmt.setType(UpdateStmt.Type.UPDATE_OR_IGNORE);
+            }
+        )
+    ]
+    qualifiedTab = qualifiedTableName()
+    "SET"
+    assign = columnAssign() {
+        stmt.addAssignment(assign);
+    }
     (
-        literal = numericLiteral()
-    |   literal = stringLiteral()
-    |   literal = blobLiteral()
-    |   (
-            "NULL"
-	    |   "CURRENT_TIME"
-	    |   "CURRENT_DATE"
-	    |   "CURRENT_TIMESTAMP"
-	    ) {
-	       literal = new Literal(new Block(token.beginLine, token.beginColumn,
-	           token.endLine, token.endColumn), token.image);
+        ","
+	    assign = columnAssign() {
+	        stmt.addAssignment(assign);
 	    }
-    ) {
-        return literal;
+    )*
+    [
+        "WHERE" {
+            Expression expr;
+        }
+        expr = expr() {
+            stmt.setWhere(expr);
+        }
+    ]
+    constraint = eventConstraint() {
+        stmt.setEnd(token.endLine, token.endColumn);
+        stmt.setQualifiedTable(qualifiedTab);
+        stmt.setConstraint(constraint);
+        return stmt;
     }
 }
 
-NumericLiteral numericLiteral() :
+QualifiedTableName qualifiedTableName() :
 {
+    QualifiedTableName qualifiedTab = new QualifiedTableName();
+    DatabaseName db = null;
+    TableName tab;
+    IndexedBy indexed;
 }
 {
-    <NUMERIC> {
-        return new NumericLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    [   
+        LOOKAHEAD(2) // Anticipate the occurrence of a dot.
+        db = databaseName() {
+            qualifiedTab.setBegin(db);
+        }
+        "."
+    ]
+    tab = tableName() {
+        if (db == null) {
+            qualifiedTab.setBegin(tab);
+        }
+    }
+    indexed = indexedBy() {
+        qualifiedTab.setEnd(token.endLine, token.endColumn);
+        qualifiedTab.setDatabase(db);
+        qualifiedTab.setTable(tab);
+        qualifiedTab.setIndexed(indexed);
+        return qualifiedTab;
     }
 }
 
-StringLiteral stringLiteral() :
+ColumnAssign columnAssign() :
 {
+    ColumnName column;
+    Expression expr;
 }
 {
-    <STRING> {
-        return new StringLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+    column = columnName()
+    "="
+    expr = expr() {
+        return new ColumnAssign(new Block(column.beginLine, column.beginColumn,
+            token.endLine, token.endColumn), column, expr);
     }
 }
 
-BlobLiteral blobLiteral() :
-{
-}
-{
-    <BLOB> {
-        return new BlobLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
-    }
-}
 
-BindParameterExpr bindParameterExpr() :
+VacuumStmt vacuumStmt() :
 {
 }
 {
-    <PARAMETER> {
-        return new BindParameterExpr(new Block(token.beginLine, 
-            token.beginColumn, token.endLine, token.endColumn), token.image);
+    "VACUUM" {
+        VacuumStmt stmt = new VacuumStmt();
+        stmt.setBeginEnd(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn);
+        return stmt;
     }
 }
 
@@ -2821,6 +3384,16 @@ FunctionName functionName() :
     }
 }
 
+PragmaName pragmaName() :
+{
+    Name name;
+}
+{
+    name = name() {
+        return new PragmaName(name);
+    }
+}
+
 SavepointName savepointName() :
 {
     Name name;
@@ -2828,5 +3401,35 @@ SavepointName savepointName() :
 {
     name = name() {
         return new SavepointName(name);
+    }
+}
+
+TriggerName triggerName() :
+{
+    Name name;
+}
+{
+    name = name() {
+        return new TriggerName(name);
+    }
+}
+
+ViewName viewName() :
+{
+    Name name;
+}
+{
+    name = name() {
+        return new ViewName(name);
+    }
+}
+
+ModuleName moduleName() :
+{
+}
+{
+    // TODO.
+    {
+    return null;
     }
 }
