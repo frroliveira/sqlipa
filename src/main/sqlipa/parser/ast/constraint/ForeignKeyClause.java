@@ -5,36 +5,35 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class ForeignKeyClause extends Node {
     
-    private TableName tab;
+    private Name table;
     
-    private List<ColumnName> columns;
+    private List<Name> columns;
     
     private List<ForeignKeySetting> settings;
     
     public ForeignKeyClause() {
         super();
-        this.columns = new LinkedList<ColumnName>();
+        this.columns = new LinkedList<Name>();
         this.settings = new LinkedList<ForeignKeySetting>();
     }
 
-    public ForeignKeyClause(Block block, TableName tab,
-            List<ColumnName> columns, List<ForeignKeySetting> settings) {
+    public ForeignKeyClause(Block block, Name table, List<Name> columns,
+            List<ForeignKeySetting> settings) {
         super(block);
-        this.tab = tab;
+        this.table = table;
         this.columns = columns;
         this.settings = settings;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
-    public List<ColumnName> getColumns() {
+    public List<Name> getColumns() {
         return columns;
     }
     
@@ -42,11 +41,11 @@ public class ForeignKeyClause extends Node {
         return settings;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
     
-    public void setColumns(List<ColumnName> columns) {
+    public void setColumns(List<Name> columns) {
         this.columns = columns;
     }
     
@@ -54,7 +53,7 @@ public class ForeignKeyClause extends Node {
         this.settings = settings;
     }
     
-    public void addColumn(ColumnName column) {
+    public void addColumn(Name column) {
         columns.add(column);
     }
     
@@ -62,7 +61,7 @@ public class ForeignKeyClause extends Node {
         settings.add(setting);
     }
     
-    public void removeColumn(ColumnName column) {
+    public void removeColumn(Name column) {
         columns.remove(column);
     }
     

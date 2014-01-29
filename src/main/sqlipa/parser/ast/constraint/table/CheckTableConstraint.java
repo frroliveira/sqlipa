@@ -2,7 +2,7 @@ package main.sqlipa.parser.ast.constraint.table;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.name.ConstraintName;
+import main.sqlipa.parser.ast.Name;
 
 public class CheckTableConstraint extends TableConstraint {
 
@@ -12,8 +12,7 @@ public class CheckTableConstraint extends TableConstraint {
         super();
     }
     
-    public CheckTableConstraint(Block block, ConstraintName name,
-            Expression expr) {
+    public CheckTableConstraint(Block block, Name name, Expression expr) {
         super(block, name);
         this.expr = expr;
     }

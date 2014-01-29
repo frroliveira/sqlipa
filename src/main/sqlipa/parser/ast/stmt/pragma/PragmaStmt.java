@@ -1,15 +1,14 @@
 package main.sqlipa.parser.ast.stmt.pragma;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.PragmaName;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
 
 public class PragmaStmt extends SqlStatement {
     
-    private DatabaseName db;
+    private Name database;
     
-    private PragmaName pragma;
+    private Name pragma;
     
     private PragmaValue value;
     
@@ -17,19 +16,19 @@ public class PragmaStmt extends SqlStatement {
         super();
     }
     
-    public PragmaStmt(Block block, Explain explain, DatabaseName db,
-            PragmaName pragma, PragmaValue value) {
+    public PragmaStmt(Block block, Explain explain, Name database,
+            Name pragma, PragmaValue value) {
         super(block, explain);
-        this.db = db;
+        this.database = database;
         this.pragma = pragma;
         this.value = value;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
-    public PragmaName getPragma() {
+    public Name getPragma() {
         return pragma;
     }
     
@@ -37,11 +36,11 @@ public class PragmaStmt extends SqlStatement {
         return value;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
-    public void setPragma(PragmaName pragma) {
+    public void setPragma(Name pragma) {
         this.pragma = pragma;
     }
     

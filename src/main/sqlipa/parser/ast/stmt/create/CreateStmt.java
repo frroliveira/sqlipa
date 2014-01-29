@@ -1,15 +1,14 @@
 package main.sqlipa.parser.ast.stmt.create;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
 
 public abstract class CreateStmt extends SqlStatement {
 
     private boolean ifNotExists;
     
-    private DatabaseName db;
+    private Name database;
     
     private Name name;
     
@@ -18,15 +17,15 @@ public abstract class CreateStmt extends SqlStatement {
     }
     
     public CreateStmt(Block block, Explain explain, boolean hasIfNotExists, 
-            DatabaseName db, Name name) {
+            Name database, Name name) {
         super(block, explain);
         this.ifNotExists = hasIfNotExists;
-        this.db = db;
+        this.database = database;
         this.name = name;
     }
 
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
     public Name getName() {
@@ -37,8 +36,8 @@ public abstract class CreateStmt extends SqlStatement {
         return ifNotExists;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
     public void setName(Name name) {

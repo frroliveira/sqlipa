@@ -6,7 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedColumn;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
-import main.sqlipa.parser.ast.name.ConstraintName;
+import main.sqlipa.parser.ast.Name;
 
 public class PrimaryKeyTableConstraint extends TableConstraint {
     
@@ -19,7 +19,7 @@ public class PrimaryKeyTableConstraint extends TableConstraint {
         this.columns = new LinkedList<IndexedColumn>();
     }
             
-    public PrimaryKeyTableConstraint(Block block, ConstraintName name,
+    public PrimaryKeyTableConstraint(Block block, Name name,
             ConflictClause clause, List<IndexedColumn> columns) {
         super(block, name);
         this.clause = clause;

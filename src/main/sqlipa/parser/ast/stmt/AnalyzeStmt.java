@@ -1,7 +1,7 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 
 public class AnalyzeStmt extends SqlStatement {
     

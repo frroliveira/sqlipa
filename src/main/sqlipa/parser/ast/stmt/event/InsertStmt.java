@@ -1,8 +1,7 @@
 package main.sqlipa.parser.ast.stmt.event;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public abstract class InsertStmt extends EventStmt {
     
@@ -18,44 +17,44 @@ public abstract class InsertStmt extends EventStmt {
     
     private Type type;
     
-    private DatabaseName db;
+    private Name database;
     
-    private TableName tab;
+    private Name table;
     
     public InsertStmt() {
         super();
     }
     
-    public InsertStmt(Block block, Explain explain, Type type, DatabaseName db,
-            TableName tab) {
+    public InsertStmt(Block block, Explain explain, Type type, Name database,
+            Name table) {
         super(block, explain);
         this.type = type;
-        this.db = db;
-        this.tab = tab;
+        this.database = database;
+        this.table = table;
     }
     
     public Type getType() {
         return type;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
     public void setType(Type type) {
         this.type = type;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
 
 }

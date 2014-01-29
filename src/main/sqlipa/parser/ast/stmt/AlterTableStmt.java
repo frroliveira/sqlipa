@@ -1,39 +1,39 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class AlterTableStmt extends SqlStatement {
 
-    private DatabaseName db;
+    private Name database;
     
-    private TableName tab;
+    private Name table;
     
     public AlterTableStmt() {
         super();
     }
     
-    public AlterTableStmt(Block block, Explain explain, DatabaseName db, TableName tab) {
+    public AlterTableStmt(Block block, Explain explain, Name database,
+            Name table) {
         super(block, explain);
-        this.db = db;
-        this.tab = tab;
+        this.database = database;
+        this.table = table;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
     
 }

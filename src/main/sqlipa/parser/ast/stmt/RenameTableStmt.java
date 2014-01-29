@@ -1,28 +1,27 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class RenameTableStmt extends AlterTableStmt {
     
-    private TableName newTab;
+    private Name newTab;
         
     public RenameTableStmt() {
         super();
     }
     
-    public RenameTableStmt(Block block, Explain explain, DatabaseName db,
-            TableName tab, TableName newTab) {
+    public RenameTableStmt(Block block, Explain explain, Name db,
+            Name tab, Name newTab) {
         super(block, explain, db, tab);
         this.newTab = newTab;
     }
     
-    public TableName getNewTable() {
+    public Name getNewTable() {
         return newTab;
     }
 
-    public void setNewTable(TableName newTab) {
+    public void setNewTable(Name newTab) {
         this.newTab = newTab;
     }
 

@@ -5,22 +5,21 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ForeignKeyClause;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.ConstraintName;
+import main.sqlipa.parser.ast.Name;
 
 public class ForeignKeyTableConstraint extends TableConstraint {
 
     private ForeignKeyClause clause;
     
-    private List<ColumnName> columns;
+    private List<Name> columns;
     
     public ForeignKeyTableConstraint() {
         super();
-        this.columns = new LinkedList<ColumnName>();
+        this.columns = new LinkedList<Name>();
     }
 
-    public ForeignKeyTableConstraint(Block block, ConstraintName name,
-            ForeignKeyClause clause, List<ColumnName> columns) {
+    public ForeignKeyTableConstraint(Block block, Name name,
+            ForeignKeyClause clause, List<Name> columns) {
         super(block, name);
         this.clause = clause;
         this.columns = columns;
@@ -30,7 +29,7 @@ public class ForeignKeyTableConstraint extends TableConstraint {
         return clause;
     }
     
-    public List<ColumnName> getColumns() {
+    public List<Name> getColumns() {
         return columns;
     }
     
@@ -38,15 +37,15 @@ public class ForeignKeyTableConstraint extends TableConstraint {
         this.clause = clause;
     }
     
-    public void setColumns(List<ColumnName> columns) {
+    public void setColumns(List<Name> columns) {
         this.columns = columns;
     }
     
-    public void addColumn(ColumnName column) {
+    public void addColumn(Name column) {
         columns.add(column);
     }
     
-    public boolean removeColumn(ColumnName column) {
+    public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
     

@@ -1,8 +1,7 @@
 package main.sqlipa.parser.ast.stmt.create;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
 
 public class CreateViewStmt extends CreateStmt {
@@ -16,7 +15,7 @@ public class CreateViewStmt extends CreateStmt {
     }
     
     public CreateViewStmt(Block block, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name name, boolean hasTemp, SelectStmt select) {
+            Name db, Name name, boolean hasTemp, SelectStmt select) {
         super(block, explain, hasIfNotExists, db, name);
         this.temp = hasTemp;
         this.select = select;

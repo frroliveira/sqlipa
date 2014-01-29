@@ -4,35 +4,35 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.ColumnName;
+import main.sqlipa.parser.ast.Name;
 
 public class JoinConstraintUsing extends JoinConstraint {
 
-    private List<ColumnName> columns;
+    private List<Name> columns;
     
     public JoinConstraintUsing() {
         super();
-        this.columns = new LinkedList<ColumnName>();
+        this.columns = new LinkedList<Name>();
     }
 
-    public JoinConstraintUsing(Block block, List<ColumnName> columns) {
+    public JoinConstraintUsing(Block block, List<Name> columns) {
         super(block);
         this.columns = columns;
     }
     
-    public List<ColumnName> getColumns() {
+    public List<Name> getColumns() {
         return columns;
     }
     
-    public void setColumns(List<ColumnName> columns) {
+    public void setColumns(List<Name> columns) {
         this.columns = columns;
     }
     
-    public void addColumn(ColumnName column) {
+    public void addColumn(Name column) {
         columns.add(column);
     }
     
-    public boolean removeColumn(ColumnName column) {
+    public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
     

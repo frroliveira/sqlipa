@@ -5,6 +5,7 @@ import main.sqlipa.parser.ast.Comment;
 import main.sqlipa.parser.ast.IndexedBy;
 import main.sqlipa.parser.ast.IndexedColumn;
 import main.sqlipa.parser.ast.LineComment;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.QualifiedTableName;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
@@ -49,18 +50,7 @@ import main.sqlipa.parser.ast.literal.BlobLiteral;
 import main.sqlipa.parser.ast.literal.Literal;
 import main.sqlipa.parser.ast.literal.NumericLiteral;
 import main.sqlipa.parser.ast.literal.StringLiteral;
-import main.sqlipa.parser.ast.name.Alias;
-import main.sqlipa.parser.ast.name.CollationName;
-import main.sqlipa.parser.ast.name.ColumnAlias;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.ConstraintName;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.FunctionName;
-import main.sqlipa.parser.ast.name.IndexName;
-import main.sqlipa.parser.ast.name.Name;
-import main.sqlipa.parser.ast.name.TableAlias;
-import main.sqlipa.parser.ast.name.TableName;
-import main.sqlipa.parser.ast.name.TypeName;
+import main.sqlipa.parser.ast.TypeName;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
 import main.sqlipa.parser.ast.stmt.create.CreateStmt;
 import main.sqlipa.parser.ast.stmt.create.CreateTableStmt;
@@ -241,26 +231,6 @@ public interface VoidVisitor {
     // Name
     public void visit(Name name);
 
-    public void visit(CollationName name);
-
-    public void visit(ColumnName name);
-
-    public void visit(ConstraintName name);
-
-    public void visit(DatabaseName name);
-
-    public void visit(FunctionName name);
-
-    public void visit(IndexName name);
-
-    public void visit(TableName name);
-
     public void visit(TypeName name);
-
-    public void visit(Alias alias);
-
-    public void visit(ColumnAlias alias);
-
-    public void visit(TableAlias alias);
 
 }

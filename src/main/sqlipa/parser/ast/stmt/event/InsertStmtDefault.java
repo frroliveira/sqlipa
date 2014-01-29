@@ -1,8 +1,7 @@
 package main.sqlipa.parser.ast.stmt.event;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class InsertStmtDefault extends InsertStmt {
     
@@ -12,12 +11,12 @@ public class InsertStmtDefault extends InsertStmt {
     
     public InsertStmtDefault(InsertStmt stmt) {
         super(stmt, stmt.getExplain(), stmt.getType(),
-                new DatabaseName(stmt.getDatabase()),
-                new TableName(stmt.getTable()));
+                new Name(stmt.getDatabase()),
+                new Name(stmt.getTable()));
     }
     
     public InsertStmtDefault(Block block, Explain explain, Type type,
-            DatabaseName db, TableName tab) {
+            Name db, Name tab) {
         super(block, explain, type, db, tab);
     }
 

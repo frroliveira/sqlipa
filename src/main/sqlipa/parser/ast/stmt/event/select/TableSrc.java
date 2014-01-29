@@ -2,17 +2,15 @@ package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedBy;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableAlias;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class TableSrc extends SingleSrc {
     
-    private DatabaseName db;
+    private Name database;
     
-    private TableName tab;
+    private Name table;
     
-    private TableAlias alias;
+    private Name alias;
     
     private IndexedBy indexed;
 
@@ -20,24 +18,24 @@ public class TableSrc extends SingleSrc {
         super();
     }
     
-    public TableSrc(Block block, DatabaseName db, TableName tab, 
-            TableAlias alias, IndexedBy indexed) {
+    public TableSrc(Block block, Name database, Name table, Name alias,
+            IndexedBy indexed) {
         super(block);
-        this.db = db;
-        this.tab = tab;
+        this.database = database;
+        this.table = table;
         this.alias = alias;
         this.indexed = indexed;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
-    public TableAlias getAlias() {
+    public Name getAlias() {
         return alias;
     }
     
@@ -45,15 +43,15 @@ public class TableSrc extends SingleSrc {
         return indexed;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
     
-    public void setAlias(TableAlias alias) {
+    public void setAlias(Name alias) {
         this.alias = alias;
     }
     

@@ -1,26 +1,26 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.SavepointName;
+import main.sqlipa.parser.ast.Name;
 
 public class SavepointStmt extends SqlStatement {
     
-    private SavepointName savepoint;
+    private Name savepoint;
     
     public SavepointStmt() {
         super();
     }
     
     public SavepointStmt(Block block, Explain explain,
-            SavepointName savepoint) {
+            Name savepoint) {
         this.savepoint = savepoint;
     }
     
-    public SavepointName getSavepoint() {
+    public Name getSavepoint() {
         return savepoint;
     }
     
-    public void setSavepoint(SavepointName savepoint) {
+    public void setSavepoint(Name savepoint) {
         this.savepoint = savepoint;
     }
 

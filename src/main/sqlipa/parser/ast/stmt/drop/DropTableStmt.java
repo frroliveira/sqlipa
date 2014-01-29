@@ -1,8 +1,7 @@
 package main.sqlipa.parser.ast.stmt.drop;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 
 public class DropTableStmt extends DropStmt {
     
@@ -11,7 +10,7 @@ public class DropTableStmt extends DropStmt {
     }
     
     public DropTableStmt(Block block, Explain explain, boolean hasIfExists, 
-            DatabaseName db, Name name) {
+            Name db, Name name) {
         super(block, explain, hasIfExists, db, name);
     }
 

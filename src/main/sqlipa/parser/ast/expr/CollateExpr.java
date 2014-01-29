@@ -1,19 +1,19 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.CollationName;
+import main.sqlipa.parser.ast.Name;
 
 public class CollateExpr extends Expression {
 
     private Expression expr;
     
-    private CollationName collation;
+    private Name collation;
     
     public CollateExpr() {
         super();
     }
     
-    public CollateExpr(Block block, Expression expr, CollationName collation) {
+    public CollateExpr(Block block, Expression expr, Name collation) {
         super(block);
         this.expr = expr;
         this.collation = collation;
@@ -23,7 +23,7 @@ public class CollateExpr extends Expression {
         return expr;
     }
     
-    public CollationName getCollation() {
+    public Name getCollation() {
         return collation;
     }
     
@@ -31,7 +31,7 @@ public class CollateExpr extends Expression {
         this.expr = expr;
     }
     
-    public void setCollation(CollationName collation) {
+    public void setCollation(Name collation) {
         this.collation = collation;
     }
     

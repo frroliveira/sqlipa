@@ -2,7 +2,7 @@ package main.sqlipa.parser.ast.constraint.column;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
-import main.sqlipa.parser.ast.name.ConstraintName;
+import main.sqlipa.parser.ast.Name;
 
 public class UniqueColumnConstraint extends ColumnConstraint {
 
@@ -12,7 +12,7 @@ public class UniqueColumnConstraint extends ColumnConstraint {
         super();
     }
     
-    public UniqueColumnConstraint(Block block, ConstraintName name,
+    public UniqueColumnConstraint(Block block, Name name,
             ConflictClause clause) {
         super(block, name);
         this.clause = clause;

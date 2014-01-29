@@ -6,7 +6,7 @@ import main.sqlipa.parser.ast.expr.Expression;
 
 public class DeleteStmt extends EventStmt {
     
-    private QualifiedTableName qualifiedTab;
+    private QualifiedTableName qualifiedTable;
     
     private Expression where;
     
@@ -17,16 +17,16 @@ public class DeleteStmt extends EventStmt {
     }
     
     public DeleteStmt(Block block, Explain explain,
-            QualifiedTableName qualifiedTab, Expression where,
+            QualifiedTableName qualifiedTable, Expression where,
             EventConstraint constraint) {
         super(block, explain);
-        this.qualifiedTab = qualifiedTab;
+        this.qualifiedTable = qualifiedTable;
         this.where = where;
         this.constraint = constraint;
     }
     
     public QualifiedTableName getQualifiedTable() {
-        return qualifiedTab;
+        return qualifiedTable;
     }
     
     public Expression getWhere() {
@@ -37,8 +37,8 @@ public class DeleteStmt extends EventStmt {
         return constraint;
     }
     
-    public void setQualifiedTable(QualifiedTableName qualifiedTab) {
-        this.qualifiedTab = qualifiedTab;
+    public void setQualifiedTable(QualifiedTableName qualifiedTable) {
+        this.qualifiedTable = qualifiedTable;
     }
     
     public void setWhere(Expression where) {

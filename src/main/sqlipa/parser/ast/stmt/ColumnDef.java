@@ -6,12 +6,12 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.constraint.column.ColumnConstraint;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.TypeName;
+import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.TypeName;
 
 public class ColumnDef extends Node {
     
-    private ColumnName column;
+    private Name column;
     
     private TypeName type;
     
@@ -22,7 +22,7 @@ public class ColumnDef extends Node {
         this.constraints = new LinkedList<ColumnConstraint>();
     }
     
-    public ColumnDef(Block block, ColumnName column, TypeName type, 
+    public ColumnDef(Block block, Name column, TypeName type, 
             List<ColumnConstraint> constraints) {
         super(block);
         this.column = column;
@@ -30,7 +30,7 @@ public class ColumnDef extends Node {
         this.constraints = constraints;
     }
     
-    public ColumnName getColumn() {
+    public Name getColumn() {
         return column;
     }
     
@@ -42,7 +42,7 @@ public class ColumnDef extends Node {
         return constraints;
     }
     
-    public void setColumn(ColumnName column) {
+    public void setColumn(Name column) {
         this.column = column;
     }
     

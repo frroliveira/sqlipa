@@ -1,7 +1,7 @@
 package main.sqlipa.parser.ast.constraint;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 
 public class MatchSetting extends ForeignKeySetting {
     

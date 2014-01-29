@@ -3,7 +3,7 @@ package main.sqlipa.parser.ast.expr;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.FunctionName;
+import main.sqlipa.parser.ast.Name;
 
 public class FunctionExpr extends Expression {
 
@@ -12,7 +12,7 @@ public class FunctionExpr extends Expression {
         UNIVERSAL
     }
     
-    private FunctionName function;
+    private Name function;
     
     private Operator op;
     
@@ -22,7 +22,7 @@ public class FunctionExpr extends Expression {
         super();
     }
     
-    public FunctionExpr(Block block, FunctionName function, Operator op,
+    public FunctionExpr(Block block, Name function, Operator op,
             List<Expression> exprs) {
         super(block);
         this.function = function;
@@ -30,7 +30,7 @@ public class FunctionExpr extends Expression {
         this.exprs = exprs;
     }
     
-    public FunctionName getFunction() {
+    public Name getFunction() {
         return function;
     }
     
@@ -42,7 +42,7 @@ public class FunctionExpr extends Expression {
         return exprs;
     }
     
-    public void setFunction(FunctionName function) {
+    public void setFunction(Name function) {
         this.function = function;
     }
     

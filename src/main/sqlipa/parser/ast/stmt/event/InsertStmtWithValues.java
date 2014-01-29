@@ -5,37 +5,35 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class InsertStmtWithValues extends InsertStmt {
     
-    private List<ColumnName> columns;
+    private List<Name> columns;
     
     private List<List<Expression>> rows;
     
     public InsertStmtWithValues() {
         super();
-        columns = new LinkedList<ColumnName>();
+        columns = new LinkedList<Name>();
         rows = new LinkedList<List<Expression>>();
     }
     
     public InsertStmtWithValues(InsertStmt stmt) {
         super(stmt, stmt.getExplain(), stmt.getType(),
-                new DatabaseName(stmt.getDatabase()),
-                new TableName(stmt.getTable()));
+                new Name(stmt.getDatabase()),
+                new Name(stmt.getTable()));
     }
     
     public InsertStmtWithValues(Block block, Explain explain, Type type,
-            DatabaseName db, TableName tab, List<ColumnName> columns,
+            Name db, Name tab, List<Name> columns,
             List<List<Expression>> rows) {
         super(block, explain, type, db, tab);
         this.columns = columns;
         this.rows = rows;
     }
     
-    public List<ColumnName> getColumns() {
+    public List<Name> getColumns() {
         return columns;
     }
     
@@ -43,7 +41,7 @@ public class InsertStmtWithValues extends InsertStmt {
         return rows;
     }
     
-    public void setColumns(List<ColumnName> columns) {
+    public void setColumns(List<Name> columns) {
         this.columns = columns;
     }
     
@@ -51,7 +49,7 @@ public class InsertStmtWithValues extends InsertStmt {
         this.rows = rows;
     }
     
-    public void addColumn(ColumnName column) {
+    public void addColumn(Name column) {
         columns.add(column);
     }
     
@@ -78,7 +76,7 @@ public class InsertStmtWithValues extends InsertStmt {
         return true;
     }
     
-    public boolean removeColumn(ColumnName column) {
+    public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
     

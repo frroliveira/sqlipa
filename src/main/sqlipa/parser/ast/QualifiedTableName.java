@@ -1,13 +1,12 @@
 package main.sqlipa.parser.ast;
 
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class QualifiedTableName extends Node {
 
-    private DatabaseName db;
+    private Name database;
     
-    private TableName tab;
+    private Name table;
     
     private IndexedBy indexed;
     
@@ -15,30 +14,30 @@ public class QualifiedTableName extends Node {
         super();
     }
     
-    public QualifiedTableName(Block block, DatabaseName db, TableName tab) {
+    public QualifiedTableName(Block block, Name database, Name table) {
         super(block);
-        this.db = db;
-        this.tab = tab;
+        this.database = database;
+        this.table = table;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
     public IndexedBy getIndexed() {
         return indexed;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
     
     public void setIndexed(IndexedBy indexed) {

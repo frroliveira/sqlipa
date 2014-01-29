@@ -4,37 +4,35 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
 
 public class InsertStmtWithSelect extends InsertStmt {
     
-    private List<ColumnName> columns;
+    private List<Name> columns;
     
     private SelectStmt select;
     
     public InsertStmtWithSelect() {
         super();
-        columns = new LinkedList<ColumnName>();
+        columns = new LinkedList<Name>();
     }
     
     public InsertStmtWithSelect(InsertStmt stmt) {
         super(stmt, stmt.getExplain(), stmt.getType(),
-                new DatabaseName(stmt.getDatabase()),
-                new TableName(stmt.getTable()));
+                new Name(stmt.getDatabase()),
+                new Name(stmt.getTable()));
     }
     
     public InsertStmtWithSelect(Block block, Explain explain, Type type,
-            DatabaseName db, TableName tab, List<ColumnName> columns,
+            Name db, Name tab, List<Name> columns,
             SelectStmt select) {
         super(block, explain, type, db, tab);
         this.columns = columns;
         this.select = select;
     }
     
-    public List<ColumnName> getColumns() {
+    public List<Name> getColumns() {
         return columns;
     }
     
@@ -42,7 +40,7 @@ public class InsertStmtWithSelect extends InsertStmt {
         return select;
     }
     
-    public void setColumns(List<ColumnName> columns) {
+    public void setColumns(List<Name> columns) {
         this.columns = columns;
     }
     
@@ -50,11 +48,11 @@ public class InsertStmtWithSelect extends InsertStmt {
         this.select = select;
     }
 
-    public void addColumn(ColumnName column) {
+    public void addColumn(Name column) {
         columns.add(column);
     }
     
-    public boolean removeColumn(ColumnName column) {
+    public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
 

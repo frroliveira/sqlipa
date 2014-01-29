@@ -1,27 +1,27 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class UniversalColumn extends ResultColumn {
 
-    private TableName tab;
+    private Name table;
     
     public UniversalColumn() {
         super();
     }
     
-    public UniversalColumn(Block block, TableName tab) {
+    public UniversalColumn(Block block, Name table) {
         super(block);
-        this.tab = tab;
+        this.table = table;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
 
 }

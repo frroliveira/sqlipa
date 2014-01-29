@@ -20,7 +20,6 @@ import main.sqlipa.parser.ast.constraint.table.*;
 import main.sqlipa.parser.ast.constraint.column.*;
 import main.sqlipa.parser.ast.expr.*;
 import main.sqlipa.parser.ast.literal.*;
-import main.sqlipa.parser.ast.name.*;
 import main.sqlipa.parser.ast.stmt.*;
 import main.sqlipa.parser.ast.stmt.create.*;
 import main.sqlipa.parser.ast.stmt.drop.*;
@@ -395,13 +394,23 @@ SqlStatement sqlStmt() :
     }
 }
 
+Name name() :
+{
+}
+{
+    <ID> | <STRING> {
+        return new Name(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
+    }
+}
+
 AlterTableStmt alterTableStmt() :
 {
     AlterTableStmt stmt;
     int line;
     int column;
-    DatabaseName db = null;
-    TableName tab;
+    Name database = null;
+    Name table;
 }
 {
     "ALTER" {
@@ -411,16 +420,16 @@ AlterTableStmt alterTableStmt() :
     "TABLE"
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    tab = tableName()
+    table = name()
     (
         stmt = renameTableStmt()
     |   stmt = addColumnStmt()
     ) {
         stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
-        stmt.setDatabase(db);
-        stmt.setTable(tab);
+        stmt.setDatabase(database);
+        stmt.setTable(table);
         return stmt;
     }
 }
@@ -428,12 +437,12 @@ AlterTableStmt alterTableStmt() :
 AlterTableStmt renameTableStmt() :
 {
     RenameTableStmt stmt = new RenameTableStmt();
-    TableName tab;
+    Name table;
 }
 {
     "RENAME" "TO"
-    tab = tableName() {
-        stmt.setNewTable(tab);
+    table = name() {
+        stmt.setNewTable(table);
         return stmt;
     }
 }
@@ -479,7 +488,7 @@ AttachStmt attachStmt() :
 {
     AttachStmt stmt = new AttachStmt();
     Expression expr;
-    DatabaseName db;
+    Name database;
 }
 {
     "ATTACH" {
@@ -490,10 +499,10 @@ AttachStmt attachStmt() :
     ]
     expr = expr()
     "AS"
-    db = databaseName() {
+    database = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         stmt.setExpression(expr);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -555,10 +564,10 @@ RollbackStmt rollbackStmt() :
     [ "TRANSACTION" ]
     [
         "TO" {
-            SavepointName savepoint;
+            Name savepoint;
         }
         [ "SAVEPOINT" ]
-        savepoint = savepointName() {
+        savepoint = name() {
             stmt.setSavepoint(savepoint);
         }
     ] {
@@ -570,13 +579,13 @@ RollbackStmt rollbackStmt() :
 SavepointStmt savepointStmt() :
 {
     SavepointStmt stmt = new SavepointStmt();
-    SavepointName savepoint;
+    Name savepoint;
 }
 {
     "SAVEPOINT"  {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
-    savepoint = savepointName() {
+    savepoint = name() {
         stmt.setSavepoint(savepoint);
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
@@ -586,14 +595,14 @@ SavepointStmt savepointStmt() :
 ReleaseStmt releaseStmt() :
 {
     ReleaseStmt stmt = new ReleaseStmt();
-    SavepointName savepoint;
+    Name savepoint;
 }
 {
     "RELEASE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [ "SAVEPOINT" ]
-    savepoint = savepointName() {
+    savepoint = name() {
         stmt.setSavepoint(savepoint);
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
@@ -603,9 +612,9 @@ ReleaseStmt releaseStmt() :
 CreateIndexStmt createIndexStmt() :
 {
     CreateIndexStmt stmt = new CreateIndexStmt();
-    DatabaseName db = null;
-    IndexName ind;
-    TableName tab;
+    Name database = null;
+    Name index;
+    Name table;
     IndexedColumn column;
 }
 {
@@ -625,11 +634,11 @@ CreateIndexStmt createIndexStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    ind = indexName()
+    index = name()
     "ON"
-    tab = tableName()
+    table = name()
     "("
     column = indexedColumn() {
         stmt.addColumn(column);
@@ -642,9 +651,9 @@ CreateIndexStmt createIndexStmt() :
     )*
     ")" {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(ind);
-        stmt.setDatabase(db);
-        stmt.setTable(tab);
+        stmt.setName(index);
+        stmt.setDatabase(database);
+        stmt.setTable(table);
         return stmt;
     }
 }
@@ -652,18 +661,18 @@ CreateIndexStmt createIndexStmt() :
 IndexedColumn indexedColumn() :
 {
     IndexedColumn indColumn = new IndexedColumn();
-    ColumnName column;
+    Name column;
 }
 {
-    column = columnName() {
+    column = name() {
         indColumn.setColumn(column);
         indColumn.setBegin(column);
     }
     [
         "COLLATE" {
-            CollationName collation;
+            Name collation;
         }
-        collation = collationName() {
+        collation = name() {
             indColumn.setCollation(collation);
         }
     ]
@@ -686,8 +695,8 @@ CreateTableStmt createTableStmt() :
     int column;
     boolean hasTemp = false;
     boolean hasIfNotExists = false;
-    DatabaseName db = null;
-    TableName tab;
+    Name database = null;
+    Name table;
 }
 {
     "CREATE" {
@@ -707,9 +716,9 @@ CreateTableStmt createTableStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    tab = tableName()
+    table = name()
     (
         stmt = createTableStmtWithColumns()
     |   stmt = createTableStmtWithSelect()
@@ -717,8 +726,8 @@ CreateTableStmt createTableStmt() :
         stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
         stmt.setTemporary(hasTemp);
         stmt.setIfNotExists(hasIfNotExists);
-        stmt.setName(tab);
-        stmt.setDatabase(db);
+        stmt.setName(table);
+        stmt.setDatabase(database);
         return stmt;
     }}
 
@@ -771,11 +780,11 @@ CreateTableStmt createTableStmtWithSelect() :
 ColumnDef columnDef() :
 {
     ColumnDef columnDef = new ColumnDef();
-    ColumnName column;
+    Name column;
     TypeName type;
     ColumnConstraint constraint;}
 {
-    column = columnName() {
+    column = name() {
         columnDef.setColumn(column);
         columnDef.setBegin(column);
     }
@@ -835,14 +844,14 @@ ColumnConstraint columnConstraint() :
     ColumnConstraint constraint;
     int line = 0;
     int column = 0;
-    ConstraintName name = null;}
+    Name name = null;}
 {
     [
         "CONSTRAINT" {
             line = token.beginLine;
             column = token.beginColumn;
         }
-        name = constraintName()
+        name = name()
     ]
     (
         constraint = primaryKeyColumnConstraint()
@@ -973,13 +982,13 @@ DefaultColumnConstraint defaultColumnConstraint() :
 CollateColumnConstraint collateColumnConstraint() :
 {
     CollateColumnConstraint constraint = new CollateColumnConstraint();
-    CollationName collation;
+    Name collation;
 }
 {
     "COLLATE" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
-    collation = collationName() {
+    collation = name() {
         constraint.setCollation(collation);
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
@@ -1030,7 +1039,7 @@ TableConstraint tableConstraint() :
 {
     TableConstraint constraint;    int line = 0;
     int column = 0;
-    ConstraintName name = null;
+    Name name = null;
 }
 {
     [
@@ -1038,7 +1047,7 @@ TableConstraint tableConstraint() :
             line = token.beginLine;
             column = token.beginColumn;
         }
-        name = constraintName()
+        name = name()
     ]
     (
         constraint = primaryKeyTableConstraint()
@@ -1130,7 +1139,7 @@ CheckTableConstraint checkTableConstraint() :
 ForeignKeyTableConstraint foreignKeyTableConstraint() :
 {
     ForeignKeyTableConstraint constraint = new ForeignKeyTableConstraint();
-    ColumnName column;
+    Name column;
     ForeignKeyClause clause;
 }
 {
@@ -1139,12 +1148,12 @@ ForeignKeyTableConstraint foreignKeyTableConstraint() :
     }
     "KEY"
     "("
-    column = columnName() {
+    column = name() {
         constraint.addColumn(column);
     }
     (
         "," 
-        column = columnName() {
+        column = name() {
             constraint.addColumn(column);
         }
     )*
@@ -1160,25 +1169,25 @@ ForeignKeyClause foreignKeyClause() :
 {
     ForeignKeyClause clause = new ForeignKeyClause();
     Block block = new Block();
-    TableName tab;
+    Name table;
     ForeignKeySetting sett;}
 {
     "REFERENCES" {
         clause.setBegin(token.beginLine, token.beginColumn);
     }
-    tab = tableName() {
-        clause.setTable(tab);
+    table = name() {
+        clause.setTable(table);
     }
     [
         "(" {
-            ColumnName column;
+            Name column;
         }
-        column = columnName() {
+        column = name() {
             clause.addColumn(column);
         }
         (
             ","
-            column = columnName() {
+            column = name() {
                 clause.addColumn(column);
             }
         )*
@@ -1330,9 +1339,9 @@ CreateTriggerStmt createTriggerStmt() :
 {
     CreateTriggerStmt stmt = new CreateTriggerStmt();
     boolean hasIfNotExists = false;
-    DatabaseName db = null;
-    TriggerName trigger;
-    TableName tab;
+    Name database = null;
+    Name trigger;
+    Name table;
     EventStmt eventStmt;
 }
 {
@@ -1352,9 +1361,9 @@ CreateTriggerStmt createTriggerStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    trigger = triggerName()
+    trigger = name()
     [
         "BEFORE" {
             stmt.setTime(CreateTriggerStmt.Time.BEFORE);
@@ -1378,21 +1387,21 @@ CreateTriggerStmt createTriggerStmt() :
         }
         [
             "OF" {
-                ColumnName column;
+                Name column;
             }
-            column = columnName() {
+            column = name() {
                 stmt.addColumn(column);
             }
             (
                 ","
-                column = columnName() {
+                column = name() {
                     stmt.addColumn(column);
                 }
             )*
         ]
     )
     "ON"
-    tab = tableName()
+    table = name()
     [
         "FOR" "EACH" "ROW" {
             stmt.setForEachRow(true);
@@ -1421,8 +1430,8 @@ CreateTriggerStmt createTriggerStmt() :
     "END" {
         stmt.setEnd(token.endLine, token.endColumn);
         stmt.setName(trigger);
-        stmt.setDatabase(db);
-        stmt.setTable(tab);
+        stmt.setDatabase(database);
+        stmt.setTable(table);
         return stmt;
     }
 }
@@ -1430,8 +1439,8 @@ CreateTriggerStmt createTriggerStmt() :
 CreateViewStmt createViewStmt() :
 {
     CreateViewStmt stmt = new CreateViewStmt();
-    DatabaseName db = null;
-    ViewName view;
+    Name database = null;
+    Name view;
     SelectStmt select;
 }
 {
@@ -1451,14 +1460,14 @@ CreateViewStmt createViewStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    view = viewName()
+    view = name()
     "AS"
     select = selectStmt() {
         stmt.setEnd(token.endLine, token.endColumn);
         stmt.setName(view);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         stmt.setSelect(select);
         return stmt;
     }
@@ -1467,9 +1476,9 @@ CreateViewStmt createViewStmt() :
 CreateVirtualTableStmt createVirtualTableStmt() :
 {
     CreateVirtualTableStmt stmt = new CreateVirtualTableStmt();
-    DatabaseName db = null;
-    TableName tab;
-    ModuleName module;
+    Name database = null;
+    Name table;
+    Name module;
 }
 {
     "CREATE" {
@@ -1483,11 +1492,11 @@ CreateVirtualTableStmt createVirtualTableStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    tab = tableName()
+    table = name()
     "USING"
-    module = moduleName()
+    module = name()
     [
         "(" {
             ModuleArgument arg;
@@ -1505,7 +1514,7 @@ CreateVirtualTableStmt createVirtualTableStmt() :
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
         stmt.setName(module);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1523,7 +1532,7 @@ ModuleArgument moduleArgument() :
 DeleteStmt deleteStmt() :
 {
     DeleteStmt stmt = new DeleteStmt();
-    QualifiedTableName qualifiedTab;
+    QualifiedTableName qualifiedTable;
     EventConstraint constraint = null;
 }
 {
@@ -1531,7 +1540,7 @@ DeleteStmt deleteStmt() :
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     "FROM"
-    qualifiedTab = qualifiedTableName()
+    qualifiedTable = qualifiedTableName()
     [
         "WHERE" {
             Expression expr;
@@ -1542,7 +1551,7 @@ DeleteStmt deleteStmt() :
     ]
     constraint = eventConstraint() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setQualifiedTable(qualifiedTab);
+        stmt.setQualifiedTable(qualifiedTable);
         stmt.setConstraint(constraint);
         return stmt;
     }
@@ -1598,16 +1607,16 @@ EventConstraint eventConstraint() :
 DetachStmt detachStmt() :
 {
     DetachStmt stmt = new DetachStmt();
-    DatabaseName db;
+    Name database;
 }
 {
     "DETACH" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [ "DATABASE" ]
-    db = databaseName() {
+    database = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1615,8 +1624,8 @@ DetachStmt detachStmt() :
 DropIndexStmt dropIndexStmt() :
 {
     DropIndexStmt stmt = new DropIndexStmt();
-    DatabaseName db = null;
-    IndexName ind;
+    Name database = null;
+    Name index;
 }
 {
     "DROP" {
@@ -1630,12 +1639,12 @@ DropIndexStmt dropIndexStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    ind = indexName() {
+    index = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(ind);
-        stmt.setDatabase(db);
+        stmt.setName(index);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1643,8 +1652,8 @@ DropIndexStmt dropIndexStmt() :
 DropTableStmt dropTableStmt() :
 {
     DropTableStmt stmt = new DropTableStmt();
-    DatabaseName db = null;
-    TableName tab;
+    Name database = null;
+    Name table;
 }
 {
     "DROP" {
@@ -1658,12 +1667,12 @@ DropTableStmt dropTableStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    tab = tableName() {
+    table = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(tab);
-        stmt.setDatabase(db);
+        stmt.setName(table);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1671,8 +1680,8 @@ DropTableStmt dropTableStmt() :
 DropTriggerStmt dropTriggerStmt() :
 {
     DropTriggerStmt stmt = new DropTriggerStmt();
-    DatabaseName db = null;
-    TriggerName trigger;
+    Name database = null;
+    Name trigger;
 }
 {
     "DROP" {
@@ -1686,12 +1695,12 @@ DropTriggerStmt dropTriggerStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    trigger = triggerName() {
+    trigger = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         stmt.setName(trigger);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1699,8 +1708,8 @@ DropTriggerStmt dropTriggerStmt() :
 DropViewStmt dropViewStmt() :
 {
     DropViewStmt stmt = new DropViewStmt();
-    DatabaseName db = null;
-    ViewName view;
+    Name database = null;
+    Name view;
 }
 {
     "DROP" {
@@ -1714,12 +1723,12 @@ DropViewStmt dropViewStmt() :
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    view = viewName() {
+    view = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         stmt.setName(view);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1988,19 +1997,19 @@ InSetExpr inSetExpr() :
 InTableExpr inTableExpr() :
 {
     InTableExpr in = new InTableExpr();
-    DatabaseName db = null;
-    TableName tab;
+    Name database = null;
+    Name table;
 }
 {
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() {
-            in.setDatabase(db);
+        database = name() {
+            in.setDatabase(database);
         }
         "."
     ]
-    tab = tableName() {
-        in.setTable(tab);
+    table = name() {
+        in.setTable(table);
         return in;
     }
 }
@@ -2170,13 +2179,13 @@ Expression concatenateExpr() :
 Expression collateExpr() :
 {
     Expression expr;
-    CollationName collation;
+    Name collation;
 }
 {
     expr = unaryExpr()
     (
         "COLLATE"
-        collation = collationName() {
+        collation = name() {
             expr = new CollateExpr(new Block(expr.beginLine, expr.beginColumn,
                 token.endLine, token.endColumn), expr, collation);
         }
@@ -2227,11 +2236,12 @@ Expression terminalExpr() :
 }
 {
     (
-        expr = literalExpr()
-    |   expr = bindParameterExpr()
+        expr = bindParameterExpr()
     |   LOOKAHEAD(2) // columnExpr also starts with a name.
         expr = functionExpr()
-    |   expr = columnExpr()
+    |   LOOKAHEAD(2) // literalExpr may also start with a <STRING>.
+        expr = columnExpr()
+    |   expr = literalExpr()
     |   expr = castExpr()
     |   expr = existsExpr()
     |   LOOKAHEAD(2) // selectExpr also starts by "(".
@@ -2267,11 +2277,11 @@ BindParameterExpr bindParameterExpr() :
 FunctionExpr functionExpr() :
 {
     FunctionExpr function = new FunctionExpr();
-    FunctionName name;
+    Name name;
     Expression expr;
 }
 {
-    name = functionName() {
+    name = name() {
         function.setFunction(name);
         function.setBegin(name);
     }
@@ -2304,34 +2314,41 @@ FunctionExpr functionExpr() :
 ColumnExpr columnExpr() :
 {
     ColumnExpr reference = new ColumnExpr();
-    DatabaseName db = null;
-    TableName tab = null;
-    ColumnName column;
+    Name database = null;
+    Name table = null;
+    Name column;
 }
 {
-    [
+    (
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
         [
             LOOKAHEAD(4) // Anticipate the occurrence of a dot.
-            db = databaseName() {
-                reference.setDatabase(db);
-                reference.setBegin(db);
+            database = name() {
+                reference.setBegin(database);
+                reference.setDatabase(database);
             }
             "."
         ]
-        tab = tableName() {
-            reference.setTable(tab);
-            if (db == null) {
-                reference.setBegin(tab);
+        table = name() {
+            if (database == null) {
+                reference.setBegin(table);
             }
+            reference.setTable(table);
         }
-        "."
-    ]
-    column = columnName() {
-        reference.setColumn(column);
-        if (column == null) {
-            reference.setBegin(column);
+        "."    
+	    column = name() {
+	        reference.setColumn(column);
+	        return reference;
+	    }
+    |   <ID> {
+            // In case ColumnExpr only has the column name, that can't be a
+            // <STRING> because would exist a syntactic conflict with a string
+            // literal.
+            reference.setColumn(new Name(new Block(token.beginLine,
+                token.beginColumn, token.endLine, token.endColumn),
+                token.image));
         }
+    ) {
         reference.setEnd(token.endLine, token.endColumn);
         return reference;
     }
@@ -2541,9 +2558,9 @@ BlobLiteral blobLiteral() :
 InsertStmt insertStmt() :
 {
     InsertStmt stmt = new InsertStmtDefault();
-    DatabaseName db = null;
-    TableName tab;
-    List<ColumnName> columns = null;
+    Name database = null;
+    Name table;
+    List<Name> columns = null;
 }
 {
     (
@@ -2579,22 +2596,22 @@ InsertStmt insertStmt() :
     "INTO"
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    tab = tableName()
+    table = name()
     (
         "DEFAULT" "VALUES"
     |   [
             "(" {
-                ColumnName column;
-                columns = new LinkedList<ColumnName>();
+                Name column;
+                columns = new LinkedList<Name>();
             }
-            column = columnName() {
+            column = name() {
                 columns.add(column);
             }
             (
                 ","
-	            column = columnName() {
+	            column = name() {
 	                columns.add(column);
 	            }
             )*
@@ -2606,13 +2623,13 @@ InsertStmt insertStmt() :
         )
     ) {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(db);
-        stmt.setTable(tab);
+        stmt.setDatabase(database);
+        stmt.setTable(table);
         return stmt;
     }
 }
 
-InsertStmt insertStmtWithValues(InsertStmt stmt, List<ColumnName> columns) :
+InsertStmt insertStmtWithValues(InsertStmt stmt, List<Name> columns) :
 {
     InsertStmtWithValues stmtWValues = new InsertStmtWithValues(stmt);
     Expression expr;
@@ -2652,7 +2669,7 @@ InsertStmt insertStmtWithValues(InsertStmt stmt, List<ColumnName> columns) :
     }
 }
         
-InsertStmt insertStmtWithSelect(InsertStmt stmt, List<ColumnName> columns) :
+InsertStmt insertStmtWithSelect(InsertStmt stmt, List<Name> columns) :
 {
     SelectStmt select;
 }
@@ -2668,8 +2685,8 @@ InsertStmt insertStmtWithSelect(InsertStmt stmt, List<ColumnName> columns) :
 PragmaStmt pragmaStmt() :
 {
     PragmaStmt stmt = new PragmaStmt();
-    DatabaseName db = null;
-    PragmaName pragma;
+    Name database = null;
+    Name pragma;
     PragmaValue value = null;
 }
 {
@@ -2678,9 +2695,9 @@ PragmaStmt pragmaStmt() :
     }
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() "."
+        database = name() "."
     ]
-    pragma = pragmaName()
+    pragma = name()
     [
         "="
         value = pragmaValue()
@@ -2689,7 +2706,7 @@ PragmaStmt pragmaStmt() :
         ")"
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(db);
+        stmt.setDatabase(database);
         stmt.setPragma(pragma);
         stmt.setValue(value);
         return stmt;
@@ -2828,7 +2845,7 @@ ResultColumn resultColumn() :
     ResultColumn column;}
 {
     (
-        LOOKAHEAD(3) // Removes ambiguity between "tab.*" and "tab.column".
+        LOOKAHEAD(3) // Removes ambiguity between "table.*" and "table.column".
         column = universalColumn()
     |   column = expressionColumn()
     ) {
@@ -2838,7 +2855,7 @@ ResultColumn resultColumn() :
 UniversalColumn universalColumn() :
 {
     UniversalColumn column = new UniversalColumn();
-    TableName tab;
+    Name table;
 }
 {
     (
@@ -2846,12 +2863,12 @@ UniversalColumn universalColumn() :
             column.setBeginEnd(token.beginLine, token.beginColumn,
                 token.endLine, token.endColumn);
         }
-    |   tab = tableName() {
-            column.setTable(tab);
+    |   table = name() {
+            column.setTable(table);
         }
         "." 
         "*" {
-            column.setBeginEnd(tab.beginLine, tab.beginColumn, token.endLine,
+            column.setBeginEnd(table.beginLine, table.beginColumn, token.endLine,
                 token.endColumn);
         }
     ) {
@@ -2882,11 +2899,11 @@ ExpressionColumn expressionColumn() :
 AliasedColumn aliasedColumn() :
 {
     AliasedColumn column = new AliasedColumn();
-    ColumnAlias alias;
+    Name alias;
 }
 {
 	[ "AS" ]
-	alias = columnAlias() {
+	alias = name() {
 	    column.setAlias(alias);
 	    return column;
 	}
@@ -2938,30 +2955,30 @@ JoinSrc singleSource() :
 TableSrc tableSource() :
 {
     TableSrc src = new TableSrc();
-    DatabaseName db = null;
-    TableName tab;
+    Name database = null;
+    Name table;
     IndexedBy indexed;
 }
 {
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() {
-            src.setDatabase(db);
-            src.setBegin(db);
+        database = name() {
+            src.setDatabase(database);
+            src.setBegin(database);
         }
         "."
     ]
-    tab = tableName() {
-        src.setTable(tab);
-        if (db == null) {
-            src.setBegin(tab);
+    table = name() {
+        src.setTable(table);
+        if (database == null) {
+            src.setBegin(table);
         }
     }
     [
         [ "AS" ] {
-            TableAlias alias;
+            Name alias;
         }
-        alias = tableAlias() {
+        alias = name() {
             src.setAlias(alias);
         }
     ]
@@ -2987,9 +3004,9 @@ SelectSrc selectSource() :
     ")"
     [
         [ "AS" ] {
-            TableAlias alias;
+            Name alias;
         }
-        alias = tableAlias() {
+        alias = name() {
             src.setAlias(alias);
         }
     ] {
@@ -3074,19 +3091,19 @@ JoinConstraintOn joinConstraintOn() :
 JoinConstraintUsing joinConstraintUsing():
 {
     JoinConstraintUsing constraint = new JoinConstraintUsing();
-    ColumnName column;
+    Name column;
 }
 {
     "USING" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
 	"("
-	column = columnName() {
+	column = name() {
         constraint.addColumn(column);
     }
     (
         ","
-        column = columnName() {
+        column = name() {
             constraint.addColumn(column);
         }
     )*
@@ -3145,12 +3162,12 @@ IndexedBy indexedBy() :
     [
 	    (
 	        "INDEXED" {
-	            IndexName ind;
+	            Name index;
 	            indexed.setBegin(token.beginLine, token.beginColumn);
             }
             "BY"
-	        ind = indexName() {
-	            indexed.setIndex(ind);
+	        index = name() {
+	            indexed.setIndex(index);
 	        }
 	    |   "NOT" {
                 indexed.setBegin(token.beginLine, token.beginColumn);
@@ -3168,7 +3185,7 @@ IndexedBy indexedBy() :
 UpdateStmt updateStmt() :
 {
     UpdateStmt stmt = new UpdateStmt();
-    QualifiedTableName qualifiedTab;
+    QualifiedTableName qualifiedTable;
     ColumnAssign assign;
     EventConstraint constraint = null;
 }
@@ -3197,7 +3214,7 @@ UpdateStmt updateStmt() :
             }
         )
     ]
-    qualifiedTab = qualifiedTableName()
+    qualifiedTable = qualifiedTableName()
     "SET"
     assign = columnAssign() {
         stmt.addAssignment(assign);
@@ -3218,7 +3235,7 @@ UpdateStmt updateStmt() :
     ]
     constraint = eventConstraint() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setQualifiedTable(qualifiedTab);
+        stmt.setQualifiedTable(qualifiedTable);
         stmt.setConstraint(constraint);
         return stmt;
     }
@@ -3226,40 +3243,40 @@ UpdateStmt updateStmt() :
 
 QualifiedTableName qualifiedTableName() :
 {
-    QualifiedTableName qualifiedTab = new QualifiedTableName();
-    DatabaseName db = null;
-    TableName tab;
+    QualifiedTableName qualifiedTable = new QualifiedTableName();
+    Name database = null;
+    Name table;
     IndexedBy indexed;
 }
 {
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        db = databaseName() {
-            qualifiedTab.setBegin(db);
+        database = name() {
+            qualifiedTable.setBegin(database);
         }
         "."
     ]
-    tab = tableName() {
-        if (db == null) {
-            qualifiedTab.setBegin(tab);
+    table = name() {
+        if (database == null) {
+            qualifiedTable.setBegin(table);
         }
     }
     indexed = indexedBy() {
-        qualifiedTab.setEnd(token.endLine, token.endColumn);
-        qualifiedTab.setDatabase(db);
-        qualifiedTab.setTable(tab);
-        qualifiedTab.setIndexed(indexed);
-        return qualifiedTab;
+        qualifiedTable.setEnd(token.endLine, token.endColumn);
+        qualifiedTable.setDatabase(database);
+        qualifiedTable.setTable(table);
+        qualifiedTable.setIndexed(indexed);
+        return qualifiedTable;
     }
 }
 
 ColumnAssign columnAssign() :
 {
-    ColumnName column;
+    Name column;
     Expression expr;
 }
 {
-    column = columnName()
+    column = name()
     "="
     expr = expr() {
         return new ColumnAssign(new Block(column.beginLine, column.beginColumn,
@@ -3277,159 +3294,5 @@ VacuumStmt vacuumStmt() :
         stmt.setBeginEnd(token.beginLine, token.beginColumn, token.endLine,
             token.endColumn);
         return stmt;
-    }
-}
-
-// Names
-Name name() :
-{
-}
-{
-    // sqlite implementation allows it to be a string also. That would
-    // introduce syntactic ambiguity in spite of not being semantically
-    // ambiguous.
-    <ID> {
-        return new Name(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
-    }
-}
-
-DatabaseName databaseName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new DatabaseName(name);
-    }
-}
-
-TableName tableName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new TableName(name);
-    }
-}
-
-ColumnName columnName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new ColumnName(name);
-    }
-}
-
-IndexName indexName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new IndexName(name);
-    }
-}
-
-CollationName collationName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new CollationName(name);
-    }
-}
-
-ConstraintName constraintName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new ConstraintName(name);
-    }
-}
-
-ColumnAlias columnAlias() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new ColumnAlias(name);
-    }
-}
-
-TableAlias tableAlias() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new TableAlias(name);
-    }
-}
-
-FunctionName functionName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new FunctionName(name);
-    }
-}
-
-PragmaName pragmaName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new PragmaName(name);
-    }
-}
-
-SavepointName savepointName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new SavepointName(name);
-    }
-}
-
-TriggerName triggerName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new TriggerName(name);
-    }
-}
-
-ViewName viewName() :
-{
-    Name name;
-}
-{
-    name = name() {
-        return new ViewName(name);
-    }
-}
-
-ModuleName moduleName() :
-{
-}
-{
-    // TODO.
-    {
-    return null;
     }
 }

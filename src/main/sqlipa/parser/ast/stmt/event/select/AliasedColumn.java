@@ -2,26 +2,26 @@ package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.name.ColumnAlias;
+import main.sqlipa.parser.ast.Name;
 
 public class AliasedColumn extends ExpressionColumn {
 
-    private ColumnAlias alias;
+    private Name alias;
     
     public AliasedColumn() {
         super();
     }
     
-    public AliasedColumn(Block block, Expression expr, ColumnAlias alias) {
+    public AliasedColumn(Block block, Expression expr, Name alias) {
         super(block, expr);
         this.alias = alias;
     }
     
-    public ColumnAlias getAlias() {
+    public Name getAlias() {
         return alias;
     }
     
-    public void setAlias(ColumnAlias alias) {
+    public void setAlias(Name alias) {
         this.alias = alias;
     }
     

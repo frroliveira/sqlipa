@@ -1,13 +1,16 @@
-package main.sqlipa.parser.ast.name;
+package main.sqlipa.parser.ast;
 
-import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.Node;
 
 public class Name extends Node {
     
     private String name;
     
     public Name() {
+    }
+    
+    public Name(Name name) {
+        super(name);
+        this.name = new String(name.getName());
     }
     
     public Name(Block block, String name) {

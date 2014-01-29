@@ -1,19 +1,19 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.TableAlias;
+import main.sqlipa.parser.ast.Name;
 
 public class SelectSrc extends SingleSrc {
 
     private SelectStmt select;
     
-    private TableAlias alias;
+    private Name alias;
     
     public SelectSrc() {
         super();
     }
     
-    public SelectSrc(Block block, SelectStmt select, TableAlias alias) {
+    public SelectSrc(Block block, SelectStmt select, Name alias) {
         super(block);
         this.select = select;
         this.alias = alias;
@@ -23,7 +23,7 @@ public class SelectSrc extends SingleSrc {
         return select;
     }
     
-    public TableAlias getAlias() {
+    public Name getAlias() {
         return alias;
     }
     
@@ -31,7 +31,7 @@ public class SelectSrc extends SingleSrc {
         this.select = select;
     }
     
-    public void setAlias(TableAlias alias) {
+    public void setAlias(Name alias) {
         this.alias = alias;
     }
     

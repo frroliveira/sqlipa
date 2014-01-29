@@ -4,10 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.constraint.table.TableConstraint;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
-import main.sqlipa.parser.ast.name.TableName;
 import main.sqlipa.parser.ast.stmt.ColumnDef;
 
 public class CreateTableStmtWithColumns extends CreateTableStmt {
@@ -24,14 +22,14 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
     
     public CreateTableStmtWithColumns(CreateTableStmt stmt) {
         super(stmt, stmt.getExplain(), stmt.hasIfNotExists(),
-                new DatabaseName(stmt.getDatabase()),
-                new TableName(stmt.getName()), stmt.hasTemporary());
+                new Name(stmt.getDatabase()),
+                new Name(stmt.getName()), stmt.hasTemporary());
         this.columns = new LinkedList<ColumnDef>();
         this.constraints = new LinkedList<TableConstraint>();
     }
     
     public CreateTableStmtWithColumns(Block block, Explain explain,
-            boolean hasIfNotExists, DatabaseName db, Name name, boolean hasTemp,
+            boolean hasIfNotExists, Name db, Name name, boolean hasTemp,
             List<ColumnDef> columns, List<TableConstraint> constraints) {
         super(block, explain, hasIfNotExists, db, name, hasTemp);
         this.columns = columns;

@@ -5,6 +5,7 @@ import main.sqlipa.parser.ast.Comment;
 import main.sqlipa.parser.ast.IndexedBy;
 import main.sqlipa.parser.ast.IndexedColumn;
 import main.sqlipa.parser.ast.LineComment;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.QualifiedTableName;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
@@ -49,18 +50,7 @@ import main.sqlipa.parser.ast.literal.BlobLiteral;
 import main.sqlipa.parser.ast.literal.Literal;
 import main.sqlipa.parser.ast.literal.NumericLiteral;
 import main.sqlipa.parser.ast.literal.StringLiteral;
-import main.sqlipa.parser.ast.name.Alias;
-import main.sqlipa.parser.ast.name.CollationName;
-import main.sqlipa.parser.ast.name.ColumnAlias;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.ConstraintName;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.FunctionName;
-import main.sqlipa.parser.ast.name.IndexName;
-import main.sqlipa.parser.ast.name.Name;
-import main.sqlipa.parser.ast.name.TableAlias;
-import main.sqlipa.parser.ast.name.TableName;
-import main.sqlipa.parser.ast.name.TypeName;
+import main.sqlipa.parser.ast.TypeName;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
 import main.sqlipa.parser.ast.stmt.create.CreateStmt;
 import main.sqlipa.parser.ast.stmt.create.CreateTableStmt;
@@ -535,67 +525,7 @@ public class DumpVisitor implements VoidVisitor {
     }
 
     @Override
-    public void visit(CollationName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(ColumnName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(ConstraintName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(DatabaseName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(FunctionName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(IndexName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(TableName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public void visit(TypeName name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(Alias alias) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(ColumnAlias alias) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(TableAlias alias) {
         // TODO Auto-generated method stub
         
     }

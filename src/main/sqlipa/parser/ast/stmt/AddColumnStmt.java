@@ -1,8 +1,7 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class AddColumnStmt extends AlterTableStmt {
     
@@ -12,8 +11,8 @@ public class AddColumnStmt extends AlterTableStmt {
         super();
     }
     
-    public AddColumnStmt(Block block, Explain explain, DatabaseName db,
-            TableName tab, ColumnDef column) {
+    public AddColumnStmt(Block block, Explain explain, Name db,
+            Name tab, ColumnDef column) {
         super(block, explain, db, tab);
         this.column = column;
     }

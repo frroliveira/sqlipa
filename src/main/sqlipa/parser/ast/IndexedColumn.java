@@ -1,7 +1,6 @@
 package main.sqlipa.parser.ast;
 
-import main.sqlipa.parser.ast.name.CollationName;
-import main.sqlipa.parser.ast.name.ColumnName;
+import main.sqlipa.parser.ast.Name;
 
 public class IndexedColumn extends Node {
     
@@ -12,16 +11,16 @@ public class IndexedColumn extends Node {
     
     private Order order;
     
-    private ColumnName column;
+    private Name column;
     
-    private CollationName collation;
+    private Name collation;
     
     public IndexedColumn() {
         super();
     }
     
-    public IndexedColumn(Block block, Order order, ColumnName column,
-            CollationName collation) {
+    public IndexedColumn(Block block, Order order, Name column,
+            Name collation) {
         super(block);
         this.order = order;
         this.column = column;
@@ -32,11 +31,11 @@ public class IndexedColumn extends Node {
         return order;
     }
     
-    public ColumnName getColumn() {
+    public Name getColumn() {
         return column;
     }
     
-    public CollationName getCollation() {
+    public Name getCollation() {
         return collation;
     }
     
@@ -44,11 +43,11 @@ public class IndexedColumn extends Node {
         this.order = order;
     }
     
-    public void setColumn(ColumnName column) {
+    public void setColumn(Name column) {
         this.column = column;
     }
     
-    public void setCollation(CollationName collation) {
+    public void setCollation(Name collation) {
         this.collation = collation;
     }
     

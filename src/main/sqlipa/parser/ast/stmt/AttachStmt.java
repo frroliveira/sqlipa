@@ -2,39 +2,39 @@ package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.name.DatabaseName;
+import main.sqlipa.parser.ast.Name;
 
 public class AttachStmt extends SqlStatement {
     
     private Expression expr;
     
-    private DatabaseName db;
+    private Name database;
         
     public AttachStmt() {
         super();
     }
     
     public AttachStmt(Block block, Explain explain, Expression expr, 
-            DatabaseName db) {
+            Name database) {
         super(block, explain);
         this.expr = expr;
-        this.db = db;
+        this.database = database;
     }
     
     public Expression getExpression() {
         return expr;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
     public void setExpression(Expression expr) {
         this.expr = expr;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
 
 }

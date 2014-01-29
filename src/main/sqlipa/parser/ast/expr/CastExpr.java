@@ -1,7 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.TypeName;
+import main.sqlipa.parser.ast.TypeName;
 
 public class CastExpr extends Expression {
 

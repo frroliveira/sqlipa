@@ -5,13 +5,11 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.ModuleArgument;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.ModuleName;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 
 public class CreateVirtualTableStmt extends CreateStmt {
     
-    private ModuleName module;
+    private Name module;
     
     private List<ModuleArgument> args;
     
@@ -21,14 +19,14 @@ public class CreateVirtualTableStmt extends CreateStmt {
     }
     
     public CreateVirtualTableStmt(Block block, Explain explain,
-            boolean hasIfNotExists, DatabaseName db, Name name,
-            ModuleName module, List<ModuleArgument> args) {
+            boolean hasIfNotExists, Name db, Name name, Name module,
+            List<ModuleArgument> args) {
         super(block, explain, hasIfNotExists, db, name);
         this.module = module;
         this.args = args;
     }
     
-    public ModuleName getModule() {
+    public Name getModule() {
         return module;
     }
     
@@ -36,7 +34,7 @@ public class CreateVirtualTableStmt extends CreateStmt {
         return args;
     }
     
-    public void setModule(ModuleName module) {
+    public void setModule(Name module) {
         this.module = module;
     }
     

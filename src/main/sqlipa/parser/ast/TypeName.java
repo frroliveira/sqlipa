@@ -1,4 +1,4 @@
-package main.sqlipa.parser.ast.name;
+package main.sqlipa.parser.ast;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.UnaryExpr;

@@ -1,15 +1,14 @@
 package main.sqlipa.parser.ast.stmt.drop;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
 
 public abstract class DropStmt extends SqlStatement {
     
     private boolean ifExists;
     
-    private DatabaseName db;
+    private Name database;
     
     private Name name;
     
@@ -18,10 +17,10 @@ public abstract class DropStmt extends SqlStatement {
     }
     
     public DropStmt(Block block, Explain explain, boolean hasIfExists,
-            DatabaseName db, Name name) {
+            Name database, Name name) {
         super(block, explain);
         this.ifExists = hasIfExists;
-        this.db = db;
+        this.database = database;
         this.name = name;
     }
     
@@ -29,8 +28,8 @@ public abstract class DropStmt extends SqlStatement {
         return ifExists;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
     public Name getName() {
@@ -41,8 +40,8 @@ public abstract class DropStmt extends SqlStatement {
         this.ifExists = hasIfExists;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
     public void setName(Name name) {

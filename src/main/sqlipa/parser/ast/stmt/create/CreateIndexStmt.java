@@ -5,15 +5,13 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedColumn;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class CreateIndexStmt extends CreateStmt {
     
     private boolean unique;
     
-    private TableName tab;
+    private Name table;
     
     private List<IndexedColumn> columns;
     
@@ -23,11 +21,11 @@ public class CreateIndexStmt extends CreateStmt {
     }
     
     public CreateIndexStmt(Block block, Explain explain, boolean hasIfNotExists,
-                DatabaseName db, Name name, boolean hasUnique, TableName tab,
+                Name db, Name name, boolean hasUnique, Name table,
                 List<IndexedColumn> columns) {
         super(block, explain, hasIfNotExists, db, name);
         this.unique = hasUnique;
-        this.tab = tab;
+        this.table = table;
         this.columns = columns;
     }
     
@@ -35,8 +33,8 @@ public class CreateIndexStmt extends CreateStmt {
         return unique;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
     public List<IndexedColumn> getColumns() {
@@ -47,8 +45,8 @@ public class CreateIndexStmt extends CreateStmt {
         this.unique = hasUnique;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
 
     public void setColumns(List<IndexedColumn> columns) {

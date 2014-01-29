@@ -1,26 +1,26 @@
 package main.sqlipa.parser.ast;
 
-import main.sqlipa.parser.ast.name.IndexName;
+import main.sqlipa.parser.ast.Name;
 
 public class IndexedBy extends Node {
     
-    private IndexName ind;
+    private Name index;
     
     public IndexedBy() {
         super();
     }
     
-    public IndexedBy(Block block, IndexName ind) {
+    public IndexedBy(Block block, Name index) {
         super(block);
-        this.ind = ind;
+        this.index = index;
     }
     
-    public IndexName getIndex() {
-        return ind;
+    public Name getIndex() {
+        return index;
     }
     
-    public void setIndex(IndexName ind) {
-        this.ind = ind;
+    public void setIndex(Name index) {
+        this.index = index;
     }
     
 }

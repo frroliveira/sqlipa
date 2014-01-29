@@ -1,8 +1,7 @@
 package main.sqlipa.parser.ast.stmt.create;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
+import main.sqlipa.parser.ast.Name;
 
 public abstract class CreateTableStmt extends CreateStmt {
 
@@ -13,7 +12,7 @@ public abstract class CreateTableStmt extends CreateStmt {
     }
     
     public CreateTableStmt(Block block, Explain explain, boolean hasIfNotExists,
-            DatabaseName db, Name name, boolean hasTemp) {
+            Name db, Name name, boolean hasTemp) {
         super(block, explain, hasIfNotExists, db, name);
         this.temp = hasTemp;
     }

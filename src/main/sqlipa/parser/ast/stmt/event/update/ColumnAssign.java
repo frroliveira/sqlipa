@@ -3,11 +3,11 @@ package main.sqlipa.parser.ast.stmt.event.update;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.name.ColumnName;
+import main.sqlipa.parser.ast.Name;
 
 public class ColumnAssign extends Node {
     
-    private ColumnName column;
+    private Name column;
     
     private Expression expr;
     
@@ -15,13 +15,13 @@ public class ColumnAssign extends Node {
         super();
     }
     
-    public ColumnAssign(Block block, ColumnName column, Expression expr) {
+    public ColumnAssign(Block block, Name column, Expression expr) {
         super(block);
         this.column = column;
         this.expr = expr;
     }
     
-    public ColumnName getColumn() {
+    public Name getColumn() {
         return column;
     }
     
@@ -29,7 +29,7 @@ public class ColumnAssign extends Node {
         return expr;
     }
     
-    public void setColumn(ColumnName column) {
+    public void setColumn(Name column) {
         this.column = column;
     }
     

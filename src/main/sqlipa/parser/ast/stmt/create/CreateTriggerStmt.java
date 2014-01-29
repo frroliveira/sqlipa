@@ -4,11 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.Name;
-import main.sqlipa.parser.ast.name.TableName;
 import main.sqlipa.parser.ast.stmt.event.EventStmt;
 
 public class CreateTriggerStmt extends CreateStmt {
@@ -33,9 +30,9 @@ public class CreateTriggerStmt extends CreateStmt {
     
     private Event event;
     
-    private List<ColumnName> columns;
+    private List<Name> columns;
     
-    private TableName tab;
+    private Name table;
     
     private Expression when;
     
@@ -43,22 +40,21 @@ public class CreateTriggerStmt extends CreateStmt {
     
     public CreateTriggerStmt() {
         super();
-        columns = new LinkedList<ColumnName>();
+        columns = new LinkedList<Name>();
         stmts = new LinkedList<EventStmt>();
     }
     
     public CreateTriggerStmt(Block block, Explain explain,
-            boolean hasIfNotExists, DatabaseName db, Name name, boolean hasTemp,
-            boolean hasForEachRow, Time time, Event event,
-            List<ColumnName> columns, TableName tab, Expression when,
-            List<EventStmt> stmts) {
+            boolean hasIfNotExists, Name db, Name name, boolean hasTemp,
+            boolean hasForEachRow, Time time, Event event, List<Name> columns,
+            Name table, Expression when, List<EventStmt> stmts) {
         super(block, explain, hasIfNotExists, db, name);
         this.temp = hasTemp;
         this.forEachRow = hasForEachRow;
         this.time = time;
         this.event = event;
         this.columns = columns;
-        this.tab = tab;
+        this.table = table;
         this.when = when;
         this.stmts = stmts;
     }
@@ -79,12 +75,12 @@ public class CreateTriggerStmt extends CreateStmt {
         return event;
     }
     
-    public List<ColumnName> getColumns() {
+    public List<Name> getColumns() {
         return columns;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
     public Expression getWhen() {
@@ -111,12 +107,12 @@ public class CreateTriggerStmt extends CreateStmt {
         this.event = event;
     }
     
-    public void setColumns(List<ColumnName> columns) {
+    public void setColumns(List<Name> columns) {
         this.columns = columns;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
     
     public void setWhen(Expression when) {
@@ -127,7 +123,7 @@ public class CreateTriggerStmt extends CreateStmt {
         this.stmts = stmts;
     }
     
-    public void addColumn(ColumnName column) {
+    public void addColumn(Name column) {
         columns.add(column);
     }
     
@@ -135,7 +131,7 @@ public class CreateTriggerStmt extends CreateStmt {
         stmts.add(stmt);
     }
     
-    public boolean removeColumn(ColumnName column) {
+    public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
     

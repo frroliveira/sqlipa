@@ -1,28 +1,26 @@
 package main.sqlipa.parser.ast.constraint.column;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.CollationName;
-import main.sqlipa.parser.ast.name.ConstraintName;
+import main.sqlipa.parser.ast.Name;
 
 public class CollateColumnConstraint extends ColumnConstraint {
 
-    private CollationName collation;
+    private Name collation;
     
     public CollateColumnConstraint() {
         super();
     }
     
-    public CollateColumnConstraint(Block block, ConstraintName name,
-            CollationName collation) {
+    public CollateColumnConstraint(Block block, Name name, Name collation) {
         super(block, name);
         this.collation = collation;
     }
     
-    public CollationName getCollation() {
+    public Name getCollation() {
         return collation;
     }
     
-    public void setCollation(CollationName collation) {
+    public void setCollation(Name collation) {
         this.collation = collation;
     }
     

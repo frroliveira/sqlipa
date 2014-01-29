@@ -2,7 +2,7 @@ package main.sqlipa.parser.ast.constraint.column;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.Constraint;
-import main.sqlipa.parser.ast.name.ConstraintName;
+import main.sqlipa.parser.ast.Name;
 
 public class ColumnConstraint extends Constraint {
 
@@ -10,7 +10,7 @@ public class ColumnConstraint extends Constraint {
         super();
     }
     
-    public ColumnConstraint(Block block, ConstraintName name) {
+    public ColumnConstraint(Block block, Name name) {
         super(block, name);
     }
     

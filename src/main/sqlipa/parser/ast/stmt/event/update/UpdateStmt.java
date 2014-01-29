@@ -22,7 +22,7 @@ public class UpdateStmt extends EventStmt {
     
     private Type type;
     
-    private QualifiedTableName qualifiedTab;
+    private QualifiedTableName qualifiedTable;
     
     private List<ColumnAssign> assigns;
     
@@ -36,11 +36,11 @@ public class UpdateStmt extends EventStmt {
     }
     
     public UpdateStmt(Block block, Explain explain, Type type,
-            QualifiedTableName qualifiedTab, List<ColumnAssign> assigns,
+            QualifiedTableName qualifiedTable, List<ColumnAssign> assigns,
             Expression where, EventConstraint constraint) {
         super(block, explain);
         this.type = type;
-        this.qualifiedTab = qualifiedTab;
+        this.qualifiedTable = qualifiedTable;
         this.assigns = assigns;
         this.where = where;
         this.constraint = constraint;
@@ -51,7 +51,7 @@ public class UpdateStmt extends EventStmt {
     }
     
     public QualifiedTableName getQualifiedTable() {
-        return qualifiedTab;
+        return qualifiedTable;
     }
     
     public List<ColumnAssign> getAssignments() {
@@ -70,8 +70,8 @@ public class UpdateStmt extends EventStmt {
         this.type = type;
     }
     
-    public void setQualifiedTable(QualifiedTableName qualifiedTab) {
-        this.qualifiedTab = qualifiedTab;
+    public void setQualifiedTable(QualifiedTableName qualifiedTable) {
+        this.qualifiedTable = qualifiedTable;
     }
     
     public void setAssignments(List<ColumnAssign> assigns) {

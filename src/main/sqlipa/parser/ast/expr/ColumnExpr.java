@@ -1,51 +1,48 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.name.ColumnName;
-import main.sqlipa.parser.ast.name.DatabaseName;
-import main.sqlipa.parser.ast.name.TableName;
+import main.sqlipa.parser.ast.Name;
 
 public class ColumnExpr extends Expression {
 
-    private DatabaseName db;
+    private Name database;
     
-    private TableName tab;
+    private Name table;
     
-    private ColumnName column;
+    private Name column;
     
     public ColumnExpr() {
         super();
     }
     
-    public ColumnExpr(Block block, DatabaseName db, TableName tab,
-            ColumnName column) {
+    public ColumnExpr(Block block, Name database, Name table, Name column) {
         super(block);
-        this.db = db;
-        this.tab = tab;
+        this.database = database;
+        this.table = table;
         this.column = column;
     }
     
-    public DatabaseName getDatabase() {
-        return db;
+    public Name getDatabase() {
+        return database;
     }
     
-    public TableName getTable() {
-        return tab;
+    public Name getTable() {
+        return table;
     }
     
-    public ColumnName getColumn() {
+    public Name getColumn() {
         return column;
     }
     
-    public void setDatabase(DatabaseName db) {
-        this.db = db;
+    public void setDatabase(Name database) {
+        this.database = database;
     }
     
-    public void setTable(TableName tab) {
-        this.tab = tab;
+    public void setTable(Name table) {
+        this.table = table;
     }
     
-    public void setColumn(ColumnName column) {
+    public void setColumn(Name column) {
         this.column = column;
     }
     
