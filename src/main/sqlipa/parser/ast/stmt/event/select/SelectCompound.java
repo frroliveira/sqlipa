@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class SelectCompound extends SelectUnit {
 
@@ -52,5 +53,10 @@ public class SelectCompound extends SelectUnit {
     public void setRight(SelectUnit right) {
         this.right = right;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

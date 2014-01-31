@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class BeginStmt extends SqlStatement {
     
@@ -27,6 +28,11 @@ public class BeginStmt extends SqlStatement {
     
     public void setType(Type type) {
         this.type = type;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

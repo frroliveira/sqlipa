@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.event.select;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.stmt.event.EventConstraint;
 import main.sqlipa.parser.ast.stmt.event.EventStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class SelectStmt extends EventStmt {
 
@@ -35,6 +36,11 @@ public class SelectStmt extends EventStmt {
     
     public void setConstraint(EventConstraint constraint) {
         this.constraint = constraint;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

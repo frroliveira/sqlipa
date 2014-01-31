@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class InSetExpr extends InExpr {
 
@@ -35,5 +36,10 @@ public class InSetExpr extends InExpr {
     public boolean removeExpression(Expression expr) {
         return set.remove(expr);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

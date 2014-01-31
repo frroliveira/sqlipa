@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class RaiseFunctionExpr extends Expression {
 
@@ -40,5 +41,10 @@ public class RaiseFunctionExpr extends Expression {
     public void setError(String error) {
         this.error = error;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

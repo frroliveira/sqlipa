@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.constraint;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class DeferrableSetting extends ForeignKeySetting {
 
@@ -43,5 +44,10 @@ public class DeferrableSetting extends ForeignKeySetting {
     public void setMode(Mode mode) {
         this.mode = mode;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

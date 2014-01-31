@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast;
 
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
+
 
 public class Name extends Node {
     
@@ -24,6 +26,11 @@ public class Name extends Node {
     
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

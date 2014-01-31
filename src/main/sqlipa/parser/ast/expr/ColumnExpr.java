@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class ColumnExpr extends Expression {
 
@@ -45,5 +46,10 @@ public class ColumnExpr extends Expression {
     public void setColumn(Name column) {
         this.column = column;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

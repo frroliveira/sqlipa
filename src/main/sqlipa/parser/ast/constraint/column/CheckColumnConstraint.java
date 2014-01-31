@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.constraint.column;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CheckColumnConstraint extends ColumnConstraint {
 
@@ -25,4 +26,9 @@ public class CheckColumnConstraint extends ColumnConstraint {
         this.expr = expr;
     }
     
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

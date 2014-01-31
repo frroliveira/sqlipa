@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class RollbackStmt extends SqlStatement {
     
@@ -22,6 +23,11 @@ public class RollbackStmt extends SqlStatement {
     
     public void setSavepoint(Name savepoint) {
         this.savepoint = savepoint;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

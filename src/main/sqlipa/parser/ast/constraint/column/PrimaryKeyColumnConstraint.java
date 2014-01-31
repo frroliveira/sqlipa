@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.constraint.column;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class PrimaryKeyColumnConstraint extends ColumnConstraint {
@@ -60,5 +61,10 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
     public void setAutoincrement(boolean hasAutoincrement) {
         this.autoincrement = hasAutoincrement;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

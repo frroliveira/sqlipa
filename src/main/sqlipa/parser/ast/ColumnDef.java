@@ -1,13 +1,10 @@
-package main.sqlipa.parser.ast.stmt;
+package main.sqlipa.parser.ast;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import main.sqlipa.parser.ast.Block;
-import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.constraint.column.ColumnConstraint;
-import main.sqlipa.parser.ast.Name;
-import main.sqlipa.parser.ast.TypeName;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class ColumnDef extends Node {
     
@@ -60,6 +57,11 @@ public class ColumnDef extends Node {
     
     public boolean removeConstraint(ColumnConstraint constraint) {
         return constraints.remove(constraint);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

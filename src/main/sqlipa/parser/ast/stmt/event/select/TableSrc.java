@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.event.select;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedBy;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class TableSrc extends SingleSrc {
     
@@ -58,5 +59,10 @@ public class TableSrc extends SingleSrc {
     public void setIndexed(IndexedBy indexed) {
         this.indexed = indexed;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

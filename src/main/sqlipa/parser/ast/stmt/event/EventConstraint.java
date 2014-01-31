@@ -6,6 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class EventConstraint extends Node {
     
@@ -58,6 +59,11 @@ public class EventConstraint extends Node {
     
     public boolean removeTerm(OrderingTerm term) {
         return terms.remove(term);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

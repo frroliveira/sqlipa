@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class JoinCompound extends JoinSrc {
     
@@ -70,5 +71,10 @@ public class JoinCompound extends JoinSrc {
     public void setConstraint(JoinConstraint constraint) {
         this.constraint = constraint;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

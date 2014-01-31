@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.stmt.event.select;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class AliasedColumn extends ExpressionColumn {
@@ -24,5 +25,10 @@ public class AliasedColumn extends ExpressionColumn {
     public void setAlias(Name alias) {
         this.alias = alias;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

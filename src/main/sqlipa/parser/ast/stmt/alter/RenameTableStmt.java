@@ -1,7 +1,8 @@
-package main.sqlipa.parser.ast.stmt;
+package main.sqlipa.parser.ast.stmt.alter;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class RenameTableStmt extends AlterTableStmt {
     
@@ -23,6 +24,11 @@ public class RenameTableStmt extends AlterTableStmt {
 
     public void setNewTable(Name newTab) {
         this.newTab = newTab;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

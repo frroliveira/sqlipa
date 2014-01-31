@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.event.update;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class ColumnAssign extends Node {
@@ -35,6 +36,11 @@ public class ColumnAssign extends Node {
     
     public void setExpression(Expression expr) {
         this.expr = expr;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

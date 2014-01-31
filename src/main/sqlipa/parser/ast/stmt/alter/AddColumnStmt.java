@@ -1,7 +1,9 @@
-package main.sqlipa.parser.ast.stmt;
+package main.sqlipa.parser.ast.stmt.alter;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.ColumnDef;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class AddColumnStmt extends AlterTableStmt {
     
@@ -23,6 +25,11 @@ public class AddColumnStmt extends AlterTableStmt {
     
     public void setColumn(ColumnDef column) {
         this.column = column;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class ForeignKeyClause extends Node {
     
@@ -68,5 +69,10 @@ public class ForeignKeyClause extends Node {
     public void removeSetting(ForeignKeySetting setting) {
         settings.remove(setting);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

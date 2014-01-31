@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class InExpr extends Expression {
 
@@ -38,5 +39,10 @@ public class InExpr extends Expression {
     public void setExpression(Expression expr) {
         this.expr = expr;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

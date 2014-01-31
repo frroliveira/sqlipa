@@ -4,9 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.ColumnDef;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.constraint.table.TableConstraint;
-import main.sqlipa.parser.ast.stmt.ColumnDef;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CreateTableStmtWithColumns extends CreateTableStmt {
 
@@ -66,6 +67,11 @@ public class CreateTableStmtWithColumns extends CreateTableStmt {
     
     public boolean removeConstraint(TableConstraint constraint) {
         return constraints.remove(constraint);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

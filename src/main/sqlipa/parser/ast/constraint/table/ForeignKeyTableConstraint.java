@@ -5,6 +5,7 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ForeignKeyClause;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class ForeignKeyTableConstraint extends TableConstraint {
@@ -48,5 +49,10 @@ public class ForeignKeyTableConstraint extends TableConstraint {
     public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

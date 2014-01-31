@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast;
 
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class QualifiedTableName extends Node {
 
@@ -43,5 +44,10 @@ public class QualifiedTableName extends Node {
     public void setIndexed(IndexedBy indexed) {
         this.indexed = indexed;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

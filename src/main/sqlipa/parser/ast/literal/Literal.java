@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.literal;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class Literal extends Node {
     
@@ -19,5 +20,10 @@ public class Literal extends Node {
     public void setValue(String value) {
         this.value = value;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

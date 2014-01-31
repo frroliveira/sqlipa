@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.constraint.column;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.ForeignKeyClause;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class ForeignKeyColumnConstraint extends ColumnConstraint {
@@ -25,5 +26,10 @@ public class ForeignKeyColumnConstraint extends ColumnConstraint {
     public void setClause(ForeignKeyClause clause) {
         this.clause = clause;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

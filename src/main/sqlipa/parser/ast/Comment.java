@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast;
 
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
+
 public abstract class Comment extends Node {
     
     private String content;
@@ -20,5 +22,10 @@ public abstract class Comment extends Node {
     public void setContent(String content) {
         this.content = content;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

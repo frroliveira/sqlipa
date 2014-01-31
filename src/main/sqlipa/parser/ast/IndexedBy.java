@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast;
 
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class IndexedBy extends Node {
     
@@ -22,5 +23,10 @@ public class IndexedBy extends Node {
     public void setIndex(Name index) {
         this.index = index;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

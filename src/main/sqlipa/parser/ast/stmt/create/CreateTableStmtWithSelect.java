@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.create;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CreateTableStmtWithSelect extends CreateTableStmt {
 
@@ -32,5 +33,10 @@ public class CreateTableStmtWithSelect extends CreateTableStmt {
     public void setSelect(SelectStmt select) {
         this.select = select;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

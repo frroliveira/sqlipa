@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast;
 
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
+
 public class ModuleArgument extends Node {
     
     private String arg;
@@ -19,6 +21,11 @@ public class ModuleArgument extends Node {
     
     public void setArgument(String arg) {
         this.arg = arg;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

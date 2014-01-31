@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class AttachStmt extends SqlStatement {
@@ -35,6 +36,11 @@ public class AttachStmt extends SqlStatement {
     
     public void setDatabase(Name database) {
         this.database = database;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

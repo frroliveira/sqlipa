@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.constraint.table;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class CheckTableConstraint extends TableConstraint {
@@ -24,5 +25,10 @@ public class CheckTableConstraint extends TableConstraint {
     public void setExpression(Expression expr) {
         this.expr = expr;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

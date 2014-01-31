@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.pragma;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class PragmaStmt extends SqlStatement {
     
@@ -46,6 +47,11 @@ public class PragmaStmt extends SqlStatement {
     
     public void setValue(PragmaValue value) {
         this.value = value;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

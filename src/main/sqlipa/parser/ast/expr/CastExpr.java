@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.TypeName;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CastExpr extends Expression {
 
@@ -34,5 +35,10 @@ public class CastExpr extends Expression {
     public void setType(TypeName type) {
         this.type = type;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.stmt;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public abstract class SqlStatement extends Node {
     
@@ -13,6 +14,7 @@ public abstract class SqlStatement extends Node {
     private Explain explain;
 
     public SqlStatement() {
+        super();
     }
     
     public SqlStatement(Block block, Explain explain) {
@@ -27,5 +29,10 @@ public abstract class SqlStatement extends Node {
     public void setExplain(Explain explain) {
         this.explain = explain;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

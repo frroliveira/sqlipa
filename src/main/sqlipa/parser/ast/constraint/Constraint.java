@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.constraint;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public abstract class Constraint extends Node {
     
@@ -24,5 +25,10 @@ public abstract class Constraint extends Node {
     public void setName(Name name) {
         this.name = name;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

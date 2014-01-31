@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CaseExpr extends Expression {
     
@@ -57,5 +58,10 @@ public class CaseExpr extends Expression {
     public boolean removeWhen(WhenExpr when) {
         return whens.remove(when);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

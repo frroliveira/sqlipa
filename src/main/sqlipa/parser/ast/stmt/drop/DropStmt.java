@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.drop;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.SqlStatement;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public abstract class DropStmt extends SqlStatement {
     
@@ -46,6 +47,11 @@ public abstract class DropStmt extends SqlStatement {
     
     public void setName(Name name) {
         this.name = name;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

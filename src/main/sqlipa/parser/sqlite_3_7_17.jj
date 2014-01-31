@@ -1,9 +1,8 @@
 options {
     STATIC = false;
-      JAVA_UNICODE_ESCAPE=true;
-    
+    JAVA_UNICODE_ESCAPE = true;
     COMMON_TOKEN_ACTION = true;
-    IGNORE_CASE = true ;
+    IGNORE_CASE = true;
 }
 
 PARSER_BEGIN(ASTParser)
@@ -81,6 +80,7 @@ MORE :
 
 TOKEN_MGR_DECLS :
 {
+    // TODO: correct comments.
     private List<Comment> comments = new LinkedList<Comment>();
     
     private void CommonTokenAction(Token token) {
@@ -262,7 +262,7 @@ TOKEN :
 |   <NOT_EQUAL_2: "<>">
 }
 
-/* Literals && Identifiers */
+/* Literals & Identifiers */
 TOKEN :
 {
     <NUMERIC:
@@ -303,6 +303,8 @@ TOKEN :
 |   <SEMICOLON: ";">
 |   <COMMA: ",">
 |   <DOT: ".">
+|   <NOT_COMMA_LP_RP: (~[",", "(", ")"])+>
+|   <NOT_LP_RP: (~["(", ")"])+>
 }
 
 /* Char Sets */
@@ -326,9 +328,11 @@ List<SqlStatement> sqlStmtList() :{
 	    }
 	    (
 	        ";"
-	        stmt = sqlStmt() {
-	            stmts.add(stmt);
-	        }
+	        [
+		        stmt = sqlStmt() {
+	                stmts.add(stmt);
+	            }
+            ]
 	    )*
     ] {
         return stmts;
@@ -398,7 +402,10 @@ Name name() :
 {
 }
 {
-    <ID> | <STRING> {
+    (
+        <ID>
+    |   <STRING>
+    ) {
         return new Name(new Block(token.beginLine, token.beginColumn,
             token.endLine, token.endColumn), token.image);
     }
@@ -1524,9 +1531,29 @@ ModuleArgument moduleArgument() :
 }
 {
     // TODO:
-    {
-        return null;
+    (<NOT_COMMA_LP_RP>)*
+    [
+	    "("
+        other()
+	    ")"
+    ]
+    (<NOT_COMMA_LP_RP>)* {
+        return new ModuleArgument(new Block(token.beginLine, token.beginColumn,
+            token.endLine, token.endColumn), token.image);
     }
+}
+
+void other() :
+{
+}
+{
+    (<NOT_LP_RP>)*
+    [
+	    "("
+        other()
+	    ")"
+    ]
+    (<NOT_LP_RP>)*
 }
 
 DeleteStmt deleteStmt() :
@@ -2715,12 +2742,23 @@ PragmaStmt pragmaStmt() :
 
 PragmaValue pragmaValue() :
 {
+    UnaryExpr expr;
+    StringLiteral literal;
+    Name name;
 }
 {
-    {
-        // TODO:
-        return null;
-    }
+    (
+        expr = signedNumber() {
+            return new PragmaNumber(expr, expr);
+        }
+    |   LOOKAHEAD(<STRING>) // name() that also can match <STRING>
+        literal = stringLiteral() {
+            return new PragmaString(literal, literal);
+        }
+    |   name = name() {
+            return new PragmaName(name, name);
+        }
+	)
 }
 
 ReindexStmt reindexStmt() :

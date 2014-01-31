@@ -7,6 +7,7 @@ import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.expr.Expression;
 import main.sqlipa.parser.ast.stmt.event.EventStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CreateTriggerStmt extends CreateStmt {
     
@@ -137,6 +138,11 @@ public class CreateTriggerStmt extends CreateStmt {
     
     public boolean removeStatement(EventStmt stmt) {
         return stmts.remove(stmt);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

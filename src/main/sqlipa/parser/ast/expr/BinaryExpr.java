@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class BinaryExpr extends Expression {
 
@@ -77,5 +78,10 @@ public class BinaryExpr extends Expression {
     public void setOperator(Operator op) {
         this.op = op;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

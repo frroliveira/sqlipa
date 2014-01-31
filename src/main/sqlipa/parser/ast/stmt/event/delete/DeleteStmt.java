@@ -1,8 +1,11 @@
-package main.sqlipa.parser.ast.stmt.event;
+package main.sqlipa.parser.ast.stmt.event.delete;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.QualifiedTableName;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.stmt.event.EventConstraint;
+import main.sqlipa.parser.ast.stmt.event.EventStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class DeleteStmt extends EventStmt {
     
@@ -47,6 +50,11 @@ public class DeleteStmt extends EventStmt {
     
     public void setConstraint(EventConstraint constraint) {
         this.constraint = constraint;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

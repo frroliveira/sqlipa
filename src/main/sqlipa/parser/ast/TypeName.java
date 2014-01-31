@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.UnaryExpr;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class TypeName extends Name {
     
@@ -37,6 +38,11 @@ public class TypeName extends Name {
     
     public void setDimensionInY(UnaryExpr yDim) {
         this.yDim = yDim;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

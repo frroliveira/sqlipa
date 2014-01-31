@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.constraint.table;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.constraint.Constraint;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public abstract class TableConstraint extends Constraint {
@@ -13,5 +14,10 @@ public abstract class TableConstraint extends Constraint {
     public TableConstraint(Block block, Name name) {
         super(block, name);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

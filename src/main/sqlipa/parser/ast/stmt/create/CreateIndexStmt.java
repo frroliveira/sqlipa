@@ -6,6 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedColumn;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CreateIndexStmt extends CreateStmt {
     
@@ -59,6 +60,11 @@ public class CreateIndexStmt extends CreateStmt {
     
     public boolean removeColumn(IndexedColumn column) {
         return columns.remove(column);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

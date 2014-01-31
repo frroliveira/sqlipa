@@ -1,5 +1,7 @@
 package main.sqlipa.parser.ast;
 
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
+
 // TODO: finish class.
 public abstract class Node extends Block {
    
@@ -19,6 +21,10 @@ public abstract class Node extends Block {
     
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

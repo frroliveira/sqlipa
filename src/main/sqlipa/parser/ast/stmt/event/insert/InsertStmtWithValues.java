@@ -1,10 +1,11 @@
-package main.sqlipa.parser.ast.stmt.event;
+package main.sqlipa.parser.ast.stmt.event.insert;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class InsertStmtWithValues extends InsertStmt {
@@ -89,6 +90,11 @@ public class InsertStmtWithValues extends InsertStmt {
             return false;
         }
         return rows.get(index).remove(value);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

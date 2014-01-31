@@ -6,6 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.IndexedColumn;
 import main.sqlipa.parser.ast.constraint.ConflictClause;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 import main.sqlipa.parser.ast.Name;
 
 public class UniqueTableConstraint extends TableConstraint {
@@ -49,5 +50,10 @@ public class UniqueTableConstraint extends TableConstraint {
     public boolean removeColumn(IndexedColumn column) {
         return columns.remove(column);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

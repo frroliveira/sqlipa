@@ -8,6 +8,7 @@ import main.sqlipa.parser.ast.QualifiedTableName;
 import main.sqlipa.parser.ast.expr.Expression;
 import main.sqlipa.parser.ast.stmt.event.EventConstraint;
 import main.sqlipa.parser.ast.stmt.event.EventStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class UpdateStmt extends EventStmt {
     
@@ -92,6 +93,11 @@ public class UpdateStmt extends EventStmt {
     
     public boolean removeAssignment(ColumnAssign assign) {
         return assigns.remove(assign);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

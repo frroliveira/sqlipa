@@ -3,6 +3,7 @@ package main.sqlipa.parser.ast.stmt.event;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class OrderingTerm extends Node {
     
@@ -40,5 +41,10 @@ public class OrderingTerm extends Node {
     public void setOrder(Order order) {
         this.order = order;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

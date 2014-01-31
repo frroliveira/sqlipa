@@ -5,6 +5,7 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.expr.Expression;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class SelectCore extends SelectUnit {
     
@@ -100,6 +101,11 @@ public class SelectCore extends SelectUnit {
     
     public boolean removeGroupByExpression(Expression expr) {
         return groupBy.remove(expr);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

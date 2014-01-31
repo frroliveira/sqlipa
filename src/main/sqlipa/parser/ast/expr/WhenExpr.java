@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Node;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class WhenExpr extends Node {
     
@@ -34,5 +35,10 @@ public class WhenExpr extends Node {
     public void setThen(Expression then) {
         this.then = then;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

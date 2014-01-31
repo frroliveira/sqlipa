@@ -1,6 +1,7 @@
 package main.sqlipa.parser.ast.constraint;
 
 import main.sqlipa.parser.ast.Block;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class OnSetting extends ForeignKeySetting {
 
@@ -46,5 +47,10 @@ public class OnSetting extends ForeignKeySetting {
     public void setAction(Action action) {
         this.action = action;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

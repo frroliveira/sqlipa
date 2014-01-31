@@ -1,4 +1,4 @@
-package main.sqlipa.parser.ast.stmt.event;
+package main.sqlipa.parser.ast.stmt.event.insert;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class InsertStmtWithSelect extends InsertStmt {
     
@@ -54,6 +55,11 @@ public class InsertStmtWithSelect extends InsertStmt {
     
     public boolean removeColumn(Name column) {
         return columns.remove(column);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

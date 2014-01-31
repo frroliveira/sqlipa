@@ -6,6 +6,7 @@ import java.util.List;
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.ModuleArgument;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class CreateVirtualTableStmt extends CreateStmt {
     
@@ -48,6 +49,11 @@ public class CreateVirtualTableStmt extends CreateStmt {
     
     public boolean removeModuleArgument(ModuleArgument arg) {
         return args.remove(arg);
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

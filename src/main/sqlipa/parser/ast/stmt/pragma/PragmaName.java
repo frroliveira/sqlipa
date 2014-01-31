@@ -1,22 +1,22 @@
-package main.sqlipa.parser.ast.constraint;
+package main.sqlipa.parser.ast.stmt.pragma;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
 import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
-public class MatchSetting extends ForeignKeySetting {
+public class PragmaName extends PragmaValue {
     
     private Name name;
     
-    public MatchSetting() {
+    public PragmaName() {
         super();
     }
     
-    public MatchSetting(Block block, Name name) {
+    public PragmaName(Block block, Name name) {
         super(block);
         this.name = name;
     }
-
+    
     public Name getName() {
         return name;
     }

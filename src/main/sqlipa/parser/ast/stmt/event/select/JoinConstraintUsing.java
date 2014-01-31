@@ -5,6 +5,7 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class JoinConstraintUsing extends JoinConstraint {
 
@@ -35,5 +36,10 @@ public class JoinConstraintUsing extends JoinConstraint {
     public boolean removeColumn(Name column) {
         return columns.remove(column);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

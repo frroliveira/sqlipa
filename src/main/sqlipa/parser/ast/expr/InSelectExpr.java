@@ -2,6 +2,7 @@ package main.sqlipa.parser.ast.expr;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class InSelectExpr extends InExpr {
 
@@ -24,5 +25,10 @@ public class InSelectExpr extends InExpr {
     public void setStatement(SelectStmt stmt) {
         this.stmt = stmt;
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

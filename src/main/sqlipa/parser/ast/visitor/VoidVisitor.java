@@ -1,79 +1,21 @@
 package main.sqlipa.parser.ast.visitor;
 
-import main.sqlipa.parser.ast.BlockComment;
-import main.sqlipa.parser.ast.Comment;
-import main.sqlipa.parser.ast.IndexedBy;
-import main.sqlipa.parser.ast.IndexedColumn;
-import main.sqlipa.parser.ast.LineComment;
-import main.sqlipa.parser.ast.Name;
-import main.sqlipa.parser.ast.Node;
-import main.sqlipa.parser.ast.QualifiedTableName;
-import main.sqlipa.parser.ast.constraint.ConflictClause;
-import main.sqlipa.parser.ast.constraint.Constraint;
-import main.sqlipa.parser.ast.constraint.DeferrableSetting;
-import main.sqlipa.parser.ast.constraint.ForeignKeyClause;
-import main.sqlipa.parser.ast.constraint.ForeignKeySetting;
-import main.sqlipa.parser.ast.constraint.MatchSetting;
-import main.sqlipa.parser.ast.constraint.OnSetting;
-import main.sqlipa.parser.ast.constraint.column.CheckColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.CollateColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.ColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.DefaultColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.ForeignKeyColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.NotNullColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.PrimaryKeyColumnConstraint;
-import main.sqlipa.parser.ast.constraint.column.UniqueColumnConstraint;
-import main.sqlipa.parser.ast.constraint.table.CheckTableConstraint;
-import main.sqlipa.parser.ast.constraint.table.ForeignKeyTableConstraint;
-import main.sqlipa.parser.ast.constraint.table.PrimaryKeyTableConstraint;
-import main.sqlipa.parser.ast.constraint.table.TableConstraint;
-import main.sqlipa.parser.ast.constraint.table.UniqueTableConstraint;
-import main.sqlipa.parser.ast.expr.BetweenExpr;
-import main.sqlipa.parser.ast.expr.BinaryExpr;
-import main.sqlipa.parser.ast.expr.BindParameterExpr;
-import main.sqlipa.parser.ast.expr.CaseExpr;
-import main.sqlipa.parser.ast.expr.CastExpr;
-import main.sqlipa.parser.ast.expr.CollateExpr;
-import main.sqlipa.parser.ast.expr.ColumnExpr;
-import main.sqlipa.parser.ast.expr.Expression;
-import main.sqlipa.parser.ast.expr.FunctionExpr;
-import main.sqlipa.parser.ast.expr.InExpr;
-import main.sqlipa.parser.ast.expr.InSelectExpr;
-import main.sqlipa.parser.ast.expr.InSetExpr;
-import main.sqlipa.parser.ast.expr.InTableExpr;
-import main.sqlipa.parser.ast.expr.LiteralExpr;
-import main.sqlipa.parser.ast.expr.RaiseFunctionExpr;
-import main.sqlipa.parser.ast.expr.SelectExpr;
-import main.sqlipa.parser.ast.expr.UnaryExpr;
-import main.sqlipa.parser.ast.expr.WhenExpr;
-import main.sqlipa.parser.ast.literal.BlobLiteral;
-import main.sqlipa.parser.ast.literal.Literal;
-import main.sqlipa.parser.ast.literal.NumericLiteral;
-import main.sqlipa.parser.ast.literal.StringLiteral;
-import main.sqlipa.parser.ast.TypeName;
-import main.sqlipa.parser.ast.stmt.SqlStatement;
-import main.sqlipa.parser.ast.stmt.create.CreateStmt;
-import main.sqlipa.parser.ast.stmt.create.CreateTableStmt;
-import main.sqlipa.parser.ast.stmt.create.CreateTableStmtWithColumns;
-import main.sqlipa.parser.ast.stmt.create.CreateTableStmtWithSelect;
-import main.sqlipa.parser.ast.stmt.event.EventStmt;
-import main.sqlipa.parser.ast.stmt.event.OrderingTerm;
-import main.sqlipa.parser.ast.stmt.event.select.AliasedColumn;
-import main.sqlipa.parser.ast.stmt.event.select.ExpressionColumn;
-import main.sqlipa.parser.ast.stmt.event.select.JoinCompound;
-import main.sqlipa.parser.ast.stmt.event.select.JoinConstraint;
-import main.sqlipa.parser.ast.stmt.event.select.JoinConstraintOn;
-import main.sqlipa.parser.ast.stmt.event.select.JoinConstraintUsing;
-import main.sqlipa.parser.ast.stmt.event.select.JoinSrc;
-import main.sqlipa.parser.ast.stmt.event.select.ResultColumn;
-import main.sqlipa.parser.ast.stmt.event.select.SelectCompound;
-import main.sqlipa.parser.ast.stmt.event.select.SelectCore;
-import main.sqlipa.parser.ast.stmt.event.select.SelectSrc;
-import main.sqlipa.parser.ast.stmt.event.select.SelectStmt;
-import main.sqlipa.parser.ast.stmt.event.select.SelectUnit;
-import main.sqlipa.parser.ast.stmt.event.select.SingleSrc;
-import main.sqlipa.parser.ast.stmt.event.select.TableSrc;
-import main.sqlipa.parser.ast.stmt.event.select.UniversalColumn;
+import main.sqlipa.parser.ast.*;
+import main.sqlipa.parser.ast.constraint.*;
+import main.sqlipa.parser.ast.constraint.column.*;
+import main.sqlipa.parser.ast.constraint.table.*;
+import main.sqlipa.parser.ast.expr.*;
+import main.sqlipa.parser.ast.literal.*;
+import main.sqlipa.parser.ast.stmt.*;
+import main.sqlipa.parser.ast.stmt.alter.*;
+import main.sqlipa.parser.ast.stmt.create.*;
+import main.sqlipa.parser.ast.stmt.drop.*;
+import main.sqlipa.parser.ast.stmt.event.*;
+import main.sqlipa.parser.ast.stmt.event.delete.*;
+import main.sqlipa.parser.ast.stmt.event.insert.*;
+import main.sqlipa.parser.ast.stmt.event.select.*;
+import main.sqlipa.parser.ast.stmt.event.update.*;
+import main.sqlipa.parser.ast.stmt.pragma.*;
 
 public interface VoidVisitor {
     
@@ -86,15 +28,51 @@ public interface VoidVisitor {
 
     public void visit(BlockComment comment);
 
+    public void visit(Name name);
+
+    public void visit(TypeName name);
+    
+    public void visit(QualifiedTableName name);
+    
+    public void visit(ColumnDef column);
+
     public void visit(IndexedBy indexed);
 
     public void visit(IndexedColumn indexed);
 
-    public void visit(QualifiedTableName name);
+    public void visit(ModuleArgument arg);
 
     // Statements
     public void visit(SqlStatement stmt);
     
+    public void visit(AnalyzeStmt stmt);
+
+    public void visit(AttachStmt stmt);
+    
+    public void visit(BeginStmt stmt);
+    
+    public void visit(CommitStmt stmt);
+    
+    public void visit(DetachStmt stmt);
+    
+    public void visit(ReindexStmt stmt);
+    
+    public void visit(ReleaseStmt stmt);
+    
+    public void visit(RollbackStmt stmt);
+    
+    public void visit(SavepointStmt stmt);
+    
+    public void visit(VacuumStmt stmt);
+        
+        // Alter
+    public void visit(AlterTableStmt stmt);
+    
+    public void visit(AddColumnStmt stmt);
+    
+    public void visit(RenameTableStmt stmt);
+    
+        // Create
     public void visit(CreateStmt stmt);
     
     public void visit(CreateTableStmt stmt);
@@ -103,14 +81,47 @@ public interface VoidVisitor {
     
     public void visit(CreateTableStmtWithSelect stmt);
     
+    public void visit(CreateIndexStmt stmt);
+    
+    public void visit(CreateViewStmt stmt);
+    
+    public void visit(CreateTriggerStmt stmt);
+    
+    public void visit(CreateVirtualTableStmt stmt);
+    
+        // Drop
+    public void visit(DropStmt stmt);
+    
+    public void visit(DropIndexStmt stmt);
+
+    public void visit(DropTableStmt stmt);
+    
+    public void visit(DropTriggerStmt stmt);
+    
+    public void visit(DropViewStmt stmt);
+
+        // Event
     public void visit(EventStmt stmt);
 
-    public void visit(SelectStmt stmt);
+    public void visit(EventConstraint constraint);
     
-    // Event
     public void visit(OrderingTerm term);
     
-    // Select
+            // Delete
+    public void visit(DeleteStmt stmt);
+    
+            // Insert
+    public void visit(InsertStmt stmt);
+    
+    public void visit(InsertStmtDefault stmt);
+    
+    public void visit(InsertStmtWithSelect stmt);
+    
+    public void visit(InsertStmtWithValues stmt);
+    
+            // Select
+    public void visit(SelectStmt stmt);
+
     public void visit(SelectUnit unit);
 
     public void visit(SelectCore core);
@@ -141,9 +152,38 @@ public interface VoidVisitor {
 
     public void visit(JoinCompound compound);
 
+            // Update
+    public void visit(UpdateStmt stmt);
+    
+    public void visit(ColumnAssign assign);
+    
+        // Pragma
+    public void visit(PragmaStmt stmt);
+    
+    public void visit(PragmaValue value);
+    
+    public void visit(PragmaNumber number);
+    
+    public void visit(PragmaName name);
+    
+    public void visit(PragmaString string);
+    
     // Constraint
     public void visit(Constraint constraint);
 
+    public void visit(ConflictClause clause);
+
+    public void visit(ForeignKeyClause clause);
+
+    public void visit(ForeignKeySetting sett);
+
+    public void visit(DeferrableSetting sett);
+
+    public void visit(MatchSetting sett);
+
+    public void visit(OnSetting sett);
+
+        // Column
     public void visit(ColumnConstraint constraint);
 
     public void visit(CheckColumnConstraint constraint);
@@ -160,6 +200,7 @@ public interface VoidVisitor {
 
     public void visit(UniqueColumnConstraint constraint);
 
+        // Table
     public void visit(TableConstraint constraint);
 
     public void visit(CheckTableConstraint constraint);
@@ -169,18 +210,6 @@ public interface VoidVisitor {
     public void visit(PrimaryKeyTableConstraint constraint);
 
     public void visit(UniqueTableConstraint constraint);
-
-    public void visit(ConflictClause clause);
-
-    public void visit(ForeignKeyClause clause);
-
-    public void visit(ForeignKeySetting sett);
-
-    public void visit(DeferrableSetting sett);
-
-    public void visit(MatchSetting sett);
-
-    public void visit(OnSetting sett);
 
     // Expression
     public void visit(Expression expr);
@@ -227,10 +256,5 @@ public interface VoidVisitor {
     public void visit(NumericLiteral literal);
 
     public void visit(StringLiteral literal);
-
-    // Name
-    public void visit(Name name);
-
-    public void visit(TypeName name);
 
 }

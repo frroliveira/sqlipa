@@ -4,6 +4,7 @@ import java.util.List;
 
 import main.sqlipa.parser.ast.Block;
 import main.sqlipa.parser.ast.Name;
+import main.sqlipa.parser.ast.visitor.VoidVisitor;
 
 public class FunctionExpr extends Expression {
 
@@ -61,5 +62,10 @@ public class FunctionExpr extends Expression {
     public boolean removeExpression(Expression expr) {
         return exprs.remove(expr);
     }
-    
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

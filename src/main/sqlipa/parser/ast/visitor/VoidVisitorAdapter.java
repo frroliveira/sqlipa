@@ -1,7 +1,5 @@
 package main.sqlipa.parser.ast.visitor;
 
-import java.util.Iterator;
-
 import main.sqlipa.parser.ast.*;
 import main.sqlipa.parser.ast.constraint.*;
 import main.sqlipa.parser.ast.constraint.column.*;
@@ -9,7 +7,6 @@ import main.sqlipa.parser.ast.constraint.table.*;
 import main.sqlipa.parser.ast.expr.*;
 import main.sqlipa.parser.ast.literal.*;
 import main.sqlipa.parser.ast.stmt.*;
-import main.sqlipa.parser.ast.stmt.SqlStatement.Explain;
 import main.sqlipa.parser.ast.stmt.alter.*;
 import main.sqlipa.parser.ast.stmt.create.*;
 import main.sqlipa.parser.ast.stmt.drop.*;
@@ -20,60 +17,8 @@ import main.sqlipa.parser.ast.stmt.event.select.*;
 import main.sqlipa.parser.ast.stmt.event.update.*;
 import main.sqlipa.parser.ast.stmt.pragma.*;
 
-public class DumpVisitor implements VoidVisitor {
+public class VoidVisitorAdapter implements VoidVisitor {
 
-    protected static class Printer {
-
-        private int level = 0;
-
-        private boolean indented = false;
-
-        private final StringBuilder buf = new StringBuilder();
-
-        public void indent() {
-            level++;
-        }
-
-        public void unindent() {
-            level--;
-        }
-
-        private void makeIndent() {
-            for (int i = 0; i < level; i++) {
-                buf.append("    ");
-            }
-        }
-
-        public void print(String arg) {
-            if (!indented) {
-                makeIndent();
-                indented = true;
-            }
-            buf.append(arg);
-        }
-
-        public void printLn(String arg) {
-            print(arg);
-            printLn();
-        }
-
-        public void printLn() {
-            buf.append("\n");
-            indented = false;
-        }
-
-        public String getSource() {
-            return buf.toString();
-        }
-
-        @Override
-        public String toString() {
-            return getSource();
-        }
-    }
-
-    private final Printer printer = new Printer();
-    
     @Override
     public void visit(Node node) {
         // TODO Auto-generated method stub
@@ -142,13 +87,8 @@ public class DumpVisitor implements VoidVisitor {
 
     @Override
     public void visit(SqlStatement stmt) {
-        Explain explain = stmt.getExplain();
-        if (explain != null) {
-            printer.print("EXPLAIN");
-            if (explain == Explain.PLAN) {
-                printer.print(" QUERY PLAN ");
-            }
-        }
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -231,50 +171,26 @@ public class DumpVisitor implements VoidVisitor {
 
     @Override
     public void visit(CreateStmt stmt) {
-        visit((SqlStatement) stmt);
-        printer.print("CREATE ");        
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
     public void visit(CreateTableStmt stmt) {
-        visit((CreateStmt) stmt);
-        if (stmt.hasTemporary()) {
-            printer.print("TEMP ");
-        }
-        printer.print("TABLE ");
-        if (stmt.hasIfNotExists()) {
-            printer.print("IF NOT EXISTS ");
-        }
-        stmt.getDatabase().accept(this);
-        printer.print(".");
-        stmt.getName().accept(this);
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
     public void visit(CreateTableStmtWithColumns stmt) {
-        visit((CreateTableStmt) stmt);
-        printer.print("(");
-        Iterator<ColumnDef> it = stmt.getColumns().iterator();
-        if (it.hasNext()) {
-            ColumnDef column = it.next();
-            column.accept(this);
-        }
-        while (it.hasNext()) {
-            printer.print(",");
-            it.next().accept(this);
-        }
-        for (TableConstraint constraint : stmt.getConstraints()) {
-            printer.print(",");
-            constraint.accept(this);
-        }
-        printer.print(")");
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
     public void visit(CreateTableStmtWithSelect stmt) {
-        visit((CreateTableStmt) stmt);
-        printer.print(" AS");
-        stmt.getSelect().accept(this);
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -768,7 +684,5 @@ public class DumpVisitor implements VoidVisitor {
         // TODO Auto-generated method stub
         
     }
-
-
     
 }
