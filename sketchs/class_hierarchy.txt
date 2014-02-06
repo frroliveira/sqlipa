@@ -634,7 +634,7 @@ namespace expr {
             Expression expr;
 
             InSelectExpr {
-                SelectStmt stmt;
+                SelectStmt select;
             }
 
             InSetExpr {
@@ -648,7 +648,7 @@ namespace expr {
         }
         
         SelectExpr {
-            SelectStmt stmt;
+            SelectStmt select;
         }
         
         CaseExpr {

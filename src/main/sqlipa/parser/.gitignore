@@ -1,8 +1,4 @@
-/ASTParser.java
-/ASTParserConstants.java
-/ASTParserTokenManager.java
-/JavaCharStream.java
+/TokenMgrError.java
 /ParseException.java
 /Token.java
-/TokenMgrError.java
-/SimpleCharStream.java
+/JavaCharStream.java

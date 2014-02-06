@@ -1,0 +1,31 @@
+package main.sqlipa.ast;
+
+import main.sqlipa.ast.visitor.VoidVisitor;
+
+public class ModuleArgument extends Node {
+    
+    private String arg;
+    
+    public ModuleArgument() {
+        super();
+    }
+    
+    public ModuleArgument(Block block, String arg) {
+        super(block);
+        this.arg = arg;
+    }
+    
+    public String getArgument() {
+        return arg;
+    }
+    
+    public void setArgument(String arg) {
+        this.arg = arg;
+    }
+
+    @Override
+    public void accept(VoidVisitor visitor) {
+        visitor.visit(this);
+    }
+
+}

@@ -13,39 +13,26 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.LinkedList;
 
-import main.sqlipa.parser.ast.*;
-import main.sqlipa.parser.ast.constraint.*;
-import main.sqlipa.parser.ast.constraint.table.*;
-import main.sqlipa.parser.ast.constraint.column.*;
-import main.sqlipa.parser.ast.expr.*;
-import main.sqlipa.parser.ast.literal.*;
-import main.sqlipa.parser.ast.stmt.*;
-import main.sqlipa.parser.ast.stmt.create.*;
-import main.sqlipa.parser.ast.stmt.drop.*;
-import main.sqlipa.parser.ast.stmt.event.*;
-import main.sqlipa.parser.ast.stmt.event.select.*;
-import main.sqlipa.parser.ast.stmt.event.update.*;
-import main.sqlipa.parser.ast.stmt.pragma.*;
+import main.sqlipa.ast.*;
+import main.sqlipa.ast.constraint.*;
+import main.sqlipa.ast.constraint.table.*;
+import main.sqlipa.ast.constraint.column.*;
+import main.sqlipa.ast.expr.*;
+import main.sqlipa.ast.literal.*;
+import main.sqlipa.ast.stmt.*;
+import main.sqlipa.ast.stmt.alter.*;
+import main.sqlipa.ast.stmt.create.*;
+import main.sqlipa.ast.stmt.drop.*;
+import main.sqlipa.ast.stmt.event.*;
+import main.sqlipa.ast.stmt.event.delete.*;
+import main.sqlipa.ast.stmt.event.insert.*;
+import main.sqlipa.ast.stmt.event.select.*;
+import main.sqlipa.ast.stmt.event.update.*;
+import main.sqlipa.ast.stmt.pragma.*;
 
-final class ASTParser {
+public final class ASTParser {
+}
 
-    public static void main(String[] args) {
-        String str =
-            "CREATE TABLE IF NOT EXISTS lyrics(" +
-            "lyric_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "title TEXT," +
-            "subtitle TEXT);";
- 
-        InputStream is = new ByteArrayInputStream(str.getBytes());
-        ASTParser parser = new ASTParser(is);
-        try {
-            parser.sqlStmtList();
-            System.out.println("Ok.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-} 
 PARSER_END(ASTParser)
 
 SKIP :
@@ -303,8 +290,6 @@ TOKEN :
 |   <SEMICOLON: ";">
 |   <COMMA: ",">
 |   <DOT: ".">
-|   <NOT_COMMA_LP_RP: (~[",", "(", ")"])+>
-|   <NOT_LP_RP: (~["(", ")"])+>
 }
 
 /* Char Sets */
@@ -318,24 +303,35 @@ TOKEN :
 }
 
 /* Grammar */
-List<SqlStatement> sqlStmtList() :{
-    List<SqlStatement> stmts = new LinkedList<SqlStatement>();    SqlStatement stmt;
+SqlStmtList sqlStmtList() :{
+    SqlStmtList list = new SqlStmtList();
+    SqlStatement stmt = null;
 }
 {
     [
-	    stmt = sqlStmt() {
-	        stmts.add(stmt);
-	    }
-	    (
-	        ";"
-	        [
-		        stmt = sqlStmt() {
-	                stmts.add(stmt);
-	            }
+        (
+            stmt = sqlStmt() {
+                list.addStatement(stmt);
+                list.setBegin(token.beginLine, token.beginColumn);
+            }
+        |   ";" {
+                list.setBegin(token.beginLine, token.beginColumn);
+            }
+        )
+        (
+            ";"
+            [
+                stmt = sqlStmt() {
+                    list.addStatement(stmt);
+                }
             ]
-	    )*
+        )*
     ] {
-        return stmts;
+        if (stmt == null) {
+            list.setBegin(token.beginLine, token.beginColumn);
+        }
+        list.setEnd(token.endLine, token.endColumn);
+        return list;
     }
 }
 
@@ -352,7 +348,7 @@ SqlStatement sqlStmt() :
             column = token.beginColumn;
             explain = SqlStatement.Explain.NORMAL;
         } 
-        ["QUERY" "PLAN"] {
+        [ "QUERY" "PLAN" ] {
             explain = SqlStatement.Explain.PLAN;
         }
     ]
@@ -1531,13 +1527,11 @@ ModuleArgument moduleArgument() :
 }
 {
     // TODO:
-    (<NOT_COMMA_LP_RP>)*
     [
 	    "("
         other()
 	    ")"
-    ]
-    (<NOT_COMMA_LP_RP>)* {
+    ] {
         return new ModuleArgument(new Block(token.beginLine, token.beginColumn,
             token.endLine, token.endColumn), token.image);
     }
@@ -1547,13 +1541,11 @@ void other() :
 {
 }
 {
-    (<NOT_LP_RP>)*
     [
 	    "("
         other()
 	    ")"
     ]
-    (<NOT_LP_RP>)*
 }
 
 DeleteStmt deleteStmt() :
@@ -1997,7 +1989,7 @@ InSelectExpr inSelectExpr() :
 {
     stmt = selectStmt() {
         InSelectExpr in = new InSelectExpr();
-        in.setStatement(stmt);
+        in.setSelect(stmt);
         return in;
     }
 }
@@ -2433,7 +2425,7 @@ SelectExpr selectExpr() :
     }
     stmt = selectStmt()
     ")" {
-        expr.setStatement(stmt);
+        expr.setSelect(stmt);
         expr.setEnd(token.endLine, token.endColumn);
         return expr;
     }
