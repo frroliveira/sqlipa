@@ -7,23 +7,14 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class UniqueColumnConstraint extends ColumnConstraint {
 
-    private ConflictClause clause;
+    public ConflictClause clause;
     
     public UniqueColumnConstraint() {
         super();
     }
     
-    public UniqueColumnConstraint(Block block, Name name,
-            ConflictClause clause) {
+    public UniqueColumnConstraint(Block block, Name name, ConflictClause clause) {
         super(block, name);
-        this.clause = clause;
-    }
-    
-    public ConflictClause getClause() {
-        return clause;
-    }
-    
-    public void setClause(ConflictClause clause) {
         this.clause = clause;
     }
 

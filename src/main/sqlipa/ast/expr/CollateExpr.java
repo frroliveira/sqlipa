@@ -6,9 +6,9 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CollateExpr extends Expression {
 
-    private Expression expr;
+    public Expression expr;
     
-    private Name collation;
+    public Name collation;
     
     public CollateExpr() {
         super();
@@ -17,22 +17,6 @@ public class CollateExpr extends Expression {
     public CollateExpr(Block block, Expression expr, Name collation) {
         super(block);
         this.expr = expr;
-        this.collation = collation;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public Name getCollation() {
-        return collation;
-    }
-    
-    public void setExpression(Expression expr) {
-        this.expr = expr;
-    }
-    
-    public void setCollation(Name collation) {
         this.collation = collation;
     }
 

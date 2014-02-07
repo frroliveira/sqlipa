@@ -7,7 +7,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class DefaultColumnConstraint extends ColumnConstraint {
 
-    private Expression expr;
+    public Expression expr;
     
     public DefaultColumnConstraint() {
         super();
@@ -15,14 +15,6 @@ public class DefaultColumnConstraint extends ColumnConstraint {
     
     public DefaultColumnConstraint(Block block, Name name, Expression expr) {
         super(block, name);
-        this.expr = expr;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public void setExpression(Expression expr) {
         this.expr = expr;
     }
 

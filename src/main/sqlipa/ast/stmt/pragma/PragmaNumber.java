@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class PragmaNumber extends PragmaValue {
     
-    private UnaryExpr number;
+    public UnaryExpr number;
     
     public PragmaNumber() {
         super();
@@ -14,14 +14,6 @@ public class PragmaNumber extends PragmaValue {
     
     public PragmaNumber(Block block, UnaryExpr number) {
         super(block);
-        this.number = number;
-    }
-    
-    public UnaryExpr getNumber() {
-        return number;
-    }
-    
-    public void setNumber(UnaryExpr number) {
         this.number = number;
     }
 

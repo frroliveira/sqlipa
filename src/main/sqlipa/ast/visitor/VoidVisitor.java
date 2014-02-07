@@ -129,7 +129,7 @@ public interface VoidVisitor {
             // Update
     public void visit(UpdateStmt stmt);
     
-    public void visit(ColumnAssign assign);
+    public void visit(ColumnAssignment assign);
     
         // Pragma
     public void visit(PragmaStmt stmt);

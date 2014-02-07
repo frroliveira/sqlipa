@@ -6,46 +6,22 @@ import main.sqlipa.ast.stmt.SqlStatement;
 
 public abstract class CreateStmt extends SqlStatement {
 
-    private boolean ifNotExists;
+    public boolean hasIfNotExists;
     
-    private Name database;
+    public Name database;
     
-    private Name name;
+    public Name name;
     
     public CreateStmt() {
         super();
     }
     
-    public CreateStmt(Block block, Explain explain, boolean hasIfNotExists, 
-            Name database, Name name) {
+    public CreateStmt(Block block, Explain explain, boolean hasIfNotExists, Name database,
+            Name name) {
         super(block, explain);
-        this.ifNotExists = hasIfNotExists;
+        this.hasIfNotExists = hasIfNotExists;
         this.database = database;
         this.name = name;
-    }
-
-    public Name getDatabase() {
-        return database;
-    }
-    
-    public Name getName() {
-        return name;
-    }
-    
-    public boolean hasIfNotExists() {
-        return ifNotExists;
-    }
-    
-    public void setDatabase(Name database) {
-        this.database = database;
-    }
-    
-    public void setName(Name name) {
-        this.name = name;
-    }
-    
-    public void setIfNotExists(boolean hasIfNotExists) {
-        this.ifNotExists = hasIfNotExists;
     }
 
 }

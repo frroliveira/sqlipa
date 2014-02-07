@@ -4,7 +4,7 @@ package main.sqlipa.parser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import main.sqlipa.ast.*;
 import main.sqlipa.ast.constraint.*;
@@ -27,8 +27,10 @@ public final class ASTParser implements ASTParserConstants {
 
 /* Grammar */
   final public SqlStmtList sqlStmtList() throws ParseException {
-    SqlStmtList list = new SqlStmtList();
+    SqlStmtList stmtList = new SqlStmtList();
     SqlStatement stmt = null;
+
+    stmtList.stmts =  new ArrayList<SqlStatement>();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ALTER:
     case ANALYZE:
@@ -75,18 +77,17 @@ public final class ASTParser implements ASTParserConstants {
       case UPDATE:
       case VACUUM:
         stmt = sqlStmt();
-                list.addStatement(stmt);
-                list.setBegin(token.beginLine, token.beginColumn);
+                stmtList.stmts.add(stmt);
         break;
       case SEMICOLON:
         jj_consume_token(SEMICOLON);
-                list.setBegin(token.beginLine, token.beginColumn);
         break;
       default:
         jj_la1[0] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
+            stmtList.setBegin(token.beginLine, token.beginColumn);
       label_1:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -121,7 +122,7 @@ public final class ASTParser implements ASTParserConstants {
         case UPDATE:
         case VACUUM:
           stmt = sqlStmt();
-                    list.addStatement(stmt);
+                    stmtList.stmts.add(stmt);
           break;
         default:
           jj_la1[2] = jj_gen;
@@ -134,10 +135,11 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
         if (stmt == null) {
-            list.setBegin(token.beginLine, token.beginColumn);
+            stmtList.setBegin(token.beginLine, token.beginColumn);
+            stmtList.stmts = null;
         }
-        list.setEnd(token.endLine, token.endColumn);
-        {if (true) return list;}
+        stmtList.setEnd(token.endLine, token.endColumn);
+        {if (true) return stmtList;}
     throw new Error("Missing return statement in function");
   }
 
@@ -265,7 +267,7 @@ public final class ASTParser implements ASTParserConstants {
         if (explain != null) {
             // If statement starts by EXPLAIN.
             stmt.setBegin(line, column);
-            stmt.setExplain(explain);
+            stmt.explain = explain;
         }
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
@@ -320,26 +322,23 @@ public final class ASTParser implements ASTParserConstants {
       throw new ParseException();
     }
         stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
+        stmt.database = database;
+        stmt.table = table;
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public AlterTableStmt renameTableStmt() throws ParseException {
     RenameTableStmt stmt = new RenameTableStmt();
-    Name table;
     jj_consume_token(RENAME);
     jj_consume_token(TO);
-    table = name();
-        stmt.setNewTable(table);
+    stmt.newTable = name();
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public AlterTableStmt addColumnStmt() throws ParseException {
     AddColumnStmt stmt = new AddColumnStmt();
-    ColumnDef column;
     jj_consume_token(ADD);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case COLUMN:
@@ -349,26 +348,23 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[11] = jj_gen;
       ;
     }
-    column = columnDef();
-        stmt.setColumn(column);
+    stmt.column = columnDef();
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public AnalyzeStmt analyzeStmt() throws ParseException {
     AnalyzeStmt stmt = new AnalyzeStmt();
-    Name first = null;
-    Name second = null;
     jj_consume_token(ANALYZE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STRING:
     case ID:
-      first = name();
+      stmt.first = name();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DOT:
         jj_consume_token(DOT);
-        second = name();
+        stmt.second = name();
         break;
       default:
         jj_la1[12] = jj_gen;
@@ -380,16 +376,12 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setFirstName(first);
-        stmt.setSecondName(second);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public AttachStmt attachStmt() throws ParseException {
     AttachStmt stmt = new AttachStmt();
-    Expression expr;
-    Name database;
     jj_consume_token(ATTACH);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -400,12 +392,10 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[14] = jj_gen;
       ;
     }
-    expr = expr();
+    stmt.expr = expr();
     jj_consume_token(AS);
-    database = name();
+    stmt.database = name();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setExpression(expr);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
@@ -421,15 +411,15 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DEFERRED:
         jj_consume_token(DEFERRED);
-            stmt.setType(BeginStmt.Type.DEFERRED);
+            stmt.type = BeginStmt.Type.DEFERRED;
         break;
       case IMMEDIATE:
         jj_consume_token(IMMEDIATE);
-            stmt.setType(BeginStmt.Type.IMMEDIATE);
+            stmt.type = BeginStmt.Type.IMMEDIATE;
         break;
       case EXCLUSIVE:
         jj_consume_token(EXCLUSIVE);
-            stmt.setType(BeginStmt.Type.EXCLUSIVE);
+            stmt.type = BeginStmt.Type.EXCLUSIVE;
         break;
       default:
         jj_la1[15] = jj_gen;
@@ -497,7 +487,6 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case TO:
       jj_consume_token(TO);
-            Name savepoint;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case SAVEPOINT:
         jj_consume_token(SAVEPOINT);
@@ -506,8 +495,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_la1[21] = jj_gen;
         ;
       }
-      savepoint = name();
-            stmt.setSavepoint(savepoint);
+      stmt.savepoint = name();
       break;
     default:
       jj_la1[22] = jj_gen;
@@ -520,11 +508,9 @@ public final class ASTParser implements ASTParserConstants {
 
   final public SavepointStmt savepointStmt() throws ParseException {
     SavepointStmt stmt = new SavepointStmt();
-    Name savepoint;
     jj_consume_token(SAVEPOINT);
         stmt.setBegin(token.beginLine, token.beginColumn);
-    savepoint = name();
-        stmt.setSavepoint(savepoint);
+    stmt.savepoint = name();
         stmt.setEnd(token.endLine, token.endColumn);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
@@ -532,7 +518,6 @@ public final class ASTParser implements ASTParserConstants {
 
   final public ReleaseStmt releaseStmt() throws ParseException {
     ReleaseStmt stmt = new ReleaseStmt();
-    Name savepoint;
     jj_consume_token(RELEASE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -543,8 +528,7 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[23] = jj_gen;
       ;
     }
-    savepoint = name();
-        stmt.setSavepoint(savepoint);
+    stmt.savepoint = name();
         stmt.setEnd(token.endLine, token.endColumn);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
@@ -552,16 +536,15 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CreateIndexStmt createIndexStmt() throws ParseException {
     CreateIndexStmt stmt = new CreateIndexStmt();
-    Name database = null;
-    Name index;
-    Name table;
     IndexedColumn column;
+
+    stmt.columns = new ArrayList<IndexedColumn>();
     jj_consume_token(CREATE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case UNIQUE:
       jj_consume_token(UNIQUE);
-            stmt.setUnique(true);
+            stmt.hasUnique = true;
       break;
     default:
       jj_la1[24] = jj_gen;
@@ -573,7 +556,7 @@ public final class ASTParser implements ASTParserConstants {
       jj_consume_token(IF);
       jj_consume_token(NOT);
       jj_consume_token(EXISTS);
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
       break;
     default:
       jj_la1[25] = jj_gen;
@@ -581,17 +564,17 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_9(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    index = name();
+    stmt.name = name();
     jj_consume_token(ON);
-    table = name();
+    stmt.table = name();
     jj_consume_token(LP);
     column = indexedColumn();
-        stmt.addColumn(column);
+        stmt.columns.add(column);
     label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -604,29 +587,22 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       column = indexedColumn();
-                stmt.addColumn(column);
+                stmt.columns.add(column);
     }
     jj_consume_token(RP);
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(index);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public IndexedColumn indexedColumn() throws ParseException {
-    IndexedColumn indColumn = new IndexedColumn();
-    Name column;
-    column = name();
-        indColumn.setColumn(column);
-        indColumn.setBegin(column);
+    IndexedColumn column = new IndexedColumn();
+    column.column = name();
+        column.setBegin(column.column);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case COLLATE:
       jj_consume_token(COLLATE);
-            Name collation;
-      collation = name();
-            indColumn.setCollation(collation);
+      column.collation = name();
       break;
     default:
       jj_la1[27] = jj_gen;
@@ -638,11 +614,11 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ASC:
         jj_consume_token(ASC);
-            indColumn.setOrder(IndexedColumn.Order.ASC);
+            column.order = IndexedColumn.Order.ASC;
         break;
       case DESC:
         jj_consume_token(DESC);
-            indColumn.setOrder(IndexedColumn.Order.DESC);
+            column.order = IndexedColumn.Order.DESC;
         break;
       default:
         jj_la1[28] = jj_gen;
@@ -654,8 +630,8 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[29] = jj_gen;
       ;
     }
-        indColumn.setEnd(token.endLine, token.endColumn);
-        {if (true) return indColumn;}
+        column.setEnd(token.endLine, token.endColumn);
+        {if (true) return column;}
     throw new Error("Missing return statement in function");
   }
 
@@ -663,7 +639,7 @@ public final class ASTParser implements ASTParserConstants {
     CreateTableStmt stmt;
     int line;
     int column;
-    boolean hasTemp = false;
+    boolean hasTemporary = false;
     boolean hasIfNotExists = false;
     Name database = null;
     Name table;
@@ -685,7 +661,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            hasTemp = true;
+            hasTemporary = true;
       break;
     default:
       jj_la1[31] = jj_gen;
@@ -724,10 +700,10 @@ public final class ASTParser implements ASTParserConstants {
       throw new ParseException();
     }
         stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
-        stmt.setTemporary(hasTemp);
-        stmt.setIfNotExists(hasIfNotExists);
-        stmt.setName(table);
-        stmt.setDatabase(database);
+        stmt.hasTemporary = hasTemporary;
+        stmt.hasIfNotExists = hasIfNotExists;
+        stmt.name = table;
+        stmt.database = database;
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
@@ -735,9 +711,11 @@ public final class ASTParser implements ASTParserConstants {
   final public CreateTableStmt createTableStmtWithColumns() throws ParseException {
     CreateTableStmtWithColumns stmt = new CreateTableStmtWithColumns();
     ColumnDef column;
+
+    stmt.columns = new ArrayList<ColumnDef>();
     jj_consume_token(LP);
     column = columnDef();
-        stmt.addColumn(column);
+        stmt.columns.add(column);
     label_3:
     while (true) {
       if (jj_2_11(2)) {
@@ -747,7 +725,7 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       column = columnDef();
-            stmt.addColumn(column);
+            stmt.columns.add(column);
     }
     label_4:
     while (true) {
@@ -760,9 +738,12 @@ public final class ASTParser implements ASTParserConstants {
         break label_4;
       }
       jj_consume_token(COMMA);
+            if (stmt.constraints == null) {
+                stmt.constraints = new ArrayList<TableConstraint>();
+            }
             TableConstraint constraint;
       constraint = tableConstraint();
-            stmt.addConstraint(constraint);
+            stmt.constraints.add(constraint);
     }
     jj_consume_token(RP);
         {if (true) return stmt;}
@@ -771,27 +752,23 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CreateTableStmt createTableStmtWithSelect() throws ParseException {
     CreateTableStmtWithSelect stmt = new CreateTableStmtWithSelect();
-    SelectStmt select;
     jj_consume_token(AS);
-    select = selectStmt();
-        stmt.setSelect(select);
+    stmt.select = selectStmt();
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public ColumnDef columnDef() throws ParseException {
-    ColumnDef columnDef = new ColumnDef();
-    Name column;
-    TypeName type;
-    ColumnConstraint constraint;
-    column = name();
-        columnDef.setColumn(column);
-        columnDef.setBegin(column);
+    ColumnDef column = new ColumnDef();
+    ColumnConstraint constraint = null;
+
+    column.constraints = new ArrayList<ColumnConstraint>();
+    column.column = name();
+        column.setBegin(column.column);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STRING:
     case ID:
-      type = typeName();
-            columnDef.setType(type);
+      column.type = typeName();
       break;
     default:
       jj_la1[35] = jj_gen;
@@ -815,10 +792,13 @@ public final class ASTParser implements ASTParserConstants {
         break label_5;
       }
       constraint = columnConstraint();
-            columnDef.addConstraint(constraint);
+            column.constraints.add(constraint);
     }
-        columnDef.setEnd(token.endLine, token.endColumn);
-        {if (true) return columnDef;}
+        column.setEnd(token.endLine, token.endColumn);
+        if (constraint == null) {
+            column.constraints = null;
+        }
+        {if (true) return column;}
     throw new Error("Missing return statement in function");
   }
 
@@ -826,7 +806,7 @@ public final class ASTParser implements ASTParserConstants {
     TypeName type = new TypeName();
     String name = new String();
 
-    type.setName(name);
+    type.name = name;
     name();
         type.setBegin(token.beginLine, token.beginColumn);
         name += token.image;
@@ -847,15 +827,11 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LP:
       jj_consume_token(LP);
-            UnaryExpr xDim;
-      xDim = signedNumber();
-            type.setDimensionInX(xDim);
+      type.xDimension = signedNumber();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case COMMA:
         jj_consume_token(COMMA);
-                UnaryExpr yDim;
-        yDim = signedNumber();
-                type.setDimensionInY(yDim);
+        type.yDimension = signedNumber();
         break;
       default:
         jj_la1[38] = jj_gen;
@@ -917,7 +893,7 @@ public final class ASTParser implements ASTParserConstants {
     }
         if (name != null) {
             constraint.setBegin(line, column);
-            constraint.setName(name);
+            constraint.name = name;
         }
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -925,7 +901,6 @@ public final class ASTParser implements ASTParserConstants {
 
   final public PrimaryKeyColumnConstraint primaryKeyColumnConstraint() throws ParseException {
     PrimaryKeyColumnConstraint constraint = new PrimaryKeyColumnConstraint();
-    ConflictClause clause;
     jj_consume_token(PRIMARY);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(KEY);
@@ -935,11 +910,11 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ASC:
         jj_consume_token(ASC);
-            constraint.setOrder(PrimaryKeyColumnConstraint.Order.ASC);
+            constraint.order = PrimaryKeyColumnConstraint.Order.ASC;
         break;
       case DESC:
         jj_consume_token(DESC);
-            constraint.setOrder(PrimaryKeyColumnConstraint.Order.DESC);
+            constraint.order = PrimaryKeyColumnConstraint.Order.DESC;
         break;
       default:
         jj_la1[42] = jj_gen;
@@ -951,12 +926,11 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[43] = jj_gen;
       ;
     }
-    clause = conflictClause();
-        constraint.setClause(clause);
+    constraint.clause = conflictClause();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AUTOINCREMENT:
       jj_consume_token(AUTOINCREMENT);
-            constraint.setAutoincrement(true);
+            constraint.hasAutoincrement = true;
       break;
     default:
       jj_la1[44] = jj_gen;
@@ -969,12 +943,10 @@ public final class ASTParser implements ASTParserConstants {
 
   final public NotNullColumnConstraint notNullColumnConstraint() throws ParseException {
     NotNullColumnConstraint constraint = new NotNullColumnConstraint();
-    ConflictClause clause;
     jj_consume_token(NOT);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(NULL);
-    clause = conflictClause();
-        constraint.setClause(clause);
+    constraint.clause = conflictClause();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -982,11 +954,9 @@ public final class ASTParser implements ASTParserConstants {
 
   final public UniqueColumnConstraint uniqueColumnConstraint() throws ParseException {
     UniqueColumnConstraint constraint = new UniqueColumnConstraint();
-    ConflictClause clause;
     jj_consume_token(UNIQUE);
         constraint.setBegin(token.beginLine, token.beginColumn);
-    clause = conflictClause();
-        constraint.setClause(clause);
+    constraint.clause = conflictClause();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -994,13 +964,11 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CheckColumnConstraint checkColumnConstraint() throws ParseException {
     CheckColumnConstraint constraint = new CheckColumnConstraint();
-    Expression expr;
     jj_consume_token(CHECK);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(LP);
-    expr = expr();
+    constraint.expr = expr();
     jj_consume_token(RP);
-        constraint.setExpression(expr);
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1008,12 +976,11 @@ public final class ASTParser implements ASTParserConstants {
 
   final public DefaultColumnConstraint defaultColumnConstraint() throws ParseException {
     DefaultColumnConstraint constraint = new DefaultColumnConstraint();
-    Expression expr;
     Literal literal;
     jj_consume_token(DEFAULT_);
         constraint.setBegin(token.beginLine, token.beginColumn);
     if (jj_2_12(2147483647)) {
-      expr = signedNumber();
+      constraint.expr = signedNumber();
     } else {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case CURRENT_DATE:
@@ -1024,11 +991,11 @@ public final class ASTParser implements ASTParserConstants {
       case STRING:
       case BLOB:
         literal = literalValue();
-            expr = new LiteralExpr(literal, literal);
+            constraint.expr = new LiteralExpr(literal, literal);
         break;
       case LP:
         jj_consume_token(LP);
-        expr = expr();
+        constraint.expr = expr();
         jj_consume_token(RP);
         break;
       default:
@@ -1038,18 +1005,15 @@ public final class ASTParser implements ASTParserConstants {
       }
     }
         constraint.setEnd(token.endLine, token.endColumn);
-        constraint.setExpression(expr);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
   }
 
   final public CollateColumnConstraint collateColumnConstraint() throws ParseException {
     CollateColumnConstraint constraint = new CollateColumnConstraint();
-    Name collation;
     jj_consume_token(COLLATE);
         constraint.setBegin(token.beginLine, token.beginColumn);
-    collation = name();
-        constraint.setCollation(collation);
+    constraint.collation = name();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1057,10 +1021,7 @@ public final class ASTParser implements ASTParserConstants {
 
   final public ForeignKeyColumnConstraint foreignKeyColumnConstraint() throws ParseException {
     ForeignKeyColumnConstraint constraint = new ForeignKeyColumnConstraint();
-    ForeignKeyClause clause;
-    clause = foreignKeyClause();
-        constraint.setBeginEnd(clause);
-        constraint.setClause(clause);
+    constraint.clause = foreignKeyClause();
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
   }
@@ -1074,11 +1035,11 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PLUS:
         jj_consume_token(PLUS);
-                number.setOperator(UnaryExpr.Operator.POSITIVE);
+                number.operator = UnaryExpr.Operator.POSITIVE;
         break;
       case MINUS:
         jj_consume_token(MINUS);
-                number.setOperator(UnaryExpr.Operator.NEGATIVE);
+                number.operator = UnaryExpr.Operator.NEGATIVE;
         break;
       default:
         jj_la1[46] = jj_gen;
@@ -1092,12 +1053,12 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
     literal = numericLiteral();
-        if (number.getOperator() == null) {
+        if (number.operator == null) {
             number.setBeginEnd(literal);
         } else {
             number.setEnd(token.endLine, token.endColumn);
         }
-        number.setExpression(new LiteralExpr(literal, literal));
+        number.expr = new LiteralExpr(literal, literal);
         {if (true) return number;}
     throw new Error("Missing return statement in function");
   }
@@ -1135,7 +1096,7 @@ public final class ASTParser implements ASTParserConstants {
     }
         if (name != null) {
             constraint.setBegin(line, column);
-            constraint.setName(name);
+            constraint.name = name;
         }
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1144,13 +1105,14 @@ public final class ASTParser implements ASTParserConstants {
   final public PrimaryKeyTableConstraint primaryKeyTableConstraint() throws ParseException {
     PrimaryKeyTableConstraint constraint = new PrimaryKeyTableConstraint();
     IndexedColumn column;
-    ConflictClause clause;
+
+    constraint.columns = new ArrayList<IndexedColumn>();
     jj_consume_token(PRIMARY);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(KEY);
     jj_consume_token(LP);
     column = indexedColumn();
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     label_7:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1163,11 +1125,10 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       column = indexedColumn();
-            constraint.addColumn(column);
+            constraint.columns.add(column);
     }
     jj_consume_token(RP);
-    clause = conflictClause();
-        constraint.setClause(clause);
+    constraint.clause = conflictClause();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1176,12 +1137,13 @@ public final class ASTParser implements ASTParserConstants {
   final public UniqueTableConstraint uniqueTableConstraint() throws ParseException {
     UniqueTableConstraint constraint = new UniqueTableConstraint();
     IndexedColumn column;
-    ConflictClause clause;
+
+    constraint.columns = new ArrayList<IndexedColumn>();
     jj_consume_token(UNIQUE);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(LP);
     column = indexedColumn();
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1194,11 +1156,10 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       column = indexedColumn();
-            constraint.addColumn(column);
+            constraint.columns.add(column);
     }
     jj_consume_token(RP);
-    clause = conflictClause();
-        constraint.setClause(clause);
+    constraint.clause = conflictClause();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1206,13 +1167,11 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CheckTableConstraint checkTableConstraint() throws ParseException {
     CheckTableConstraint constraint = new CheckTableConstraint();
-    Expression expr;
     jj_consume_token(CHECK);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(LP);
-    expr = expr();
+    constraint.expr = expr();
     jj_consume_token(RP);
-        constraint.setExpression(expr);
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1221,13 +1180,14 @@ public final class ASTParser implements ASTParserConstants {
   final public ForeignKeyTableConstraint foreignKeyTableConstraint() throws ParseException {
     ForeignKeyTableConstraint constraint = new ForeignKeyTableConstraint();
     Name column;
-    ForeignKeyClause clause;
+
+    constraint.columns = new ArrayList<Name>();
     jj_consume_token(FOREIGN);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(KEY);
     jj_consume_token(LP);
     column = name();
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     label_9:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1240,11 +1200,10 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       column = name();
-            constraint.addColumn(column);
+            constraint.columns.add(column);
     }
     jj_consume_token(RP);
-    clause = foreignKeyClause();
-        constraint.setClause(clause);
+    constraint.clause = foreignKeyClause();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1252,19 +1211,19 @@ public final class ASTParser implements ASTParserConstants {
 
   final public ForeignKeyClause foreignKeyClause() throws ParseException {
     ForeignKeyClause clause = new ForeignKeyClause();
-    Block block = new Block();
-    Name table;
-    ForeignKeySetting sett;
+    ForeignKeySetting setting = null;
+
+    clause.settings = new ArrayList<ForeignKeySetting>();
     jj_consume_token(REFERENCES);
         clause.setBegin(token.beginLine, token.beginColumn);
-    table = name();
-        clause.setTable(table);
+    clause.table = name();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LP:
       jj_consume_token(LP);
             Name column;
+            clause.columns = new ArrayList<Name>();
       column = name();
-            clause.addColumn(column);
+            clause.columns.add(column);
       label_10:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1277,7 +1236,7 @@ public final class ASTParser implements ASTParserConstants {
         }
         jj_consume_token(COMMA);
         column = name();
-                clause.addColumn(column);
+                clause.columns.add(column);
       }
       jj_consume_token(RP);
       break;
@@ -1298,12 +1257,12 @@ public final class ASTParser implements ASTParserConstants {
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ON:
-        sett = onSetting();
-            clause.addSetting(sett);
+        setting = onSetting();
+            clause.settings.add(setting);
         break;
       case MATCH:
-        sett = matchSetting();
-            clause.addSetting(sett);
+        setting = matchSetting();
+            clause.settings.add(setting);
         break;
       default:
         jj_la1[56] = jj_gen;
@@ -1314,11 +1273,14 @@ public final class ASTParser implements ASTParserConstants {
     if (jj_2_13(2)) {
       // Ensures that is deferrable because first token can be 
                            // either NOT or DEFERRABLE.
-              sett = deferrableSetting();
-            clause.addSetting(sett);
+              setting = deferrableSetting();
+            clause.settings.add(setting);
     } else {
       ;
     }
+        if (setting == null) {
+            clause.settings = null;
+        }
         clause.setEnd(token.endLine, token.endColumn);
         {if (true) return clause;}
     throw new Error("Missing return statement in function");
@@ -1331,11 +1293,11 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DELETE:
       jj_consume_token(DELETE);
-            sett.setEvent(OnSetting.Event.DELETE);
+            sett.event = OnSetting.Event.DELETE;
       break;
     case UPDATE:
       jj_consume_token(UPDATE);
-            sett.setEvent(OnSetting.Event.UPDATE);
+            sett.event = OnSetting.Event.UPDATE;
       break;
     default:
       jj_la1[57] = jj_gen;
@@ -1348,11 +1310,11 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case NULL:
         jj_consume_token(NULL);
-                sett.setAction(OnSetting.Action.SET_NULL);
+                sett.action = OnSetting.Action.SET_NULL;
         break;
       case DEFAULT_:
         jj_consume_token(DEFAULT_);
-                sett.setAction(OnSetting.Action.SET_DEFAULT);
+                sett.action = OnSetting.Action.SET_DEFAULT;
         break;
       default:
         jj_la1[58] = jj_gen;
@@ -1362,16 +1324,16 @@ public final class ASTParser implements ASTParserConstants {
       break;
     case CASCADE:
       jj_consume_token(CASCADE);
-            sett.setAction(OnSetting.Action.CASCADE);
+            sett.action = OnSetting.Action.CASCADE;
       break;
     case RESTRICT:
       jj_consume_token(RESTRICT);
-            sett.setAction(OnSetting.Action.RESTRICT);
+            sett.action = OnSetting.Action.RESTRICT;
       break;
     case NO:
       jj_consume_token(NO);
       jj_consume_token(ACTION);
-            sett.setAction(OnSetting.Action.NO_ACTION);
+            sett.action = OnSetting.Action.NO_ACTION;
       break;
     default:
       jj_la1[59] = jj_gen;
@@ -1388,8 +1350,8 @@ public final class ASTParser implements ASTParserConstants {
     jj_consume_token(MATCH);
         sett.setBegin(token.beginLine, token.beginColumn);
     name();
-        sett.setName(new Name(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image));
+        sett.name = new Name(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);
         sett.setEnd(token.endLine, token.endColumn);
         {if (true) return sett;}
     throw new Error("Missing return statement in function");
@@ -1401,13 +1363,13 @@ public final class ASTParser implements ASTParserConstants {
     case NOT:
       jj_consume_token(NOT);
             sett.setBegin(token.beginLine, token.beginColumn);
-            sett.setType(DeferrableSetting.Type.NOT_DEFERRABLE);
+            sett.type = DeferrableSetting.Type.NOT_DEFERRABLE;
       jj_consume_token(DEFERRABLE);
       break;
     case DEFERRABLE:
       jj_consume_token(DEFERRABLE);
             sett.setBegin(token.beginLine, token.beginColumn);
-            sett.setType(DeferrableSetting.Type.DEFERRABLE);
+            sett.type = DeferrableSetting.Type.DEFERRABLE;
       break;
     default:
       jj_la1[60] = jj_gen;
@@ -1420,11 +1382,11 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DEFERRED:
         jj_consume_token(DEFERRED);
-                sett.setMode(DeferrableSetting.Mode.DEFERRED);
+                sett.mode = DeferrableSetting.Mode.DEFERRED;
         break;
       case IMMEDIATE:
         jj_consume_token(IMMEDIATE);
-                sett.setMode(DeferrableSetting.Mode.IMMEDIATE);
+                sett.mode = DeferrableSetting.Mode.IMMEDIATE;
         break;
       default:
         jj_la1[61] = jj_gen;
@@ -1451,23 +1413,23 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ROLLBACK:
         jj_consume_token(ROLLBACK);
-                clause.setAction(ConflictClause.Action.ROLLBACK);
+                clause.action = ConflictClause.Action.ROLLBACK;
         break;
       case ABORT:
         jj_consume_token(ABORT);
-                clause.setAction(ConflictClause.Action.ABORT);
+                clause.action = ConflictClause.Action.ABORT;
         break;
       case FAIL:
         jj_consume_token(FAIL);
-                clause.setAction(ConflictClause.Action.FAIL);
+                clause.action = ConflictClause.Action.FAIL;
         break;
       case IGNORE:
         jj_consume_token(IGNORE);
-                clause.setAction(ConflictClause.Action.IGNORE);
+                clause.action = ConflictClause.Action.IGNORE;
         break;
       case REPLACE:
         jj_consume_token(REPLACE);
-                clause.setAction(ConflictClause.Action.REPLACE);
+                clause.action = ConflictClause.Action.REPLACE;
         break;
       default:
         jj_la1[63] = jj_gen;
@@ -1487,11 +1449,7 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CreateTriggerStmt createTriggerStmt() throws ParseException {
     CreateTriggerStmt stmt = new CreateTriggerStmt();
-    boolean hasIfNotExists = false;
-    Name database = null;
-    Name trigger;
-    Name table;
-    EventStmt eventStmt;
+    stmt.stmts = new ArrayList<EventStmt>();
     jj_consume_token(CREATE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1509,7 +1467,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            stmt.setTemporary(true);
+            stmt.hasTemporary = true;
       break;
     default:
       jj_la1[66] = jj_gen;
@@ -1521,7 +1479,7 @@ public final class ASTParser implements ASTParserConstants {
       jj_consume_token(IF);
       jj_consume_token(NOT);
       jj_consume_token(EXISTS);
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
       break;
     default:
       jj_la1[67] = jj_gen;
@@ -1529,12 +1487,12 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_14(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    trigger = name();
+    stmt.name = name();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AFTER:
     case BEFORE:
@@ -1542,16 +1500,16 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case BEFORE:
         jj_consume_token(BEFORE);
-            stmt.setTime(CreateTriggerStmt.Time.BEFORE);
+            stmt.time = CreateTriggerStmt.Time.BEFORE;
         break;
       case AFTER:
         jj_consume_token(AFTER);
-            stmt.setTime(CreateTriggerStmt.Time.AFTER);
+            stmt.time = CreateTriggerStmt.Time.AFTER;
         break;
       case INSTEAD:
         jj_consume_token(INSTEAD);
         jj_consume_token(OF);
-            stmt.setTime(CreateTriggerStmt.Time.INSTEAD_OF);
+            stmt.time = CreateTriggerStmt.Time.INSTEAD_OF;
         break;
       default:
         jj_la1[68] = jj_gen;
@@ -1566,21 +1524,22 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DELETE:
       jj_consume_token(DELETE);
-            stmt.setEvent(CreateTriggerStmt.Event.DELETE);
+            stmt.event = CreateTriggerStmt.Event.DELETE;
       break;
     case INSERT:
       jj_consume_token(INSERT);
-            stmt.setEvent(CreateTriggerStmt.Event.INSERT);
+            stmt.event = CreateTriggerStmt.Event.INSERT;
       break;
     case UPDATE:
       jj_consume_token(UPDATE);
-            stmt.setEvent(CreateTriggerStmt.Event.DELETE);
+            stmt.event = CreateTriggerStmt.Event.DELETE;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case OF:
         jj_consume_token(OF);
                 Name column;
+                stmt.columns = new ArrayList<Name>();
         column = name();
-                stmt.addColumn(column);
+                stmt.columns.add(column);
         label_12:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1593,7 +1552,7 @@ public final class ASTParser implements ASTParserConstants {
           }
           jj_consume_token(COMMA);
           column = name();
-                    stmt.addColumn(column);
+                    stmt.columns.add(column);
         }
         break;
       default:
@@ -1607,13 +1566,13 @@ public final class ASTParser implements ASTParserConstants {
       throw new ParseException();
     }
     jj_consume_token(ON);
-    table = name();
+    stmt.table = name();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case FOR:
       jj_consume_token(FOR);
       jj_consume_token(EACH);
       jj_consume_token(ROW);
-            stmt.setForEachRow(true);
+            stmt.hasForEachRow = true;
       break;
     default:
       jj_la1[73] = jj_gen;
@@ -1622,15 +1581,14 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WHEN:
       jj_consume_token(WHEN);
-            Expression expr;
-      expr = expr();
-            stmt.setWhen(expr);
+      stmt.when = expr();
       break;
     default:
       jj_la1[74] = jj_gen;
       ;
     }
     jj_consume_token(BEGIN);
+        EventStmt eventStmt;
     label_13:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1652,7 +1610,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            stmt.addStatement(eventStmt);
+            stmt.stmts.add(eventStmt);
       jj_consume_token(SEMICOLON);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DELETE:
@@ -1669,18 +1627,12 @@ public final class ASTParser implements ASTParserConstants {
     }
     jj_consume_token(END);
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(trigger);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public CreateViewStmt createViewStmt() throws ParseException {
     CreateViewStmt stmt = new CreateViewStmt();
-    Name database = null;
-    Name view;
-    SelectStmt select;
     jj_consume_token(CREATE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1698,7 +1650,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            stmt.setTemporary(true);
+            stmt.hasTemporary = true;
       break;
     default:
       jj_la1[78] = jj_gen;
@@ -1710,7 +1662,7 @@ public final class ASTParser implements ASTParserConstants {
       jj_consume_token(IF);
       jj_consume_token(NOT);
       jj_consume_token(EXISTS);
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
       break;
     default:
       jj_la1[79] = jj_gen;
@@ -1718,27 +1670,21 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_15(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    view = name();
+    stmt.name = name();
     jj_consume_token(AS);
-    select = selectStmt();
+    stmt.select = selectStmt();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(view);
-        stmt.setDatabase(database);
-        stmt.setSelect(select);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public CreateVirtualTableStmt createVirtualTableStmt() throws ParseException {
     CreateVirtualTableStmt stmt = new CreateVirtualTableStmt();
-    Name database = null;
-    Name table;
-    Name module;
     jj_consume_token(CREATE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(VIRTUAL);
@@ -1748,7 +1694,7 @@ public final class ASTParser implements ASTParserConstants {
       jj_consume_token(IF);
       jj_consume_token(NOT);
       jj_consume_token(EXISTS);
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
       break;
     default:
       jj_la1[80] = jj_gen;
@@ -1756,20 +1702,21 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_16(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    table = name();
+    stmt.name = name();
     jj_consume_token(USING);
-    module = name();
+    stmt.module = name();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LP:
       jj_consume_token(LP);
-            ModuleArgument arg;
-      arg = moduleArgument();
-            stmt.addModuleArgument(arg);
+            ModuleArgument argument;
+            stmt.arguments = new ArrayList<ModuleArgument>();
+      argument = moduleArgument();
+            stmt.arguments.add(argument);
       label_14:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1781,8 +1728,8 @@ public final class ASTParser implements ASTParserConstants {
           break label_14;
         }
         jj_consume_token(COMMA);
-        arg = moduleArgument();
-                stmt.addModuleArgument(arg);
+        argument = moduleArgument();
+                stmt.arguments.add(argument);
       }
       jj_consume_token(RP);
       break;
@@ -1791,8 +1738,6 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(module);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
@@ -1828,42 +1773,37 @@ public final class ASTParser implements ASTParserConstants {
 
   final public DeleteStmt deleteStmt() throws ParseException {
     DeleteStmt stmt = new DeleteStmt();
-    QualifiedTableName qualifiedTable;
-    EventConstraint constraint = null;
     jj_consume_token(DELETE);
         stmt.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(FROM);
-    qualifiedTable = qualifiedTableName();
+    stmt.qualifiedTable = qualifiedTableName();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WHERE:
       jj_consume_token(WHERE);
-            Expression expr;
-      expr = expr();
-            stmt.setWhere(expr);
+      stmt.where = expr();
       break;
     default:
       jj_la1[85] = jj_gen;
       ;
     }
-    constraint = eventConstraint();
+    stmt.constraint = eventConstraint();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setQualifiedTable(qualifiedTable);
-        stmt.setConstraint(constraint);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public EventConstraint eventConstraint() throws ParseException {
-    EventConstraint constraint = null;
+    EventConstraint constraint = new EventConstraint();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ORDER:
       jj_consume_token(ORDER);
-            constraint = new EventConstraint();
             constraint.setBegin(token.beginLine, token.beginColumn);
             OrderingTerm term;
+
+            constraint.terms = new ArrayList<OrderingTerm>();
       jj_consume_token(BY);
       term = orderingTerm();
-            constraint.addTerm(term);
+            constraint.terms.add(term);
       label_15:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1876,7 +1816,7 @@ public final class ASTParser implements ASTParserConstants {
         }
         jj_consume_token(COMMA);
         term = orderingTerm();
-                constraint.addTerm(term);
+                constraint.terms.add(term);
       }
       break;
     default:
@@ -1886,13 +1826,10 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LIMIT:
       jj_consume_token(LIMIT);
-            if (constraint == null) {
-                constraint = new EventConstraint();
+            if (constraint.terms == null) {
                 constraint.setBegin(token.beginLine, token.beginColumn);
             }
-            Expression expr;
-      expr = expr();
-            constraint.setLimit(expr);
+      constraint.limit = expr();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case OFFSET:
       case COMMA:
@@ -1908,8 +1845,7 @@ public final class ASTParser implements ASTParserConstants {
           jj_consume_token(-1);
           throw new ParseException();
         }
-        expr = expr();
-                constraint.setOffset(expr);
+        constraint.offset = expr();
         break;
       default:
         jj_la1[89] = jj_gen;
@@ -1920,8 +1856,9 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[90] = jj_gen;
       ;
     }
-        if (constraint != null) {
-            constraint.setEnd(token.endLine, token.endColumn);
+        constraint.setEnd(token.endLine, token.endColumn);
+        if (constraint.terms == null && constraint.limit == null) {
+            {if (true) return null;}
         }
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -1929,7 +1866,6 @@ public final class ASTParser implements ASTParserConstants {
 
   final public DetachStmt detachStmt() throws ParseException {
     DetachStmt stmt = new DetachStmt();
-    Name database;
     jj_consume_token(DETACH);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1940,17 +1876,14 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[91] = jj_gen;
       ;
     }
-    database = name();
+    stmt.database = name();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public DropIndexStmt dropIndexStmt() throws ParseException {
     DropIndexStmt stmt = new DropIndexStmt();
-    Name database = null;
-    Name index;
     jj_consume_token(DROP);
         stmt.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(INDEX);
@@ -1958,7 +1891,7 @@ public final class ASTParser implements ASTParserConstants {
     case IF:
       jj_consume_token(IF);
       jj_consume_token(EXISTS);
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
       break;
     default:
       jj_la1[92] = jj_gen;
@@ -1966,23 +1899,19 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_17(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    index = name();
+    stmt.name = name();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(index);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public DropTableStmt dropTableStmt() throws ParseException {
     DropTableStmt stmt = new DropTableStmt();
-    Name database = null;
-    Name table;
     jj_consume_token(DROP);
         stmt.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(TABLE);
@@ -1990,7 +1919,7 @@ public final class ASTParser implements ASTParserConstants {
     case IF:
       jj_consume_token(IF);
       jj_consume_token(EXISTS);
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
       break;
     default:
       jj_la1[93] = jj_gen;
@@ -1998,23 +1927,19 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_18(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    table = name();
+    stmt.name = name();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(table);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public DropTriggerStmt dropTriggerStmt() throws ParseException {
     DropTriggerStmt stmt = new DropTriggerStmt();
-    Name database = null;
-    Name trigger;
     jj_consume_token(DROP);
         stmt.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(TRIGGER);
@@ -2022,7 +1947,7 @@ public final class ASTParser implements ASTParserConstants {
     case IF:
       jj_consume_token(IF);
       jj_consume_token(EXISTS);
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
       break;
     default:
       jj_la1[94] = jj_gen;
@@ -2030,23 +1955,19 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_19(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    trigger = name();
+    stmt.name = name();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(trigger);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public DropViewStmt dropViewStmt() throws ParseException {
     DropViewStmt stmt = new DropViewStmt();
-    Name database = null;
-    Name view;
     jj_consume_token(DROP);
         stmt.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(VIEW);
@@ -2054,7 +1975,7 @@ public final class ASTParser implements ASTParserConstants {
     case IF:
       jj_consume_token(IF);
       jj_consume_token(EXISTS);
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
       break;
     default:
       jj_la1[95] = jj_gen;
@@ -2062,15 +1983,13 @@ public final class ASTParser implements ASTParserConstants {
     }
     if (jj_2_20(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    view = name();
+    stmt.name = name();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(view);
-        stmt.setDatabase(database);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
@@ -2093,9 +2012,8 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(OR);
       right = andExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.OR);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.OR);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2117,9 +2035,8 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(AND);
       right = notExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.AND);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.AND);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2133,8 +2050,8 @@ public final class ASTParser implements ASTParserConstants {
             int line = token.beginLine;
             int column = token.beginColumn;
       expr = notExpr();
-            expr = new UnaryExpr(new Block(line, column, token.endLine,
-                token.endColumn), UnaryExpr.Operator.LOGICAL_NOT, expr);
+            expr = new UnaryExpr(new Block(line, column, token.endLine, token.endColumn),
+                UnaryExpr.Operator.LOGICAL_NOT, expr);
       break;
     case CASE:
     case CAST:
@@ -2222,38 +2139,38 @@ public final class ASTParser implements ASTParserConstants {
   }
 
   final public Expression unaryEqualityExpr(Expression expr) throws ParseException {
-    UnaryExpr.Operator op;
+    UnaryExpr.Operator operator;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ISNULL:
       jj_consume_token(ISNULL);
-            op = UnaryExpr.Operator.IS_NULL;
+            operator = UnaryExpr.Operator.IS_NULL;
       break;
     case NOTNULL:
       jj_consume_token(NOTNULL);
-            op = UnaryExpr.Operator.NOT_NULL;
+            operator = UnaryExpr.Operator.NOT_NULL;
       break;
     case NOT:
       jj_consume_token(NOT);
       jj_consume_token(NULL);
-            op = UnaryExpr.Operator.NOT_NULL;
+            operator = UnaryExpr.Operator.NOT_NULL;
       break;
     default:
       jj_la1[101] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-        {if (true) return new UnaryExpr(new Block(expr.beginLine, expr.beginColumn,
-            token.endLine, token.endColumn), op, expr);}
+        {if (true) return new UnaryExpr(new Block(expr.beginLine, expr.beginColumn, token.endLine,
+            token.endColumn), operator, expr);}
     throw new Error("Missing return statement in function");
   }
 
   final public Expression binaryEqualityExpr(Expression left) throws ParseException {
     Expression right;
-    BinaryExpr.Operator op;
-    op = binaryEqualityOperator();
+    BinaryExpr.Operator operator;
+    operator = binaryEqualityOperator();
     right = relationalExpr();
-        {if (true) return new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-            token.endLine, token.endColumn), left, right, op);}
+        {if (true) return new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+            token.endColumn), left, right, operator);}
     throw new Error("Missing return statement in function");
   }
 
@@ -2340,28 +2257,26 @@ public final class ASTParser implements ASTParserConstants {
   final public BetweenExpr betweenExpr(Expression expr) throws ParseException {
     BetweenExpr between = new BetweenExpr();
 
-    between.setExpression(expr);
+    between.expr = expr;
     between.setBegin(expr);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
       jj_consume_token(NOT);
       jj_consume_token(BETWEEN);
-            between.setOperator(BetweenExpr.Operator.NOT_BETWEEN);
+            between.operator = BetweenExpr.Operator.NOT_BETWEEN;
       break;
     case BETWEEN:
       jj_consume_token(BETWEEN);
-            between.setOperator(BetweenExpr.Operator.BETWEEN);
+            between.operator = BetweenExpr.Operator.BETWEEN;
       break;
     default:
       jj_la1[105] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-    expr = relationalExpr();
-        between.setLower(expr);
+    between.lower = relationalExpr();
     jj_consume_token(AND);
-    expr = relationalExpr();
-        between.setUpper(expr);
+    between.upper = relationalExpr();
         between.setEnd(token.endLine, token.endColumn);
         {if (true) return between;}
     throw new Error("Missing return statement in function");
@@ -2369,16 +2284,16 @@ public final class ASTParser implements ASTParserConstants {
 
   final public InExpr inExpr(Expression expr) throws ParseException {
     InExpr in = null;
-    InExpr.Operator op;
+    InExpr.Operator operator;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
       jj_consume_token(NOT);
       jj_consume_token(IN);
-            op = InExpr.Operator.NOT_IN;
+            operator = InExpr.Operator.NOT_IN;
       break;
     case IN:
       jj_consume_token(IN);
-            op = InExpr.Operator.IN;
+            operator = InExpr.Operator.IN;
       break;
     default:
       jj_la1[106] = jj_gen;
@@ -2389,62 +2304,13 @@ public final class ASTParser implements ASTParserConstants {
     case LP:
       jj_consume_token(LP);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case CASE:
-      case CAST:
-      case CURRENT_DATE:
-      case CURRENT_TIME:
-      case CURRENT_TIMESTAMP:
-      case EXISTS:
-      case NOT:
-      case NULL:
-      case RAISE:
       case SELECT:
-      case PLUS:
-      case MINUS:
-      case BIT_NOT:
-      case NUMERIC:
-      case STRING:
-      case BLOB:
-      case PARAMETER:
-      case ID:
-      case LP:
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case SELECT:
-          in = inSelectExpr();
-          break;
-        case CASE:
-        case CAST:
-        case CURRENT_DATE:
-        case CURRENT_TIME:
-        case CURRENT_TIMESTAMP:
-        case EXISTS:
-        case NOT:
-        case NULL:
-        case RAISE:
-        case PLUS:
-        case MINUS:
-        case BIT_NOT:
-        case NUMERIC:
-        case STRING:
-        case BLOB:
-        case PARAMETER:
-        case ID:
-        case LP:
-          in = inSetExpr();
-          break;
-        default:
-          jj_la1[107] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
+        in = inSelectExpr();
         break;
       default:
-        jj_la1[108] = jj_gen;
-        ;
+        jj_la1[107] = jj_gen;
+        in = inSetExpr();
       }
-            if (in == null) {
-                in = new InSetExpr();
-            }
       jj_consume_token(RP);
       break;
     case STRING:
@@ -2452,12 +2318,12 @@ public final class ASTParser implements ASTParserConstants {
       in = inTableExpr();
       break;
     default:
-      jj_la1[109] = jj_gen;
+      jj_la1[108] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-        in.setExpression(expr);
-        in.setOperator(op);
+        in.expr = expr;
+        in.operator = operator;
         in.setBegin(expr);
         in.setEnd(token.endLine, token.endColumn);
         {if (true) return in;}
@@ -2465,10 +2331,8 @@ public final class ASTParser implements ASTParserConstants {
   }
 
   final public InSelectExpr inSelectExpr() throws ParseException {
-    SelectStmt stmt;
-    stmt = selectStmt();
-        InSelectExpr in = new InSelectExpr();
-        in.setSelect(stmt);
+    InSelectExpr in = new InSelectExpr();
+    in.select = selectStmt();
         {if (true) return in;}
     throw new Error("Missing return statement in function");
   }
@@ -2476,21 +2340,46 @@ public final class ASTParser implements ASTParserConstants {
   final public InSetExpr inSetExpr() throws ParseException {
     InSetExpr in = new InSetExpr();
     Expression expr;
-    expr = expr();
-        in.addExpression(expr);
-    label_19:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[110] = jj_gen;
-        break label_19;
-      }
-      jj_consume_token(COMMA);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case CASE:
+    case CAST:
+    case CURRENT_DATE:
+    case CURRENT_TIME:
+    case CURRENT_TIMESTAMP:
+    case EXISTS:
+    case NOT:
+    case NULL:
+    case RAISE:
+    case PLUS:
+    case MINUS:
+    case BIT_NOT:
+    case NUMERIC:
+    case STRING:
+    case BLOB:
+    case PARAMETER:
+    case ID:
+    case LP:
       expr = expr();
-            in.addExpression(expr);
+                in.set = new ArrayList<Expression>();
+                in.set.add(expr);
+      label_19:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case COMMA:
+          ;
+          break;
+        default:
+          jj_la1[109] = jj_gen;
+          break label_19;
+        }
+        jj_consume_token(COMMA);
+        expr = expr();
+                    in.set.add(expr);
+      }
+      break;
+    default:
+      jj_la1[110] = jj_gen;
+      ;
     }
         {if (true) return in;}
     throw new Error("Missing return statement in function");
@@ -2498,18 +2387,14 @@ public final class ASTParser implements ASTParserConstants {
 
   final public InTableExpr inTableExpr() throws ParseException {
     InTableExpr in = new InTableExpr();
-    Name database = null;
-    Name table;
     if (jj_2_24(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
-            in.setDatabase(database);
+              in.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    table = name();
-        in.setTable(table);
+    in.table = name();
         {if (true) return in;}
     throw new Error("Missing return statement in function");
   }
@@ -2517,7 +2402,7 @@ public final class ASTParser implements ASTParserConstants {
   final public Expression relationalExpr() throws ParseException {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
     left = escapeExpr();
     label_20:
     while (true) {
@@ -2535,19 +2420,19 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case LESS:
         jj_consume_token(LESS);
-                op = BinaryExpr.Operator.LESS;
+                operator = BinaryExpr.Operator.LESS;
         break;
       case LESS_OR_EQUAL:
         jj_consume_token(LESS_OR_EQUAL);
-                op = BinaryExpr.Operator.LESS_OR_EQUAL;
+                operator = BinaryExpr.Operator.LESS_OR_EQUAL;
         break;
       case GREATER:
         jj_consume_token(GREATER);
-                op = BinaryExpr.Operator.GREATER;
+                operator = BinaryExpr.Operator.GREATER;
         break;
       case GREATER_OR_EQUAL:
         jj_consume_token(GREATER_OR_EQUAL);
-                op = BinaryExpr.Operator.GREATER_OR_EQUAL;
+                operator = BinaryExpr.Operator.GREATER_OR_EQUAL;
         break;
       default:
         jj_la1[112] = jj_gen;
@@ -2555,8 +2440,8 @@ public final class ASTParser implements ASTParserConstants {
         throw new ParseException();
       }
       right = escapeExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2570,9 +2455,8 @@ public final class ASTParser implements ASTParserConstants {
     case ESCAPE:
       jj_consume_token(ESCAPE);
       right = bitwiseExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.ESCAPE);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.ESCAPE);
       break;
     default:
       jj_la1[113] = jj_gen;
@@ -2585,7 +2469,7 @@ public final class ASTParser implements ASTParserConstants {
   final public Expression bitwiseExpr() throws ParseException {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
     left = additiveExpr();
     label_21:
     while (true) {
@@ -2600,10 +2484,10 @@ public final class ASTParser implements ASTParserConstants {
         jj_la1[114] = jj_gen;
         break label_21;
       }
-      op = bitwiseOperator();
+      operator = bitwiseOperator();
       right = additiveExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2638,7 +2522,7 @@ public final class ASTParser implements ASTParserConstants {
   final public Expression additiveExpr() throws ParseException {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
     left = multiplicativeExpr();
     label_22:
     while (true) {
@@ -2654,11 +2538,11 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PLUS:
         jj_consume_token(PLUS);
-                op = BinaryExpr.Operator.ADDITION;
+                operator = BinaryExpr.Operator.ADDITION;
         break;
       case MINUS:
         jj_consume_token(MINUS);
-                op = BinaryExpr.Operator.SUBTRACTION;
+                operator = BinaryExpr.Operator.SUBTRACTION;
         break;
       default:
         jj_la1[117] = jj_gen;
@@ -2666,8 +2550,8 @@ public final class ASTParser implements ASTParserConstants {
         throw new ParseException();
       }
       right = multiplicativeExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2676,7 +2560,7 @@ public final class ASTParser implements ASTParserConstants {
   final public Expression multiplicativeExpr() throws ParseException {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
     left = concatenateExpr();
     label_23:
     while (true) {
@@ -2693,15 +2577,15 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case STAR:
         jj_consume_token(STAR);
-                op = BinaryExpr.Operator.MULTIPLICATION;
+                operator = BinaryExpr.Operator.MULTIPLICATION;
         break;
       case SLASH:
         jj_consume_token(SLASH);
-                op = BinaryExpr.Operator.DIVISION;
+                operator = BinaryExpr.Operator.DIVISION;
         break;
       case MODULO:
         jj_consume_token(MODULO);
-                op = BinaryExpr.Operator.MODULO;
+                operator = BinaryExpr.Operator.MODULO;
         break;
       default:
         jj_la1[119] = jj_gen;
@@ -2709,8 +2593,8 @@ public final class ASTParser implements ASTParserConstants {
         throw new ParseException();
       }
       right = concatenateExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2732,9 +2616,8 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(CONCATENATION);
       right = collateExpr();
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.CONCATENATION);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.CONCATENATION);
     }
         {if (true) return left;}
     throw new Error("Missing return statement in function");
@@ -2756,8 +2639,8 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COLLATE);
       collation = name();
-            expr = new CollateExpr(new Block(expr.beginLine, expr.beginColumn,
-                token.endLine, token.endColumn), expr, collation);
+            expr = new CollateExpr(new Block(expr.beginLine, expr.beginColumn, token.endLine,
+                token.endColumn), expr, collation);
     }
         {if (true) return expr;}
     throw new Error("Missing return statement in function");
@@ -2765,17 +2648,17 @@ public final class ASTParser implements ASTParserConstants {
 
   final public Expression unaryExpr() throws ParseException {
     Expression expr;
-    UnaryExpr.Operator op;
+    UnaryExpr.Operator operator;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case PLUS:
     case MINUS:
     case BIT_NOT:
-      op = unaryOperator();
+      operator = unaryOperator();
                 int line = token.beginLine;
                 int column = token.beginColumn;
       expr = unaryExpr();
-            expr = new UnaryExpr(new Block(line, column, token.endLine,
-                token.endColumn), op, expr);
+            expr = new UnaryExpr(new Block(line, column, token.endLine, token.endColumn), operator,
+                expr);
       break;
     case CASE:
     case CAST:
@@ -2894,18 +2777,16 @@ public final class ASTParser implements ASTParserConstants {
 
   final public BindParameterExpr bindParameterExpr() throws ParseException {
     jj_consume_token(PARAMETER);
-        {if (true) return new BindParameterExpr(new Block(token.beginLine,
-            token.beginColumn, token.endLine, token.endColumn), token.image);}
+        {if (true) return new BindParameterExpr(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);}
     throw new Error("Missing return statement in function");
   }
 
   final public FunctionExpr functionExpr() throws ParseException {
     FunctionExpr function = new FunctionExpr();
-    Name name;
     Expression expr;
-    name = name();
-        function.setFunction(name);
-        function.setBegin(name);
+    function.function = name();
+        function.setBegin(function.function);
     jj_consume_token(LP);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case CASE:
@@ -2931,7 +2812,7 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case STAR:
         jj_consume_token(STAR);
-            function.setOperator(FunctionExpr.Operator.UNIVERSAL);
+            function.operator = FunctionExpr.Operator.UNIVERSAL;
         break;
       case CASE:
       case CAST:
@@ -2955,14 +2836,15 @@ public final class ASTParser implements ASTParserConstants {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case DISTINCT:
           jj_consume_token(DISTINCT);
-                function.setOperator(FunctionExpr.Operator.DISTINCT);
+                function.operator = FunctionExpr.Operator.DISTINCT;
           break;
         default:
           jj_la1[127] = jj_gen;
           ;
         }
         expr = expr();
-            function.addExpression(expr);
+            function.exprs = new ArrayList<Expression>();
+            function.exprs.add(expr);
         label_26:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -2975,7 +2857,7 @@ public final class ASTParser implements ASTParserConstants {
           }
           jj_consume_token(COMMA);
           expr = expr();
-                function.addExpression(expr);
+                function.exprs.add(expr);
         }
         break;
       default:
@@ -2996,27 +2878,21 @@ public final class ASTParser implements ASTParserConstants {
 
   final public ColumnExpr columnExpr() throws ParseException {
     ColumnExpr reference = new ColumnExpr();
-    Name database = null;
-    Name table = null;
-    Name column;
     if (jj_2_29(2)) {
       if (jj_2_28(4)) {
         // Anticipate the occurrence of a dot.
-                    database = name();
-                reference.setBegin(database);
-                reference.setDatabase(database);
+                    reference.database = name();
+                reference.setBegin(reference.database);
         jj_consume_token(DOT);
       } else {
         ;
       }
-      table = name();
-            if (database == null) {
-                reference.setBegin(table);
+      reference.table = name();
+            if (reference.database == null) {
+                reference.setBegin(reference.table);
             }
-            reference.setTable(table);
       jj_consume_token(DOT);
-      column = name();
-                reference.setColumn(column);
+      reference.column = name();
                 {if (true) return reference;}
     } else {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3025,9 +2901,8 @@ public final class ASTParser implements ASTParserConstants {
             // In case ColumnExpr only has the column name, that can't be a
             // <STRING> because would exist a syntactic conflict with a string
             // literal.
-            reference.setColumn(new Name(new Block(token.beginLine,
-                token.beginColumn, token.endLine, token.endColumn),
-                token.image));
+            reference.column = new Name(new Block(token.beginLine, token.beginColumn, token.endLine,
+                token.endColumn), token.image);
         break;
       default:
         jj_la1[131] = jj_gen;
@@ -3042,16 +2917,12 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CastExpr castExpr() throws ParseException {
     CastExpr cast = new CastExpr();
-    Expression expr;
-    TypeName type;
     jj_consume_token(CAST);
         cast.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(LP);
-    expr = expr();
-        cast.setExpression(expr);
+    cast.expr = expr();
     jj_consume_token(AS);
-    type = typeName();
-        cast.setType(type);
+    cast.type = typeName();
     jj_consume_token(RP);
         cast.setEnd(token.endLine, token.endColumn);
         {if (true) return cast;}
@@ -3060,12 +2931,10 @@ public final class ASTParser implements ASTParserConstants {
 
   final public UnaryExpr existsExpr() throws ParseException {
     UnaryExpr exists = new UnaryExpr();
-    Expression expr;
     jj_consume_token(EXISTS);
         exists.setBegin(token.beginLine, token.beginColumn);
-    expr = selectExpr();
-        exists.setExpression(expr);
-        exists.setOperator(UnaryExpr.Operator.EXISTS);
+    exists.expr = selectExpr();
+        exists.operator = UnaryExpr.Operator.EXISTS;
         exists.setEnd(token.endLine, token.endColumn);
         {if (true) return exists;}
     throw new Error("Missing return statement in function");
@@ -3073,12 +2942,10 @@ public final class ASTParser implements ASTParserConstants {
 
   final public SelectExpr selectExpr() throws ParseException {
     SelectExpr expr = new SelectExpr();
-    SelectStmt stmt;
     jj_consume_token(LP);
         expr.setBegin(token.beginLine, token.beginColumn);
-    stmt = selectStmt();
+    expr.select = selectStmt();
     jj_consume_token(RP);
-        expr.setSelect(stmt);
         expr.setEnd(token.endLine, token.endColumn);
         {if (true) return expr;}
     throw new Error("Missing return statement in function");
@@ -3086,8 +2953,9 @@ public final class ASTParser implements ASTParserConstants {
 
   final public CaseExpr caseExpr() throws ParseException {
     CaseExpr caseExpr = new CaseExpr();
-    Expression expr;
-    WhenExpr when;
+    WhenExpr expr;
+
+    caseExpr.whens = new ArrayList<WhenExpr>();
     jj_consume_token(CASE);
         caseExpr.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3109,8 +2977,7 @@ public final class ASTParser implements ASTParserConstants {
     case PARAMETER:
     case ID:
     case LP:
-      expr = expr();
-            caseExpr.setCase(expr);
+      caseExpr.caseExpr = expr();
       break;
     default:
       jj_la1[132] = jj_gen;
@@ -3118,8 +2985,8 @@ public final class ASTParser implements ASTParserConstants {
     }
     label_27:
     while (true) {
-      when = whenExpr();
-            caseExpr.addWhen(when);
+      expr = whenExpr();
+            caseExpr.whens.add(expr);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case WHEN:
         ;
@@ -3132,8 +2999,7 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ELSE:
       jj_consume_token(ELSE);
-      expr = expr();
-            caseExpr.setElse(expr);
+      caseExpr.elseExpr = expr();
       break;
     default:
       jj_la1[134] = jj_gen;
@@ -3147,14 +3013,11 @@ public final class ASTParser implements ASTParserConstants {
 
   final public WhenExpr whenExpr() throws ParseException {
     WhenExpr when = new WhenExpr();
-    Expression expr;
     jj_consume_token(WHEN);
         when.setBegin(token.beginLine, token.beginColumn);
-    expr = expr();
-        when.setWhen(expr);
+    when.when = expr();
     jj_consume_token(THEN);
-    expr = expr();
-        when.setThen(expr);
+    when.then = expr();
         when.setEnd(token.endLine, token.endColumn);
         {if (true) return when;}
     throw new Error("Missing return statement in function");
@@ -3168,7 +3031,7 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IGNORE:
       jj_consume_token(IGNORE);
-            expr.setType(RaiseFunctionExpr.Type.IGNORE);
+            expr.type = RaiseFunctionExpr.Type.IGNORE;
       break;
     case ABORT:
     case FAIL:
@@ -3176,15 +3039,15 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ROLLBACK:
         jj_consume_token(ROLLBACK);
-                expr.setType(RaiseFunctionExpr.Type.ROLLBACK);
+                expr.type = RaiseFunctionExpr.Type.ROLLBACK;
         break;
       case ABORT:
         jj_consume_token(ABORT);
-                expr.setType(RaiseFunctionExpr.Type.ABORT);
+                expr.type = RaiseFunctionExpr.Type.ABORT;
         break;
       case FAIL:
         jj_consume_token(FAIL);
-                expr.setType(RaiseFunctionExpr.Type.FAIL);
+                expr.type = RaiseFunctionExpr.Type.FAIL;
         break;
       default:
         jj_la1[135] = jj_gen;
@@ -3204,7 +3067,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            expr.setError(token.image);
+            expr.error = token.image;
       break;
     default:
       jj_la1[137] = jj_gen;
@@ -3251,8 +3114,8 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-           literal = new Literal(new Block(token.beginLine, token.beginColumn,
-               token.endLine, token.endColumn), token.image);
+            literal = new Literal(new Block(token.beginLine, token.beginColumn, token.endLine,
+                token.endColumn), token.image);
       break;
     default:
       jj_la1[139] = jj_gen;
@@ -3265,58 +3128,56 @@ public final class ASTParser implements ASTParserConstants {
 
   final public NumericLiteral numericLiteral() throws ParseException {
     jj_consume_token(NUMERIC);
-        {if (true) return new NumericLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);}
+        {if (true) return new NumericLiteral(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);}
     throw new Error("Missing return statement in function");
   }
 
   final public StringLiteral stringLiteral() throws ParseException {
     jj_consume_token(STRING);
-        {if (true) return new StringLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);}
+        {if (true) return new StringLiteral(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);}
     throw new Error("Missing return statement in function");
   }
 
   final public BlobLiteral blobLiteral() throws ParseException {
     jj_consume_token(BLOB);
-        {if (true) return new BlobLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);}
+        {if (true) return new BlobLiteral(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);}
     throw new Error("Missing return statement in function");
   }
 
   final public InsertStmt insertStmt() throws ParseException {
     InsertStmt stmt = new InsertStmtDefault();
-    Name database = null;
-    Name table;
     List<Name> columns = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case INSERT:
       jj_consume_token(INSERT);
             stmt.setBegin(token.beginLine, token.beginColumn);
-            stmt.setType(InsertStmt.Type.INSERT);
+            stmt.type = InsertStmt.Type.INSERT;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case OR:
         jj_consume_token(OR);
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case ROLLBACK:
           jj_consume_token(ROLLBACK);
-                    stmt.setType(InsertStmt.Type.INSERT_OR_ROLLBACK);
+                    stmt.type = InsertStmt.Type.INSERT_OR_ROLLBACK;
           break;
         case ABORT:
           jj_consume_token(ABORT);
-                    stmt.setType(InsertStmt.Type.INSERT_OR_ABORT);
+                    stmt.type = InsertStmt.Type.INSERT_OR_ABORT;
           break;
         case REPLACE:
           jj_consume_token(REPLACE);
-                    stmt.setType(InsertStmt.Type.INSERT_OR_REPLACE);
+                    stmt.type = InsertStmt.Type.INSERT_OR_REPLACE;
           break;
         case FAIL:
           jj_consume_token(FAIL);
-                    stmt.setType(InsertStmt.Type.INSERT_OR_FAIL);
+                    stmt.type = InsertStmt.Type.INSERT_OR_FAIL;
           break;
         case IGNORE:
           jj_consume_token(IGNORE);
-                    stmt.setType(InsertStmt.Type.INSERT_OR_IGNORE);
+                    stmt.type = InsertStmt.Type.INSERT_OR_IGNORE;
           break;
         default:
           jj_la1[140] = jj_gen;
@@ -3332,7 +3193,7 @@ public final class ASTParser implements ASTParserConstants {
     case REPLACE:
       jj_consume_token(REPLACE);
             stmt.setBegin(token.beginLine, token.beginColumn);
-            stmt.setType(InsertStmt.Type.REPLACE);
+            stmt.type = InsertStmt.Type.REPLACE;
       break;
     default:
       jj_la1[142] = jj_gen;
@@ -3342,12 +3203,12 @@ public final class ASTParser implements ASTParserConstants {
     jj_consume_token(INTO);
     if (jj_2_30(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    table = name();
+    stmt.table = name();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DEFAULT_:
       jj_consume_token(DEFAULT_);
@@ -3360,7 +3221,7 @@ public final class ASTParser implements ASTParserConstants {
       case LP:
         jj_consume_token(LP);
                 Name column;
-                columns = new LinkedList<Name>();
+                columns = new ArrayList<Name>();
         column = name();
                 columns.add(column);
         label_28:
@@ -3402,21 +3263,20 @@ public final class ASTParser implements ASTParserConstants {
       throw new ParseException();
     }
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public InsertStmt insertStmtWithValues(InsertStmt stmt, List<Name> columns) throws ParseException {
     InsertStmtWithValues stmtWValues = new InsertStmtWithValues(stmt);
+    List<Expression> list = new ArrayList<Expression>();
     Expression expr;
 
-    stmtWValues.setColumns(columns);
+    stmtWValues.columns = columns;
     jj_consume_token(VALUES);
     jj_consume_token(LP);
     expr = expr();
-        stmtWValues.addValue(expr);
+        list.add(expr);
     label_29:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3429,9 +3289,10 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       expr = expr();
-                stmtWValues.addValue(expr);
+                list.add(expr);
     }
     jj_consume_token(RP);
+        stmtWValues.rows.add(list);
     label_30:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3443,10 +3304,10 @@ public final class ASTParser implements ASTParserConstants {
         break label_30;
       }
       jj_consume_token(COMMA);
-            stmtWValues.addRow();
+            list = new ArrayList<Expression>();
       jj_consume_token(LP);
       expr = expr();
-                stmtWValues.addValue(expr);
+                list.add(expr);
       label_31:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3459,50 +3320,47 @@ public final class ASTParser implements ASTParserConstants {
         }
         jj_consume_token(COMMA);
         expr = expr();
-                    stmtWValues.addValue(expr);
+                    list.add(expr);
       }
       jj_consume_token(RP);
+            stmtWValues.rows.add(list);
     }
         {if (true) return stmtWValues;}
     throw new Error("Missing return statement in function");
   }
 
   final public InsertStmt insertStmtWithSelect(InsertStmt stmt, List<Name> columns) throws ParseException {
-    SelectStmt select;
-    select = selectStmt();
-        InsertStmtWithSelect stmtWSelect = new InsertStmtWithSelect(stmt);
-        stmtWSelect.setSelect(select);
-        stmtWSelect.setColumns(columns);
+    InsertStmtWithSelect stmtWSelect = new InsertStmtWithSelect(stmt);
+
+    stmtWSelect.columns = columns;
+    stmtWSelect.select = selectStmt();
         {if (true) return stmtWSelect;}
     throw new Error("Missing return statement in function");
   }
 
   final public PragmaStmt pragmaStmt() throws ParseException {
     PragmaStmt stmt = new PragmaStmt();
-    Name database = null;
-    Name pragma;
-    PragmaValue value = null;
     jj_consume_token(PRAGMA);
         stmt.setBegin(token.beginLine, token.beginColumn);
     if (jj_2_31(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
+              stmt.database = name();
       jj_consume_token(DOT);
     } else {
       ;
     }
-    pragma = name();
+    stmt.pragma = name();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case EQUAL_1:
     case LP:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case EQUAL_1:
         jj_consume_token(EQUAL_1);
-        value = pragmaValue();
+        stmt.value = pragmaValue();
         break;
       case LP:
         jj_consume_token(LP);
-        value = pragmaValue();
+        stmt.value = pragmaValue();
         jj_consume_token(RP);
         break;
       default:
@@ -3516,9 +3374,6 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(database);
-        stmt.setPragma(pragma);
-        stmt.setValue(value);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
@@ -3559,18 +3414,16 @@ public final class ASTParser implements ASTParserConstants {
 
   final public ReindexStmt reindexStmt() throws ParseException {
     ReindexStmt stmt = new ReindexStmt();
-    Name first = null;
-    Name second = null;
     jj_consume_token(REINDEX);
         stmt.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STRING:
     case ID:
-      first = name();
+      stmt.first = name();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DOT:
         jj_consume_token(DOT);
-        second = name();
+        stmt.second = name();
         break;
       default:
         jj_la1[154] = jj_gen;
@@ -3582,20 +3435,16 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setFirst(first);
-        stmt.setSecond(second);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public SelectStmt selectStmt() throws ParseException {
     SelectStmt stmt = new SelectStmt();
-    SelectUnit unit;
-    SelectCompound.Operator op;
+    SelectCompound.Operator operator;
     SelectUnit core;
-    EventConstraint constraint = null;
-    unit = selectCore();
-        stmt.setBegin(unit);
+    stmt.unit = selectCore();
+        stmt.setBegin(stmt.unit);
     label_32:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3608,16 +3457,13 @@ public final class ASTParser implements ASTParserConstants {
         jj_la1[156] = jj_gen;
         break label_32;
       }
-      op = compoundOperator();
+      operator = compoundOperator();
       core = selectCore();
-            unit = new SelectCompound(new Block(unit.beginLine,
-                unit.beginColumn, token.endLine, token.endColumn), unit, op,
-                core);
+            stmt.unit = new SelectCompound(new Block(stmt.unit.beginLine, stmt.unit.beginColumn,
+                token.endLine, token.endColumn), stmt.unit, operator, core);
     }
 
-    constraint = eventConstraint();
-        stmt.setUnit(unit);
-        stmt.setConstraint(constraint);
+    stmt.constraint = eventConstraint();
         stmt.setEnd(token.endLine, token.endColumn);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
@@ -3626,6 +3472,8 @@ public final class ASTParser implements ASTParserConstants {
   final public SelectCore selectCore() throws ParseException {
     SelectCore core = new SelectCore();
     ResultColumn column;
+
+    core.columns = new ArrayList<ResultColumn>();
     jj_consume_token(SELECT);
         core.setBegin(token.beginLine, token.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3634,7 +3482,7 @@ public final class ASTParser implements ASTParserConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DISTINCT:
         jj_consume_token(DISTINCT);
-            core.setDistinct(true);
+            core.hasDistinct = true;
         break;
       case ALL:
         jj_consume_token(ALL);
@@ -3650,7 +3498,7 @@ public final class ASTParser implements ASTParserConstants {
       ;
     }
     column = resultColumn();
-        core.addColumn(column);
+        core.columns.add(column);
     label_33:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3663,14 +3511,12 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       resultColumn();
-                core.addColumn(column);
+                core.columns.add(column);
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case FROM:
       jj_consume_token(FROM);
-            JoinSrc src;
-      src = joinSource();
-            core.setFrom(src);
+      core.from = joinSource();
       break;
     default:
       jj_la1[160] = jj_gen;
@@ -3679,9 +3525,7 @@ public final class ASTParser implements ASTParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WHERE:
       jj_consume_token(WHERE);
-            Expression expr;
-      expr = expr();
-            core.setWhere(expr);
+      core.where = expr();
       break;
     default:
       jj_la1[161] = jj_gen;
@@ -3692,8 +3536,10 @@ public final class ASTParser implements ASTParserConstants {
       jj_consume_token(GROUP);
       jj_consume_token(BY);
             Expression expr;
+
+            core.groupBy = new ArrayList<Expression>();
       expr = expr();
-            core.addGroupByExpression(expr);
+            core.groupBy.add(expr);
       label_34:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -3706,13 +3552,12 @@ public final class ASTParser implements ASTParserConstants {
         }
         jj_consume_token(COMMA);
         expr = expr();
-                core.addGroupByExpression(expr);
+                core.groupBy.add(expr);
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case HAVING:
         jj_consume_token(HAVING);
-        expr = expr();
-                core.setHaving(expr);
+        core.having = expr();
         break;
       default:
         jj_la1[163] = jj_gen;
@@ -3767,20 +3612,17 @@ public final class ASTParser implements ASTParserConstants {
 
   final public UniversalColumn universalColumn() throws ParseException {
     UniversalColumn column = new UniversalColumn();
-    Name table;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STAR:
       jj_consume_token(STAR);
-            column.setBeginEnd(token.beginLine, token.beginColumn,
-                token.endLine, token.endColumn);
+            column.setBeginEnd(token.beginLine, token.beginColumn, token.endLine, token.endColumn);
       break;
     case STRING:
     case ID:
-      table = name();
-            column.setTable(table);
+      column.table = name();
       jj_consume_token(DOT);
       jj_consume_token(STAR);
-            column.setBeginEnd(table.beginLine, table.beginColumn, token.endLine,
+            column.setBeginEnd(column.table.beginLine, column.table.beginColumn, token.endLine,
                 token.endColumn);
       break;
     default:
@@ -3809,16 +3651,14 @@ public final class ASTParser implements ASTParserConstants {
         if (column == null) {
             column = new ExpressionColumn();
         }
-        column.setExpression(expr);
-        column.setBeginEnd(expr.beginLine, expr.beginColumn, token.endLine,
-            token.endColumn);
+        column.expr = expr;
+        column.setBeginEnd(expr.beginLine, expr.beginColumn, token.endLine, token.endColumn);
         {if (true) return column;}
     throw new Error("Missing return statement in function");
   }
 
   final public AliasedColumn aliasedColumn() throws ParseException {
     AliasedColumn column = new AliasedColumn();
-    Name alias;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AS:
       jj_consume_token(AS);
@@ -3827,15 +3667,14 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[168] = jj_gen;
       ;
     }
-    alias = name();
-            column.setAlias(alias);
+    column.alias = name();
             {if (true) return column;}
     throw new Error("Missing return statement in function");
   }
 
   final public JoinSrc joinSource() throws ParseException {
     JoinSrc src;
-    JoinCompound.Operator op;
+    JoinCompound.Operator operator;
     JoinSrc right;
     JoinConstraint constraint;
     src = singleSource();
@@ -3854,11 +3693,11 @@ public final class ASTParser implements ASTParserConstants {
         jj_la1[169] = jj_gen;
         break label_35;
       }
-      op = joinOp();
+      operator = joinOp();
       right = singleSource();
       constraint = joinConstraint();
-            src = new JoinCompound(new Block(src.beginLine, src.beginColumn,
-                token.endLine, token.endColumn), src, op, right, constraint);
+            src = new JoinCompound(new Block(src.beginLine, src.beginColumn, token.endLine,
+                token.endColumn), src, operator, right, constraint);
     }
         {if (true) return src;}
     throw new Error("Missing return statement in function");
@@ -3900,22 +3739,17 @@ public final class ASTParser implements ASTParserConstants {
 
   final public TableSrc tableSource() throws ParseException {
     TableSrc src = new TableSrc();
-    Name database = null;
-    Name table;
-    IndexedBy indexed;
     if (jj_2_35(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
-            src.setDatabase(database);
-            src.setBegin(database);
+              src.database = name();
+            src.setBegin(src.database);
       jj_consume_token(DOT);
     } else {
       ;
     }
-    table = name();
-        src.setTable(table);
-        if (database == null) {
-            src.setBegin(table);
+    src.table = name();
+        if (src.database == null) {
+            src.setBegin(src.table);
         }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AS:
@@ -3929,16 +3763,13 @@ public final class ASTParser implements ASTParserConstants {
         jj_la1[172] = jj_gen;
         ;
       }
-            Name alias;
-      alias = name();
-            src.setAlias(alias);
+      src.alias = name();
       break;
     default:
       jj_la1[173] = jj_gen;
       ;
     }
-    indexed = indexedBy();
-        src.setIndexed(indexed);
+    src.indexedBy = indexedBy();
         src.setEnd(token.endLine, token.endColumn);
         {if (true) return src;}
     throw new Error("Missing return statement in function");
@@ -3946,11 +3777,9 @@ public final class ASTParser implements ASTParserConstants {
 
   final public SelectSrc selectSource() throws ParseException {
     SelectSrc src = new SelectSrc();
-    SelectStmt stmt;
     jj_consume_token(LP);
         src.setBegin(token.beginLine, token.beginColumn);
-    stmt = selectStmt();
-        src.setSelect(stmt);
+    src.select = selectStmt();
     jj_consume_token(RP);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AS:
@@ -3964,9 +3793,7 @@ public final class ASTParser implements ASTParserConstants {
         jj_la1[174] = jj_gen;
         ;
       }
-            Name alias;
-      alias = name();
-            src.setAlias(alias);
+      src.alias = name();
       break;
     default:
       jj_la1[175] = jj_gen;
@@ -4092,11 +3919,9 @@ public final class ASTParser implements ASTParserConstants {
 
   final public JoinConstraintOn joinConstraintOn() throws ParseException {
     JoinConstraintOn constraint = new JoinConstraintOn();
-    Expression expr;
     jj_consume_token(ON);
         constraint.setBegin(token.beginLine, token.beginColumn);
-    expr = expr();
-        constraint.setExpression(expr);
+    constraint.expr = expr();
         constraint.setEnd(token.endLine, token.endColumn);
         {if (true) return constraint;}
     throw new Error("Missing return statement in function");
@@ -4105,11 +3930,13 @@ public final class ASTParser implements ASTParserConstants {
   final public JoinConstraintUsing joinConstraintUsing() throws ParseException {
     JoinConstraintUsing constraint = new JoinConstraintUsing();
     Name column;
+
+    constraint.columns = new ArrayList<Name>();
     jj_consume_token(USING);
         constraint.setBegin(token.beginLine, token.beginColumn);
     jj_consume_token(LP);
     column = name();
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     label_36:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -4122,7 +3949,7 @@ public final class ASTParser implements ASTParserConstants {
       }
       jj_consume_token(COMMA);
       column = name();
-            constraint.addColumn(column);
+            constraint.columns.add(column);
     }
     jj_consume_token(RP);
         constraint.setEnd(token.endLine, token.endColumn);
@@ -4132,21 +3959,19 @@ public final class ASTParser implements ASTParserConstants {
 
   final public OrderingTerm orderingTerm() throws ParseException {
     OrderingTerm term = new OrderingTerm();
-    Expression expr;
-    expr = expr();
-        term.setBegin(expr);
-        term.setExpression(expr);
+    term.expr = expr();
+        term.setBegin(term.expr);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ASC:
     case DESC:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ASC:
         jj_consume_token(ASC);
-            term.setOrder(OrderingTerm.Order.ASC);
+            term.order = OrderingTerm.Order.ASC;
         break;
       case DESC:
         jj_consume_token(DESC);
-            term.setOrder(OrderingTerm.Order.DESC);
+            term.order = OrderingTerm.Order.DESC;
         break;
       default:
         jj_la1[183] = jj_gen;
@@ -4195,22 +4020,20 @@ public final class ASTParser implements ASTParserConstants {
   }
 
   final public IndexedBy indexedBy() throws ParseException {
-    IndexedBy indexed = new IndexedBy();
+    IndexedBy indexedBy = new IndexedBy();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case INDEXED:
     case NOT:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case INDEXED:
         jj_consume_token(INDEXED);
-                    Name index;
-                    indexed.setBegin(token.beginLine, token.beginColumn);
+                    indexedBy.setBegin(token.beginLine, token.beginColumn);
         jj_consume_token(BY);
-        index = name();
-                    indexed.setIndex(index);
+        indexedBy.index = name();
         break;
       case NOT:
         jj_consume_token(NOT);
-                indexed.setBegin(token.beginLine, token.beginColumn);
+                indexedBy.setBegin(token.beginLine, token.beginColumn);
         jj_consume_token(INDEXED);
         break;
       default:
@@ -4218,8 +4041,8 @@ public final class ASTParser implements ASTParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            indexed.setEnd(token.endLine, token.endColumn);
-            {if (true) return indexed;}
+            indexedBy.setEnd(token.endLine, token.endColumn);
+            {if (true) return indexedBy;}
       break;
     default:
       jj_la1[188] = jj_gen;
@@ -4231,35 +4054,35 @@ public final class ASTParser implements ASTParserConstants {
 
   final public UpdateStmt updateStmt() throws ParseException {
     UpdateStmt stmt = new UpdateStmt();
-    QualifiedTableName qualifiedTable;
-    ColumnAssign assign;
-    EventConstraint constraint = null;
+    ColumnAssignment assignment;
+
+    stmt.assignments = new ArrayList<ColumnAssignment>();
     jj_consume_token(UPDATE);
         stmt.setBegin(token.beginLine, token.beginColumn);
-        stmt.setType(UpdateStmt.Type.UPDATE);
+        stmt.type = UpdateStmt.Type.UPDATE;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case OR:
       jj_consume_token(OR);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ROLLBACK:
         jj_consume_token(ROLLBACK);
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_ROLLBACK);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_ROLLBACK;
         break;
       case ABORT:
         jj_consume_token(ABORT);
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_ABORT);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_ABORT;
         break;
       case REPLACE:
         jj_consume_token(REPLACE);
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_REPLACE);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_REPLACE;
         break;
       case FAIL:
         jj_consume_token(FAIL);
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_FAIL);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_FAIL;
         break;
       case IGNORE:
         jj_consume_token(IGNORE);
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_IGNORE);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_IGNORE;
         break;
       default:
         jj_la1[189] = jj_gen;
@@ -4271,10 +4094,10 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1[190] = jj_gen;
       ;
     }
-    qualifiedTable = qualifiedTableName();
+    stmt.qualifiedTable = qualifiedTableName();
     jj_consume_token(SET);
-    assign = columnAssign();
-        stmt.addAssignment(assign);
+    assignment = columnAssignment();
+        stmt.assignments.add(assignment);
     label_37:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -4286,70 +4109,59 @@ public final class ASTParser implements ASTParserConstants {
         break label_37;
       }
       jj_consume_token(COMMA);
-      assign = columnAssign();
-                stmt.addAssignment(assign);
+      assignment = columnAssignment();
+                stmt.assignments.add(assignment);
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WHERE:
       jj_consume_token(WHERE);
-            Expression expr;
-      expr = expr();
-            stmt.setWhere(expr);
+      stmt.where = expr();
       break;
     default:
       jj_la1[192] = jj_gen;
       ;
     }
-    constraint = eventConstraint();
+    stmt.constraint = eventConstraint();
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setQualifiedTable(qualifiedTable);
-        stmt.setConstraint(constraint);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
 
   final public QualifiedTableName qualifiedTableName() throws ParseException {
     QualifiedTableName qualifiedTable = new QualifiedTableName();
-    Name database = null;
-    Name table;
-    IndexedBy indexed;
     if (jj_2_36(2)) {
       // Anticipate the occurrence of a dot.
-              database = name();
-            qualifiedTable.setBegin(database);
+              qualifiedTable.database = name();
+            qualifiedTable.setBegin(qualifiedTable.database);
       jj_consume_token(DOT);
     } else {
       ;
     }
-    table = name();
-        if (database == null) {
-            qualifiedTable.setBegin(table);
+    qualifiedTable.table = name();
+        if (qualifiedTable.database == null) {
+            qualifiedTable.setBegin(qualifiedTable.table);
         }
-    indexed = indexedBy();
+    qualifiedTable.indexedBy = indexedBy();
         qualifiedTable.setEnd(token.endLine, token.endColumn);
-        qualifiedTable.setDatabase(database);
-        qualifiedTable.setTable(table);
-        qualifiedTable.setIndexed(indexed);
         {if (true) return qualifiedTable;}
     throw new Error("Missing return statement in function");
   }
 
-  final public ColumnAssign columnAssign() throws ParseException {
+  final public ColumnAssignment columnAssignment() throws ParseException {
     Name column;
     Expression expr;
     column = name();
     jj_consume_token(EQUAL_1);
     expr = expr();
-        {if (true) return new ColumnAssign(new Block(column.beginLine, column.beginColumn,
-            token.endLine, token.endColumn), column, expr);}
+        {if (true) return new ColumnAssignment(new Block(column.beginLine, column.beginColumn, token.endLine,
+            token.endColumn), column, expr);}
     throw new Error("Missing return statement in function");
   }
 
   final public VacuumStmt vacuumStmt() throws ParseException {
     jj_consume_token(VACUUM);
         VacuumStmt stmt = new VacuumStmt();
-        stmt.setBeginEnd(token.beginLine, token.beginColumn, token.endLine,
-            token.endColumn);
+        stmt.setBeginEnd(token.beginLine, token.beginColumn, token.endLine, token.endColumn);
         {if (true) return stmt;}
     throw new Error("Missing return statement in function");
   }
@@ -4606,6 +4418,432 @@ public final class ASTParser implements ASTParserConstants {
     finally { jj_save(35, xla); }
   }
 
+  private boolean jj_3_3() {
+    if (jj_3R_40()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_39()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_88() {
+    if (jj_3R_89()) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_38()) return true;
+    return false;
+  }
+
+  private boolean jj_3_35() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_107() {
+    if (jj_scan_token(CAST)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_58() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(115)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(116)) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_77() {
+    if (jj_3R_81()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_74() {
+    if (jj_3R_80()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_72() {
+    if (jj_3R_79()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_scan_token(CREATE)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_58()) jj_scanpos = xsp;
+    if (jj_scan_token(TRIGGER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_71() {
+    if (jj_scan_token(LP)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_73() {
+    if (jj_scan_token(ID)) return true;
+    return false;
+  }
+
+  private boolean jj_3_11() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_46()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    if (jj_scan_token(IN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_119() {
+    if (jj_scan_token(BLOB)) return true;
+    return false;
+  }
+
+  private boolean jj_3_34() {
+    if (jj_3R_55()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_69() {
+    if (jj_scan_token(NOT)) return true;
+    if (jj_scan_token(IN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_53() {
+    if (jj_3R_74()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_87() {
+    if (jj_3R_88()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_50() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_69()) {
+    jj_scanpos = xsp;
+    if (jj_3R_70()) return true;
+    }
+    xsp = jj_scanpos;
+    if (jj_3R_71()) {
+    jj_scanpos = xsp;
+    if (jj_3R_72()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3_28() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_32() {
+    if (jj_scan_token(STRING)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_118() {
+    if (jj_scan_token(STRING)) return true;
+    return false;
+  }
+
+  private boolean jj_3_29() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_28()) jj_scanpos = xsp;
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_20() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_52() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_29()) {
+    jj_scanpos = xsp;
+    if (jj_3R_73()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_117() {
+    if (jj_scan_token(NUMERIC)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_67() {
+    if (jj_scan_token(BETWEEN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_66() {
+    if (jj_scan_token(NOT)) return true;
+    if (jj_scan_token(BETWEEN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_49() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_66()) {
+    jj_scanpos = xsp;
+    if (jj_3R_67()) return true;
+    }
+    if (jj_3R_68()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_85() {
+    if (jj_3R_87()) return true;
+    return false;
+  }
+
+  private boolean jj_3_10() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_116() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(89)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(38)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(37)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(39)) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_115() {
+    if (jj_3R_119()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_114() {
+    if (jj_3R_118()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_113() {
+    if (jj_3R_117()) return true;
+    return false;
+  }
+
+  private boolean jj_3_19() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_112() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_113()) {
+    jj_scanpos = xsp;
+    if (jj_3R_114()) {
+    jj_scanpos = xsp;
+    if (jj_3R_115()) {
+    jj_scanpos = xsp;
+    if (jj_3R_116()) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_62() {
+    if (jj_scan_token(INITIALLY)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_57() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(115)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(116)) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3_16() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_31() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_61() {
+    if (jj_scan_token(DEFERRABLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_39() {
+    if (jj_scan_token(CREATE)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_57()) jj_scanpos = xsp;
+    if (jj_scan_token(TABLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_60() {
+    if (jj_scan_token(NOT)) return true;
+    if (jj_scan_token(DEFERRABLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_51() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(LP)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_44() {
+    if (jj_scan_token(DROP)) return true;
+    if (jj_scan_token(TRIGGER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_47() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_60()) {
+    jj_scanpos = xsp;
+    if (jj_3R_61()) return true;
+    }
+    xsp = jj_scanpos;
+    if (jj_3R_62()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private boolean jj_3R_105() {
+    if (jj_scan_token(PARAMETER)) return true;
+    return false;
+  }
+
+  private boolean jj_3_18() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_82() {
+    if (jj_3R_85()) return true;
+    return false;
+  }
+
+  private boolean jj_3_15() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_76() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    if (jj_scan_token(STAR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_106() {
+    if (jj_3R_112()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_75() {
+    if (jj_scan_token(STAR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_43() {
+    if (jj_scan_token(DROP)) return true;
+    if (jj_scan_token(TABLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_111() {
+    if (jj_scan_token(RAISE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_104() {
+    if (jj_3R_111()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_54() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_75()) {
+    jj_scanpos = xsp;
+    if (jj_3R_76()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(115)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(116)) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_103() {
+    if (jj_3R_110()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_102() {
+    if (jj_3R_109()) return true;
+    return false;
+  }
+
+  private boolean jj_3_27() {
+    if (jj_scan_token(LP)) return true;
+    if (jj_3R_53()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_101() {
+    if (jj_3R_108()) return true;
+    return false;
+  }
+
   private boolean jj_3R_100() {
     if (jj_3R_107()) return true;
     return false;
@@ -4616,23 +4854,21 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_3R_40()) return true;
-    return false;
-  }
-
   private boolean jj_3R_78() {
     if (jj_3R_82()) return true;
     return false;
   }
 
-  private boolean jj_3_16() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
+  private boolean jj_3R_41() {
+    if (jj_scan_token(CREATE)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_59()) jj_scanpos = xsp;
+    if (jj_scan_token(VIEW)) return true;
     return false;
   }
 
-  private boolean jj_3_18() {
+  private boolean jj_3_17() {
     if (jj_3R_45()) return true;
     if (jj_scan_token(DOT)) return true;
     return false;
@@ -4643,8 +4879,8 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_39()) return true;
+  private boolean jj_3_33() {
+    if (jj_3R_54()) return true;
     return false;
   }
 
@@ -4653,13 +4889,14 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_38()) return true;
+  private boolean jj_3R_98() {
+    if (jj_3R_105()) return true;
     return false;
   }
 
-  private boolean jj_3R_98() {
-    if (jj_3R_105()) return true;
+  private boolean jj_3_36() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
     return false;
   }
 
@@ -4697,19 +4934,15 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3R_43() {
+  private boolean jj_3R_42() {
     if (jj_scan_token(DROP)) return true;
-    if (jj_scan_token(TABLE)) return true;
+    if (jj_scan_token(INDEX)) return true;
     return false;
   }
 
-  private boolean jj_3R_110() {
-    if (jj_scan_token(CASE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_62() {
-    if (jj_scan_token(INITIALLY)) return true;
+  private boolean jj_3_9() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
     return false;
   }
 
@@ -4718,18 +4951,25 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
+  private boolean jj_3_8() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_65() {
+    if (jj_scan_token(NOT)) return true;
+    if (jj_scan_token(NULL)) return true;
+    return false;
+  }
+
   private boolean jj_3R_96() {
     if (jj_scan_token(PLUS)) return true;
     return false;
   }
 
-  private boolean jj_3R_61() {
-    if (jj_scan_token(DEFERRABLE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_81() {
-    if (jj_scan_token(SELECT)) return true;
+  private boolean jj_3R_64() {
+    if (jj_scan_token(NOTNULL)) return true;
     return false;
   }
 
@@ -4751,103 +4991,13 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3_35() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_10() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_60() {
-    if (jj_scan_token(NOT)) return true;
-    if (jj_scan_token(DEFERRABLE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_30() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_17() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_92() {
-    if (jj_3R_94()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_47() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_60()) {
-    jj_scanpos = xsp;
-    if (jj_3R_61()) return true;
-    }
-    xsp = jj_scanpos;
-    if (jj_3R_62()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3R_65() {
-    if (jj_scan_token(NOT)) return true;
-    if (jj_scan_token(NULL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_68() {
-    if (jj_3R_78()) return true;
-    return false;
-  }
-
-  private boolean jj_3_15() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_109() {
-    if (jj_scan_token(LP)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_91() {
-    if (jj_3R_93()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    if (jj_scan_token(NOTNULL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_57() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(115)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(116)) return true;
-    }
-    return false;
-  }
-
   private boolean jj_3R_63() {
     if (jj_scan_token(ISNULL)) return true;
     return false;
   }
 
-  private boolean jj_3R_42() {
-    if (jj_scan_token(DROP)) return true;
-    if (jj_scan_token(INDEX)) return true;
+  private boolean jj_3R_56() {
+    if (jj_scan_token(UNIQUE)) return true;
     return false;
   }
 
@@ -4864,308 +5014,23 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3R_90() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_91()) {
-    jj_scanpos = xsp;
-    if (jj_3R_92()) return true;
-    }
+  private boolean jj_3R_68() {
+    if (jj_3R_78()) return true;
     return false;
   }
 
-  private boolean jj_3R_59() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(115)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(116)) return true;
-    }
+  private boolean jj_3R_92() {
+    if (jj_3R_94()) return true;
     return false;
   }
 
-  private boolean jj_3R_39() {
-    if (jj_scan_token(CREATE)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_57()) jj_scanpos = xsp;
-    if (jj_scan_token(TABLE)) return true;
+  private boolean jj_3R_110() {
+    if (jj_scan_token(CASE)) return true;
     return false;
   }
 
-  private boolean jj_3_24() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_34() {
-    if (jj_3R_55()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_77() {
-    if (jj_3R_81()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_108() {
-    if (jj_scan_token(EXISTS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_79() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_24()) jj_scanpos = xsp;
-    if (jj_3R_45()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_41() {
-    if (jj_scan_token(CREATE)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_59()) jj_scanpos = xsp;
-    if (jj_scan_token(VIEW)) return true;
-    return false;
-  }
-
-  private boolean jj_3_23() {
-    if (jj_3R_50()) return true;
-    return false;
-  }
-
-  private boolean jj_3_22() {
-    if (jj_3R_49()) return true;
-    return false;
-  }
-
-  private boolean jj_3_21() {
-    if (jj_3R_48()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_89() {
-    if (jj_3R_90()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_86() {
-    if (jj_3R_68()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_84() {
-    if (jj_3R_86()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_107() {
-    if (jj_scan_token(CAST)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_119() {
-    if (jj_scan_token(BLOB)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_83() {
-    if (jj_scan_token(NOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_32() {
-    if (jj_scan_token(STRING)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_88() {
-    if (jj_3R_89()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_80() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_83()) {
-    jj_scanpos = xsp;
-    if (jj_3R_84()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_118() {
-    if (jj_scan_token(STRING)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_73() {
-    if (jj_scan_token(ID)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_72() {
-    if (jj_3R_79()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_117() {
-    if (jj_scan_token(NUMERIC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_13() {
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_74() {
-    if (jj_3R_80()) return true;
-    return false;
-  }
-
-  private boolean jj_3_28() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_71() {
-    if (jj_scan_token(LP)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_87() {
-    if (jj_3R_88()) return true;
-    return false;
-  }
-
-  private boolean jj_3_9() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_116() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(89)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(38)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(37)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(39)) return true;
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_70() {
-    if (jj_scan_token(IN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_29() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_28()) jj_scanpos = xsp;
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_115() {
-    if (jj_3R_119()) return true;
-    return false;
-  }
-
-  private boolean jj_3_36() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_114() {
-    if (jj_3R_118()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_113() {
-    if (jj_3R_117()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_69() {
-    if (jj_scan_token(NOT)) return true;
-    if (jj_scan_token(IN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_52() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_29()) {
-    jj_scanpos = xsp;
-    if (jj_3R_73()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_112() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_113()) {
-    jj_scanpos = xsp;
-    if (jj_3R_114()) {
-    jj_scanpos = xsp;
-    if (jj_3R_115()) {
-    jj_scanpos = xsp;
-    if (jj_3R_116()) return true;
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_50() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_69()) {
-    jj_scanpos = xsp;
-    if (jj_3R_70()) return true;
-    }
-    xsp = jj_scanpos;
-    if (jj_3R_71()) {
-    jj_scanpos = xsp;
-    if (jj_3R_72()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3_31() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_56() {
-    if (jj_scan_token(UNIQUE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_53() {
-    if (jj_3R_74()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_76() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    if (jj_scan_token(STAR)) return true;
+  private boolean jj_3R_91() {
+    if (jj_3R_93()) return true;
     return false;
   }
 
@@ -5178,113 +5043,47 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3R_75() {
-    if (jj_scan_token(STAR)) return true;
+  private boolean jj_3_23() {
+    if (jj_3R_50()) return true;
     return false;
   }
 
-  private boolean jj_3_14() {
+  private boolean jj_3_13() {
+    if (jj_3R_47()) return true;
+    return false;
+  }
+
+  private boolean jj_3_22() {
+    if (jj_3R_49()) return true;
+    return false;
+  }
+
+  private boolean jj_3_24() {
     if (jj_3R_45()) return true;
     if (jj_scan_token(DOT)) return true;
     return false;
   }
 
-  private boolean jj_3_8() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
+  private boolean jj_3_21() {
+    if (jj_3R_48()) return true;
     return false;
   }
 
-  private boolean jj_3R_85() {
-    if (jj_3R_87()) return true;
-    return false;
-  }
-
-  private boolean jj_3_20() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_67() {
-    if (jj_scan_token(BETWEEN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_54() {
+  private boolean jj_3R_90() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_75()) {
+    if (jj_3R_91()) {
     jj_scanpos = xsp;
-    if (jj_3R_76()) return true;
+    if (jj_3R_92()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_66() {
-    if (jj_scan_token(NOT)) return true;
-    if (jj_scan_token(BETWEEN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_12() {
+  private boolean jj_3R_79() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_scan_token(135)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(136)) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_58() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(115)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(116)) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_49() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_66()) {
-    jj_scanpos = xsp;
-    if (jj_3R_67()) return true;
-    }
-    if (jj_3R_68()) return true;
-    return false;
-  }
-
-  private boolean jj_3_33() {
-    if (jj_3R_54()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_46() {
+    if (jj_3_24()) jj_scanpos = xsp;
     if (jj_3R_45()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_40() {
-    if (jj_scan_token(CREATE)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_58()) jj_scanpos = xsp;
-    if (jj_scan_token(TRIGGER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_51() {
-    if (jj_3R_45()) return true;
-    if (jj_scan_token(LP)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_111() {
-    if (jj_scan_token(RAISE)) return true;
     return false;
   }
 
@@ -5298,60 +5097,24 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3_19() {
+  private boolean jj_3R_109() {
+    if (jj_scan_token(LP)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_86() {
+    if (jj_3R_68()) return true;
+    return false;
+  }
+
+  private boolean jj_3_30() {
     if (jj_3R_45()) return true;
     if (jj_scan_token(DOT)) return true;
     return false;
   }
 
-  private boolean jj_3R_105() {
-    if (jj_scan_token(PARAMETER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_82() {
-    if (jj_3R_85()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_106() {
-    if (jj_3R_112()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_44() {
-    if (jj_scan_token(DROP)) return true;
-    if (jj_scan_token(TRIGGER)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_3R_44()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_3R_43()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_104() {
-    if (jj_3R_111()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_42()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_103() {
-    if (jj_3R_110()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_102() {
-    if (jj_3R_109()) return true;
+  private boolean jj_3R_84() {
+    if (jj_3R_86()) return true;
     return false;
   }
 
@@ -5361,25 +5124,74 @@ public final class ASTParser implements ASTParserConstants {
     return false;
   }
 
-  private boolean jj_3_11() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_3R_46()) return true;
+  private boolean jj_3R_89() {
+    if (jj_3R_90()) return true;
     return false;
   }
 
-  private boolean jj_3_27() {
-    if (jj_scan_token(LP)) return true;
-    if (jj_3R_53()) return true;
+  private boolean jj_3R_81() {
+    if (jj_scan_token(SELECT)) return true;
     return false;
   }
 
-  private boolean jj_3R_101() {
-    if (jj_3R_108()) return true;
+  private boolean jj_3R_46() {
+    if (jj_3R_45()) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_3R_44()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_108() {
+    if (jj_scan_token(EXISTS)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_83() {
+    if (jj_scan_token(NOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_3R_43()) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_80() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_83()) {
+    jj_scanpos = xsp;
+    if (jj_3R_84()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3_14() {
+    if (jj_3R_45()) return true;
+    if (jj_scan_token(DOT)) return true;
     return false;
   }
 
   private boolean jj_3_4() {
     if (jj_3R_41()) return true;
+    return false;
+  }
+
+  private boolean jj_3_12() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(135)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(136)) return true;
+    }
     return false;
   }
 
@@ -5410,19 +5222,19 @@ public final class ASTParser implements ASTParserConstants {
       jj_la1_init_5();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x918000,0x0,0x918000,0x918000,0x0,0x0,0x918000,0x0,0x0,0x0,0x1000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x80000,0x80000,0x0,0x0,0x0,0x40000,0x0,0x0,0x60000000,0x0,0x0,0x0,0x0,0x60000000,0x80000,0x80000,0x200000,0x0,0x0,0x0,0x0,0x20000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x0,0x0,0x0,0x400,0x0,0x0,0x0,0x0,0x402000,0x402000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000,0x18000000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x1000000,0x0,0x18000000,0x18000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x18000000,0x0,0x0,0x10000000,0x8000000,0x0,0x0,0x18000000,0x18000000,0x0,0x18000000,0x0,0x0,0x400,0x0,0x400,0x0,0x0,0x400,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x18000000,0x0,0x40000,0x40000,0x0,0x0,0x0,0x40000,0x40000,0x40000,0x40000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000,0x80000,0x4000,0x0,0x0,0x0,0x400,0x0,0x0,0x0,};
+      jj_la1_0 = new int[] {0x918000,0x0,0x918000,0x918000,0x0,0x0,0x918000,0x0,0x0,0x0,0x1000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x80000,0x80000,0x0,0x0,0x0,0x40000,0x0,0x0,0x60000000,0x0,0x0,0x0,0x0,0x60000000,0x80000,0x80000,0x200000,0x0,0x0,0x0,0x0,0x20000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x0,0x0,0x0,0x400,0x0,0x0,0x0,0x0,0x402000,0x402000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000,0x18000000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x1000000,0x0,0x0,0x0,0x0,0x18000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x18000000,0x0,0x0,0x10000000,0x8000000,0x0,0x0,0x18000000,0x18000000,0x0,0x18000000,0x0,0x0,0x400,0x0,0x400,0x0,0x0,0x400,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x18000000,0x0,0x40000,0x40000,0x0,0x0,0x0,0x40000,0x40000,0x40000,0x40000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000,0x80000,0x4000,0x0,0x0,0x0,0x400,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x1095009,0x0,0x1095009,0x1095009,0x0,0x1000000,0x80001,0x5008,0x10000,0x0,0x0,0x0,0x0,0x0,0x100,0x400800,0x400800,0x0,0x80001,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000,0x2000,0x0,0x0,0x0,0x0,0x0,0x0,0x204,0x0,0x0,0x0,0x4,0x200,0x2000,0x2000,0x0,0xe0,0x0,0x0,0x4,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1000,0x200,0x0,0x400,0x800,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1000,0x4000000,0x0,0x1000,0x1000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x0,0x0,0x0,0x8000e0,0x40000000,0x40000000,0x0,0x0,0x40000000,0x40000000,0x0,0x0,0x8000e0,0x8000e0,0x0,0x0,0x0,0x0,0x100000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000e0,0x0,0x0,0x8000e0,0x0,0x8000,0x0,0x8080e0,0x8080e0,0x0,0x8000e0,0x0,0x40000,0x2000000,0x0,0x2000000,0xe0,0xe0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x200000,0x8000,0x8000,0x0,0x10000000,0x0,0x0,0x0,0x80000000,0x8000e0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x0,0x0,0x0,0x2000,0x2000,0x0,0x200000,0x0,0x0,0x2000000,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x1095009,0x0,0x1095009,0x1095009,0x0,0x1000000,0x80001,0x5008,0x10000,0x0,0x0,0x0,0x0,0x0,0x100,0x400800,0x400800,0x0,0x80001,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000,0x2000,0x0,0x0,0x0,0x0,0x0,0x0,0x204,0x0,0x0,0x0,0x4,0x200,0x2000,0x2000,0x0,0xe0,0x0,0x0,0x4,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1000,0x200,0x0,0x400,0x800,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1000,0x4000000,0x0,0x1000,0x1000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x100,0x0,0x0,0x0,0x0,0x0,0x0,0x8000e0,0x40000000,0x40000000,0x0,0x0,0x40000000,0x40000000,0x0,0x0,0x0,0x0,0x0,0x8000e0,0x0,0x0,0x100000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000e0,0x0,0x0,0x8000e0,0x0,0x8000,0x0,0x8080e0,0x8080e0,0x0,0x8000e0,0x0,0x40000,0x2000000,0x0,0x2000000,0xe0,0xe0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x200000,0x8000,0x8000,0x0,0x10000000,0x0,0x0,0x0,0x80000000,0x8000e0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x10,0x0,0x0,0x0,0x2000,0x2000,0x0,0x200000,0x0,0x0,0x2000000,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x200,0x0,0x200,0x200,0x0,0x0,0x0,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10100000,0x10100000,0x0,0x2000000,0x400000,0x800000,0x8,0x80,0x4,0x10000000,0x0,0x0,0x2,0x400,0x400,0x0,0x4000000,0x200,0x0,0x0,0x200,0x200,0x0,0x0,0x2,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x8000000,0x8000000,0x80000,0x0,0x2,0x2,0x2,0x2,0x20000000,0x0,0x2800000,0x1946010,0x942000,0x1804000,0x800000,0x140000,0x942000,0x800000,0x800010,0x2800000,0x2800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x0,0x0,0x2000000,0x0,0x0,0x0,0x2800000,0x2800000,0x0,0x2800000,0x0,0x0,0x0,0x0,0x4,0x2000000,0x2000000,0x4,0x20000000,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x800,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x2800000,0x0,0x0,0x0,0x228100,0x0,0x0,0x0,0x0,0x0,0x0,0x80008000,0x28100,0x80008000,0x228100,0x10000000,0x10000000,0x0,0x0,0x0,0x0,0x800,0x800040,0x800040,0x4,0x20000000,0x0,0x0,};
+      jj_la1_2 = new int[] {0x200,0x0,0x200,0x200,0x0,0x0,0x0,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10100000,0x10100000,0x0,0x2000000,0x400000,0x800000,0x8,0x80,0x4,0x10000000,0x0,0x0,0x2,0x400,0x400,0x0,0x4000000,0x200,0x0,0x0,0x200,0x200,0x0,0x0,0x2,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x8000000,0x8000000,0x80000,0x0,0x2,0x2,0x2,0x2,0x20000000,0x0,0x2800000,0x1946010,0x942000,0x1804000,0x800000,0x140000,0x942000,0x800000,0x800010,0x0,0x0,0x0,0x2800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x0,0x0,0x2000000,0x0,0x0,0x0,0x2800000,0x2800000,0x0,0x2800000,0x0,0x0,0x0,0x0,0x4,0x2000000,0x2000000,0x4,0x20000000,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x800,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x2800000,0x0,0x0,0x0,0x228100,0x0,0x0,0x0,0x0,0x0,0x0,0x80008000,0x28100,0x80008000,0x228100,0x10000000,0x10000000,0x0,0x0,0x0,0x0,0x800,0x800040,0x800040,0x4,0x20000000,0x0,0x0,};
    }
    private static void jj_la1_init_3() {
-      jj_la1_3 = new int[] {0x2801a582,0x0,0x2801a582,0x2801a582,0x8,0x0,0x0,0x0,0x2801a582,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x800000,0x0,0x800000,0x800000,0x8000,0x400000,0x8000,0x4000000,0x0,0x0,0x0,0x0,0x0,0x180000,0x180000,0x0,0x0,0x0,0x0,0x4000024,0x0,0x0,0x0,0x0,0x4000024,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000000,0x0,0x20800,0x0,0x0,0x0,0x2400,0x0,0x180000,0x180000,0x0,0x0,0x0,0x0,0x0,0x8000000,0x0,0x0,0x8010400,0x8010400,0x180000,0x180000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x40,0x40,0x0,0x0,0x40,0x40,0x0,0x0,0x10010,0x10010,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x10,0x0,0x0,0x10,0x10,0x0,0x10,0x0,0x0,0x2000,0x0,0x2000,0x0,0x0,0x2400,0x0,0x400,0x0,0x0,0x40010000,0x40010000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10000000,0x10000000,0x0,0x0,0x0,0x0,0x2000000,0x0,0x0,0x2400,0x0,0x0,0x0,};
+      jj_la1_3 = new int[] {0x2801a582,0x0,0x2801a582,0x2801a582,0x8,0x0,0x0,0x0,0x2801a582,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x800000,0x0,0x800000,0x800000,0x8000,0x400000,0x8000,0x4000000,0x0,0x0,0x0,0x0,0x0,0x180000,0x180000,0x0,0x0,0x0,0x0,0x4000024,0x0,0x0,0x0,0x0,0x4000024,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000000,0x0,0x20800,0x0,0x0,0x0,0x2400,0x0,0x180000,0x180000,0x0,0x0,0x0,0x0,0x0,0x8000000,0x0,0x0,0x8010400,0x8010400,0x180000,0x180000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x40,0x40,0x0,0x0,0x40,0x40,0x0,0x0,0x10000,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x10,0x0,0x0,0x10,0x10,0x0,0x10,0x0,0x0,0x2000,0x0,0x2000,0x0,0x0,0x2400,0x0,0x400,0x0,0x0,0x40010000,0x40010000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10000000,0x10000000,0x0,0x0,0x0,0x0,0x2000000,0x0,0x0,0x2400,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_4() {
-      jj_la1_4 = new int[] {0x40000000,0x40000000,0x0,0x40000000,0x0,0x0,0x0,0x0,0x0,0x9000000,0x0,0x0,0x0,0x9000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x10000000,0x80000000,0x9000000,0x0,0x9000000,0x80000000,0x10000000,0x0,0x0,0x0,0x0,0x0,0x13400000,0x180,0x180,0x0,0x0,0x80000000,0x80000000,0x80000000,0x80000000,0x10000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x10000000,0x10000000,0x10000000,0x4,0x80000000,0x0,0x80000000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1f402180,0x3c0000,0x3c0000,0x0,0x0,0x0,0x3c0000,0x0,0x0,0x1f402180,0x1f402180,0x19000000,0x80000000,0x3c000,0x3c000,0x0,0x1e00,0x1e00,0x180,0x180,0x70,0x70,0x8,0x0,0x1f402180,0x2180,0x4000000,0x3400000,0x10000000,0x0,0x80000000,0x1f402190,0x1f402190,0x8000000,0x1f402180,0x2,0x0,0x0,0x9000000,0x0,0x0,0x3400000,0x0,0x0,0x0,0x80000000,0x10000000,0x0,0x10000000,0x80000000,0x80000000,0x80000000,0x10040000,0x10040000,0x400180,0x9000000,0x0,0x9000000,0x0,0x0,0x0,0x80000000,0x0,0x4,0x80000000,0x0,0x0,0x1f402180,0x9000010,0x9000000,0x0,0x80000000,0x9000000,0x10000000,0x0,0x9000000,0x0,0x9000000,0x0,0x0,0x0,0x80000000,0x0,0x0,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x4,};
+      jj_la1_4 = new int[] {0x40000000,0x40000000,0x0,0x40000000,0x0,0x0,0x0,0x0,0x0,0x9000000,0x0,0x0,0x0,0x9000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x10000000,0x80000000,0x9000000,0x0,0x9000000,0x80000000,0x10000000,0x0,0x0,0x0,0x0,0x0,0x13400000,0x180,0x180,0x0,0x0,0x80000000,0x80000000,0x80000000,0x80000000,0x10000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x10000000,0x10000000,0x10000000,0x4,0x80000000,0x0,0x80000000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1f402180,0x3c0000,0x3c0000,0x0,0x0,0x0,0x3c0000,0x0,0x0,0x0,0x19000000,0x80000000,0x1f402180,0x3c000,0x3c000,0x0,0x1e00,0x1e00,0x180,0x180,0x70,0x70,0x8,0x0,0x1f402180,0x2180,0x4000000,0x3400000,0x10000000,0x0,0x80000000,0x1f402190,0x1f402190,0x8000000,0x1f402180,0x2,0x0,0x0,0x9000000,0x0,0x0,0x3400000,0x0,0x0,0x0,0x80000000,0x10000000,0x0,0x10000000,0x80000000,0x80000000,0x80000000,0x10040000,0x10040000,0x400180,0x9000000,0x0,0x9000000,0x0,0x0,0x0,0x80000000,0x0,0x4,0x80000000,0x0,0x0,0x1f402180,0x9000010,0x9000000,0x0,0x80000000,0x9000000,0x10000000,0x0,0x9000000,0x0,0x9000000,0x0,0x0,0x0,0x80000000,0x0,0x0,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x4,};
    }
    private static void jj_la1_init_5() {
       jj_la1_5 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};

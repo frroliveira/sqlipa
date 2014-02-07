@@ -7,7 +7,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class ForeignKeyColumnConstraint extends ColumnConstraint {
 
-    private ForeignKeyClause clause;
+    public ForeignKeyClause clause;
     
     public ForeignKeyColumnConstraint() {
         super();
@@ -16,14 +16,6 @@ public class ForeignKeyColumnConstraint extends ColumnConstraint {
     public ForeignKeyColumnConstraint(Block block, Name name,
             ForeignKeyClause clause) {
         super(block, name);
-        this.clause = clause;
-    }
-    
-    public ForeignKeyClause getClause() {
-        return clause;
-    }
-    
-    public void setClause(ForeignKeyClause clause) {
         this.clause = clause;
     }
 

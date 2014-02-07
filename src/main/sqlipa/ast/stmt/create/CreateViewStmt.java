@@ -7,34 +7,18 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CreateViewStmt extends CreateStmt {
     
-    private boolean temp;
+    public boolean hasTemporary;
     
-    private SelectStmt select;
+    public SelectStmt select;
     
     public CreateViewStmt() {
         super();
     }
     
-    public CreateViewStmt(Block block, Explain explain, boolean hasIfNotExists,
-            Name db, Name name, boolean hasTemp, SelectStmt select) {
-        super(block, explain, hasIfNotExists, db, name);
-        this.temp = hasTemp;
-        this.select = select;
-    }
-    
-    public boolean hasTemporary() {
-        return temp;
-    }
-    
-    public SelectStmt getSelect() {
-        return select;
-    }
-    
-    public void setTemporary(boolean hasTemp) {
-        this.temp = hasTemp;
-    }
-    
-    public void setSelect(SelectStmt select) {
+    public CreateViewStmt(Block block, Explain explain, boolean hasIfNotExists, Name database,
+            Name name, boolean hasTemporary, SelectStmt select) {
+        super(block, explain, hasIfNotExists, database, name);
+        this.hasTemporary = hasTemporary;
         this.select = select;
     }
 

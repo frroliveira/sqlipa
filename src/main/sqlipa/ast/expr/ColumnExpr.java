@@ -6,11 +6,11 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class ColumnExpr extends Expression {
 
-    private Name database;
+    public Name database;
     
-    private Name table;
+    public Name table;
     
-    private Name column;
+    public Name column;
     
     public ColumnExpr() {
         super();
@@ -20,30 +20,6 @@ public class ColumnExpr extends Expression {
         super(block);
         this.database = database;
         this.table = table;
-        this.column = column;
-    }
-    
-    public Name getDatabase() {
-        return database;
-    }
-    
-    public Name getTable() {
-        return table;
-    }
-    
-    public Name getColumn() {
-        return column;
-    }
-    
-    public void setDatabase(Name database) {
-        this.database = database;
-    }
-    
-    public void setTable(Name table) {
-        this.table = table;
-    }
-    
-    public void setColumn(Name column) {
         this.column = column;
     }
 

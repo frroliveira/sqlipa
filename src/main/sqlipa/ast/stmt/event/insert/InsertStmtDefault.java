@@ -11,14 +11,11 @@ public class InsertStmtDefault extends InsertStmt {
     }
     
     public InsertStmtDefault(InsertStmt stmt) {
-        super(stmt, stmt.getExplain(), stmt.getType(),
-                new Name(stmt.getDatabase()),
-                new Name(stmt.getTable()));
+        super(stmt, stmt.explain, stmt.type, new Name(stmt.database), new Name(stmt.table));
     }
     
-    public InsertStmtDefault(Block block, Explain explain, Type type,
-            Name db, Name tab) {
-        super(block, explain, type, db, tab);
+    public InsertStmtDefault(Block block, Explain explain, Type type, Name database, Name table) {
+        super(block, explain, type, database, table);
     }
 
     @Override

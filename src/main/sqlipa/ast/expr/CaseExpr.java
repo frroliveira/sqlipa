@@ -1,6 +1,5 @@
 package main.sqlipa.ast.expr;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.ast.Block;
@@ -8,55 +7,21 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CaseExpr extends Expression {
     
-    private Expression caseExpr;
+    public Expression caseExpr;
     
-    private Expression elseExpr;
+    public Expression elseExpr;
     
-    private List<WhenExpr> whens;
+    public List<WhenExpr> whens;
 
     public CaseExpr() {
         super();
-        this.whens = new LinkedList<WhenExpr>();
     }
     
-    public CaseExpr(Block block, Expression caseExpr, Expression elseExpr,
-            List<WhenExpr> when) {
+    public CaseExpr(Block block, Expression caseExpr, Expression elseExpr, List<WhenExpr> whens) {
         super(block);
         this.caseExpr = caseExpr;
         this.elseExpr = elseExpr;
-        this.whens = when;
-    }
-    
-    public Expression getCase() {
-        return caseExpr;
-    }
-    
-    public Expression getElse() {
-        return elseExpr;
-    }
-    
-    public List<WhenExpr> getWhens() {
-        return whens;
-    }
-    
-    public void setCase(Expression caseExpr) {
-        this.caseExpr = caseExpr;
-    }
-    
-    public void setElse(Expression elseExpr) {
-        this.elseExpr = elseExpr;
-    }
-    
-    public void setWhens(List<WhenExpr> whens) {
         this.whens = whens;
-    }
-    
-    public void addWhen(WhenExpr when) {
-        whens.add(when);
-    }
-    
-    public boolean removeWhen(WhenExpr when) {
-        return whens.remove(when);
     }
 
     @Override

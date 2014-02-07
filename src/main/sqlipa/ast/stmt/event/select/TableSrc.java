@@ -7,57 +7,24 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class TableSrc extends SingleSrc {
     
-    private Name database;
+    public Name database;
     
-    private Name table;
+    public Name table;
     
-    private Name alias;
+    public Name alias;
     
-    private IndexedBy indexed;
+    public IndexedBy indexedBy;
 
     public TableSrc() {
         super();
     }
     
-    public TableSrc(Block block, Name database, Name table, Name alias,
-            IndexedBy indexed) {
+    public TableSrc(Block block, Name database, Name table, Name alias, IndexedBy indexedBy) {
         super(block);
         this.database = database;
         this.table = table;
         this.alias = alias;
-        this.indexed = indexed;
-    }
-    
-    public Name getDatabase() {
-        return database;
-    }
-    
-    public Name getTable() {
-        return table;
-    }
-    
-    public Name getAlias() {
-        return alias;
-    }
-    
-    public IndexedBy getIndexed() {
-        return indexed;
-    }
-    
-    public void setDatabase(Name database) {
-        this.database = database;
-    }
-    
-    public void setTable(Name table) {
-        this.table = table;
-    }
-    
-    public void setAlias(Name alias) {
-        this.alias = alias;
-    }
-    
-    public void setIndexed(IndexedBy indexed) {
-        this.indexed = indexed;
+        this.indexedBy = indexedBy;
     }
 
     @Override

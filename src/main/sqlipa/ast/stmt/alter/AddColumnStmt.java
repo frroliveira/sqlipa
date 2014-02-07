@@ -7,23 +7,15 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class AddColumnStmt extends AlterTableStmt {
     
-    private ColumnDef column;
+    public ColumnDef column;
     
     public AddColumnStmt() {
         super();
     }
     
-    public AddColumnStmt(Block block, Explain explain, Name db,
-            Name tab, ColumnDef column) {
-        super(block, explain, db, tab);
-        this.column = column;
-    }
-    
-    public ColumnDef getColumn() {
-        return column;
-    }
-    
-    public void setColumn(ColumnDef column) {
+    public AddColumnStmt(Block block, Explain explain, Name database, Name table,
+            ColumnDef column) {
+        super(block, explain, database, table);
         this.column = column;
     }
 

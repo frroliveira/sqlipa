@@ -7,7 +7,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class AliasedColumn extends ExpressionColumn {
 
-    private Name alias;
+    public Name alias;
     
     public AliasedColumn() {
         super();
@@ -15,14 +15,6 @@ public class AliasedColumn extends ExpressionColumn {
     
     public AliasedColumn(Block block, Expression expr, Name alias) {
         super(block, expr);
-        this.alias = alias;
-    }
-    
-    public Name getAlias() {
-        return alias;
-    }
-    
-    public void setAlias(Name alias) {
         this.alias = alias;
     }
 

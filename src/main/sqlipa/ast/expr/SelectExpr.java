@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class SelectExpr extends Expression {
 
-    private SelectStmt select;
+    public SelectStmt select;
     
     public SelectExpr() {
         super();
@@ -14,14 +14,6 @@ public class SelectExpr extends Expression {
     
     public SelectExpr(Block block, SelectStmt select) {
         super(block);
-        this.select = select;
-    }
-    
-    public SelectStmt getSelect() {
-        return select;
-    }
-    
-    public void setSelect(SelectStmt select) {
         this.select = select;
     }
 

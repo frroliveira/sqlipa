@@ -5,6 +5,10 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class BlobLiteral extends Literal {
 
+    public BlobLiteral() {
+        super();
+    }
+    
     public BlobLiteral(Block block, String value) {
         super(block, value);
     }

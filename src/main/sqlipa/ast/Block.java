@@ -14,8 +14,7 @@ public class Block {
     }
     
     public Block(Block block) {
-        this(block.beginLine, block.beginColumn, block.endLine,
-                block.endColumn);
+        this(block.beginLine, block.beginColumn, block.endLine, block.endColumn);
     }
     
     public Block(int beginLine, int beginColumn, int endLine, int endColumn) {
@@ -44,12 +43,10 @@ public class Block {
     }
     
     public void setBeginEnd(Block block) {
-        setBeginEnd(block.beginLine, block.beginColumn, block.endLine,
-                block.endColumn);
+        setBeginEnd(block.beginLine, block.beginColumn, block.endLine, block.endColumn);
     }
     
-    public void setBeginEnd(int beginLine, int beginColumn, int endLine, 
-            int endColumn) {
+    public void setBeginEnd(int beginLine, int beginColumn, int endLine, int endColumn) {
         this.beginLine = beginLine;
         this.beginColumn = beginColumn;
         this.endLine = endLine;

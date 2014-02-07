@@ -5,7 +5,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class IndexedBy extends Node {
     
-    private Name index;
+    public Name index;
     
     public IndexedBy() {
         super();
@@ -13,14 +13,6 @@ public class IndexedBy extends Node {
     
     public IndexedBy(Block block, Name index) {
         super(block);
-        this.index = index;
-    }
-    
-    public Name getIndex() {
-        return index;
-    }
-    
-    public void setIndex(Name index) {
         this.index = index;
     }
 

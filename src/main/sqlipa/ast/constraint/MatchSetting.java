@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class MatchSetting extends ForeignKeySetting {
     
-    private Name name;
+    public Name name;
     
     public MatchSetting() {
         super();
@@ -14,14 +14,6 @@ public class MatchSetting extends ForeignKeySetting {
     
     public MatchSetting(Block block, Name name) {
         super(block);
-        this.name = name;
-    }
-
-    public Name getName() {
-        return name;
-    }
-    
-    public void setName(Name name) {
         this.name = name;
     }
 

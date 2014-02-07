@@ -12,54 +12,22 @@ public class PrimaryKeyColumnConstraint extends ColumnConstraint {
         DESC
     }
 
-    private Order order;
+    public Order order;
     
-    private ConflictClause clause;
+    public ConflictClause clause;
     
-    private boolean autoincrement;
+    public boolean hasAutoincrement;
 
     public PrimaryKeyColumnConstraint() {
         super();
     }
     
-    public PrimaryKeyColumnConstraint(Order order, ConflictClause clause,
+    public PrimaryKeyColumnConstraint(Block block, Name name, Order order, ConflictClause clause,
             boolean hasAutoincrement) {
-        super();
-        this.order = order;
-        this.clause = clause;
-        this.autoincrement = hasAutoincrement;
-    }
-    
-    public PrimaryKeyColumnConstraint(Block block, Name name, Order order,
-            ConflictClause clause, boolean hasAutoincrement) {
         super(block, name);
         this.order = order;
         this.clause = clause;
-        this.autoincrement = hasAutoincrement;
-    }
-    
-    public Order getOrder() {
-        return order;
-    }
-    
-    public ConflictClause getClause() {
-        return clause;
-    }
-    
-    public boolean hasAutoincrement() {
-        return autoincrement;
-    }
-    
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-    
-    public void setClause(ConflictClause clause) {
-        this.clause = clause;
-    }
-    
-    public void setAutoincrement(boolean hasAutoincrement) {
-        this.autoincrement = hasAutoincrement;
+        this.hasAutoincrement = hasAutoincrement;
     }
 
     @Override

@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class DetachStmt extends SqlStatement {
     
-    private Name database;
+    public Name database;
     
     public DetachStmt() {
         super();
@@ -14,14 +14,6 @@ public class DetachStmt extends SqlStatement {
     
     public DetachStmt(Block block, Explain explain, Name database) {
         super(block, explain);
-        this.database = database;
-    }
-    
-    public Name getDatabase() {
-        return database;
-    }
-    
-    public void setDatabase(Name database) {
         this.database = database;
     }
 

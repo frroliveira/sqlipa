@@ -10,9 +10,9 @@ public class DropIndexStmt extends DropStmt {
         super();
     }
     
-    public DropIndexStmt(Block block, Explain explain, boolean hasIfExists, 
-            Name db, Name name) {
-        super(block, explain, hasIfExists, db, name);
+    public DropIndexStmt(Block block, Explain explain, boolean hasIfExists, Name database,
+            Name name) {
+        super(block, explain, hasIfExists, database, name);
     }
 
     @Override

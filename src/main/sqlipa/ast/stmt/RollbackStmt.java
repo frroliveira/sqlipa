@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class RollbackStmt extends SqlStatement {
     
-    private Name savepoint;
+    public Name savepoint;
     
     public RollbackStmt() {
         super();
@@ -14,14 +14,6 @@ public class RollbackStmt extends SqlStatement {
     
     public RollbackStmt(Block block, Explain explain, Name savepoint) {
         super(block, explain);
-        this.savepoint = savepoint;
-    }
-    
-    public Name getSavepoint() {
-        return savepoint;
-    }
-    
-    public void setSavepoint(Name savepoint) {
         this.savepoint = savepoint;
     }
 

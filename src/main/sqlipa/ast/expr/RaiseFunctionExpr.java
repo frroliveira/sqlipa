@@ -12,9 +12,9 @@ public class RaiseFunctionExpr extends Expression {
         FAIL
     }
     
-    private Type type;
+    public Type type;
     
-    private String error;
+    public String error;
     
     public RaiseFunctionExpr() {
         super();
@@ -23,22 +23,6 @@ public class RaiseFunctionExpr extends Expression {
     public RaiseFunctionExpr(Block block, Type type, String error) {
         super(block);
         this.type = type;
-        this.error = error;
-    }
-    
-    public Type getType() {
-        return type;
-    }
-    
-    public String getError() {
-        return error;
-    }
-    
-    public void setType(Type type) {
-        this.type = type;
-    }
-    
-    public void setError(String error) {
         this.error = error;
     }
 

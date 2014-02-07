@@ -6,9 +6,9 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class SelectSrc extends SingleSrc {
 
-    private SelectStmt select;
+    public SelectStmt select;
     
-    private Name alias;
+    public Name alias;
     
     public SelectSrc() {
         super();
@@ -20,22 +20,6 @@ public class SelectSrc extends SingleSrc {
         this.alias = alias;
     }
     
-    public SelectStmt getSelect() {
-        return select;
-    }
-    
-    public Name getAlias() {
-        return alias;
-    }
-    
-    public void setSelect(SelectStmt select) {
-        this.select = select;
-    }
-    
-    public void setAlias(Name alias) {
-        this.alias = alias;
-    }
-
     @Override
     public void accept(VoidVisitor visitor) {
         visitor.visit(this);

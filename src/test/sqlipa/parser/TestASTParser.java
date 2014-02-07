@@ -30,21 +30,21 @@ public class TestASTParser {
     public void testAlterTableStmt_rename() throws ParseException {
         // Without database specification.
         AlterTableStmt alter = stmt("ALTER TABLE table_name RENAME TO new_table_name")
-                .alterTableStmt();
+                .alterTableStmt();  
         
         assertTrue(alter instanceof RenameTableStmt);
-        assertNull(alter.getDatabase());
-        assertEquals("table_name", alter.getTable().getName());
-        assertEquals("new_table_name", ((RenameTableStmt) alter).getNewTable().getName());
+        assertNull(alter.database);
+        assertEquals("table_name", alter.table.name);
+        assertEquals("new_table_name", ((RenameTableStmt) alter).newTable.name);
 
         // With database specification.
         alter = stmt("ALTER TABLE database_name.table_name RENAME TO new_table_name")
                 .alterTableStmt();
 
         assertTrue(alter instanceof RenameTableStmt);
-        assertEquals("database_name", alter.getDatabase().getName());
-        assertEquals("table_name", alter.getTable().getName());
-        assertEquals("new_table_name", ((RenameTableStmt) alter).getNewTable().getName());
+        assertEquals("database_name", alter.database.name);
+        assertEquals("table_name", alter.table.name);
+        assertEquals("new_table_name", ((RenameTableStmt) alter).newTable.name);
     }
 
     @Test
@@ -54,18 +54,18 @@ public class TestASTParser {
                 .alterTableStmt();
         
         assertTrue(stmt instanceof AddColumnStmt);
-        assertNull(stmt.getDatabase());
-        assertEquals("table_name", stmt.getTable().getName());
-        assertNotNull(((AddColumnStmt) stmt).getColumn());
+        assertNull(stmt.database);
+        assertEquals("table_name", stmt.table.name);
+        assertNotNull(((AddColumnStmt) stmt).column);
         
         // With database specification and without COLUMN.
         stmt = stmt("ALTER TABLE database_name.table_name ADD new_column INTEGER NOT NULL")
                 .alterTableStmt();
         
         assertTrue(stmt instanceof AddColumnStmt);
-        assertEquals("database_name", stmt.getDatabase().getName());
-        assertEquals("table_name", stmt.getTable().getName());
-        assertNotNull(((AddColumnStmt) stmt).getColumn());
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("table_name", stmt.table.name);
+        assertNotNull(((AddColumnStmt) stmt).column);
     }
     
     @Test
@@ -73,14 +73,14 @@ public class TestASTParser {
         // One name in ANALYZE.
         AnalyzeStmt stmt = stmt("ANALYZE table_name").analyzeStmt();
         
-        assertEquals("table_name", stmt.getFirstName().getName());
-        assertNull(stmt.getSecondName());
+        assertEquals("table_name", stmt.first.name);
+        assertNull(stmt.second);
      
         // Two names in ANALYZE.
         stmt = stmt("ANALYZE database_name.index_name").analyzeStmt();
         
-        assertEquals("database_name", stmt.getFirstName().getName());
-        assertEquals("index_name", stmt.getSecondName().getName());        
+        assertEquals("database_name", stmt.first.name);
+        assertEquals("index_name", stmt.second.name);        
     }
 
     @Test
@@ -88,23 +88,23 @@ public class TestASTParser {
         // Without DATABASE.
         AttachStmt stmt = stmt("ATTACH file_name AS database_name").attachStmt();
         
-        assertNotNull(stmt.getExpression());
-        assertEquals("database_name", stmt.getDatabase().getName());
+        assertNotNull(stmt.expr);
+        assertEquals("database_name", stmt.database.name);
      
         // With DATABASE.
         stmt = stmt("ATTACH DATABASE file_name AS database_name").attachStmt();
         
-        assertNotNull(stmt.getExpression());
-        assertEquals("database_name", stmt.getDatabase().getName());
+        assertNotNull(stmt.expr);
+        assertEquals("database_name", stmt.database.name);
     }
 
     @Test
     public void testBeginStmt() throws ParseException {
-        assertNull(stmt("BEGIN").beginStmt().getType());
-        assertNull(stmt("BEGIN TRANSACTION").beginStmt().getType());
-        assertEquals(BeginStmt.Type.DEFERRED, stmt("BEGIN DEFERRED").beginStmt().getType());
-        assertEquals(BeginStmt.Type.IMMEDIATE, stmt("BEGIN IMMEDIATE").beginStmt().getType());
-        assertEquals(BeginStmt.Type.EXCLUSIVE, stmt("BEGIN EXCLUSIVE TRANSACTION").beginStmt().getType());
+        assertNull(stmt("BEGIN").beginStmt().type);
+        assertNull(stmt("BEGIN TRANSACTION").beginStmt().type);
+        assertEquals(BeginStmt.Type.DEFERRED, stmt("BEGIN DEFERRED").beginStmt().type);
+        assertEquals(BeginStmt.Type.IMMEDIATE, stmt("BEGIN IMMEDIATE").beginStmt().type);
+        assertEquals(BeginStmt.Type.EXCLUSIVE, stmt("BEGIN EXCLUSIVE TRANSACTION").beginStmt().type);
     }
 
     @Test
@@ -117,44 +117,44 @@ public class TestASTParser {
     
     @Test
     public void testRollbackStmt() throws ParseException {
-        assertNull(stmt("ROLLBACK").rollbackStmt().getSavepoint());
-        assertNull(stmt("ROLLBACK TRANSACTION").rollbackStmt().getSavepoint());
-        assertEquals("savepoint_name", stmt("ROLLBACK TO savepoint_name").rollbackStmt().getSavepoint().getName());
-        assertEquals("savepoint_name", stmt("ROLLBACK TO SAVEPOINT savepoint_name").rollbackStmt().getSavepoint().getName());
-        assertEquals("savepoint_name", stmt("ROLLBACK TRANSACTION TO savepoint_name").rollbackStmt().getSavepoint().getName());
-        assertEquals("savepoint_name", stmt("ROLLBACK TRANSACTION TO SAVEPOINT savepoint_name").rollbackStmt().getSavepoint().getName());    
+        assertNull(stmt("ROLLBACK").rollbackStmt().savepoint);
+        assertNull(stmt("ROLLBACK TRANSACTION").rollbackStmt().savepoint);
+        assertEquals("savepoint_name", stmt("ROLLBACK TO savepoint_name").rollbackStmt().savepoint.name);
+        assertEquals("savepoint_name", stmt("ROLLBACK TO SAVEPOINT savepoint_name").rollbackStmt().savepoint.name);
+        assertEquals("savepoint_name", stmt("ROLLBACK TRANSACTION TO savepoint_name").rollbackStmt().savepoint.name);
+        assertEquals("savepoint_name", stmt("ROLLBACK TRANSACTION TO SAVEPOINT savepoint_name").rollbackStmt().savepoint.name);    
     }
 
     @Test
     public void testSavepointStmt() throws ParseException {
-        assertEquals("savepoint_name", stmt("SAVEPOINT savepoint_name").savepointStmt().getSavepoint().getName());
+        assertEquals("savepoint_name", stmt("SAVEPOINT savepoint_name").savepointStmt().savepoint.name);
     }
     
     @Test
     public void testReleaseStmt() throws ParseException {
-        assertEquals("savepoint_name", stmt("RELEASE savepoint_name").releaseStmt().getSavepoint().getName());        
-        assertEquals("savepoint_name", stmt("RELEASE SAVEPOINT savepoint_name").releaseStmt().getSavepoint().getName());        
+        assertEquals("savepoint_name", stmt("RELEASE savepoint_name").releaseStmt().savepoint.name);        
+        assertEquals("savepoint_name", stmt("RELEASE SAVEPOINT savepoint_name").releaseStmt().savepoint.name);        
     }
     
     @Test
     public void testCreateIndexStmt() throws ParseException {
         CreateIndexStmt stmt = stmt("CREATE INDEX IF NOT EXISTS index_name ON table_name(column_name1)").createIndexStmt();
         
-        assertFalse(stmt.hasUnique());
-        assertTrue(stmt.hasIfNotExists());
-        assertNull(stmt.getDatabase());
-        assertEquals("index_name", stmt.getName().getName());
-        assertEquals("table_name", stmt.getTable().getName());
-        assertList(stmt.getColumns(), 1);
+        assertFalse(stmt.hasUnique);
+        assertTrue(stmt.hasIfNotExists);
+        assertNull(stmt.database);
+        assertEquals("index_name", stmt.name.name);
+        assertEquals("table_name", stmt.table.name);
+        assertList(stmt.columns, 1);
 
         stmt = stmt("CREATE UNIQUE INDEX database_name.index_name ON table_name(column_name1, column2)").createIndexStmt();
         
-        assertTrue(stmt.hasUnique());
-        assertFalse(stmt.hasIfNotExists());
-        assertEquals("database_name", stmt.getDatabase().getName());
-        assertEquals("index_name", stmt.getName().getName());
-        assertEquals("table_name", stmt.getTable().getName());
-        assertList(stmt.getColumns(), 2);
+        assertTrue(stmt.hasUnique);
+        assertFalse(stmt.hasIfNotExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("index_name", stmt.name.name);
+        assertEquals("table_name", stmt.table.name);
+        assertList(stmt.columns, 2);
         
         thrown.expect(ParseException.class);
         stmt = stmt("CREATE INDEX index_name ON table_name()").createIndexStmt();

@@ -11,7 +11,7 @@ package main.sqlipa.parser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import main.sqlipa.ast.*;
 import main.sqlipa.ast.constraint.*;
@@ -68,19 +68,17 @@ MORE :
 TOKEN_MGR_DECLS :
 {
     // TODO: correct comments.
-    private List<Comment> comments = new LinkedList<Comment>();
+    private List<Comment> comments = new ArrayList<Comment>();
     
     private void CommonTokenAction(Token token) {
         token = token.specialToken;
         while (token != null) {
             if (token.kind == LINE_COMMENT) {
-                comments.add(new LineComment(new Block(token.beginLine,
-                    token.beginColumn, token.endLine, token.endColumn), 
-                    token.image));
+                comments.add(new LineComment(new Block(token.beginLine, token.beginColumn,
+                    token.endLine, token.endColumn), token.image));
             } else if (token.kind == BLOCK_COMMENT) {
-                comments.add(new BlockComment(new Block(token.beginLine,
-                    token.beginColumn, token.endLine, token.endColumn), 
-                    token.image));
+                comments.add(new BlockComment(new Block(token.beginLine, token.beginColumn,
+                    token.endLine, token.endColumn), token.image));
             } else {
                 break;
             }
@@ -90,7 +88,7 @@ TOKEN_MGR_DECLS :
     
     public List<Comment> popComments() {
         List<Comment> ret = comments;
-        comments = new LinkedList<Comment>();
+        comments = new ArrayList<Comment>();
         return ret;
     }
     
@@ -296,42 +294,44 @@ TOKEN :
 TOKEN :
 {
     <#DIGIT: ["0" - "9"]>
-    // Has mentioned in sqlite implementation '$' is not documented but is
-    // implemented for compatibility.
+    // Has mentioned in sqlite implementation '$' is not documented but is implemented for
+    // compatibility.
 |   <#CHAR: ["A" - "Z", "_", "$"]>
 |   <#HEX_CHAR: ["0" - "9", "A" - "F"]>
 }
 
 /* Grammar */
 SqlStmtList sqlStmtList() :{
-    SqlStmtList list = new SqlStmtList();
+    SqlStmtList stmtList = new SqlStmtList();
     SqlStatement stmt = null;
+    
+    stmtList.stmts =  new ArrayList<SqlStatement>();
 }
 {
     [
         (
             stmt = sqlStmt() {
-                list.addStatement(stmt);
-                list.setBegin(token.beginLine, token.beginColumn);
+                stmtList.stmts.add(stmt);
             }
-        |   ";" {
-                list.setBegin(token.beginLine, token.beginColumn);
-            }
-        )
+        |   ";"
+        ) {
+            stmtList.setBegin(token.beginLine, token.beginColumn);
+        }
         (
             ";"
             [
                 stmt = sqlStmt() {
-                    list.addStatement(stmt);
+                    stmtList.stmts.add(stmt);
                 }
             ]
         )*
     ] {
         if (stmt == null) {
-            list.setBegin(token.beginLine, token.beginColumn);
+            stmtList.setBegin(token.beginLine, token.beginColumn);
+            stmtList.stmts = null;
         }
-        list.setEnd(token.endLine, token.endColumn);
-        return list;
+        stmtList.setEnd(token.endLine, token.endColumn);
+        return stmtList;
     }
 }
 
@@ -388,7 +388,7 @@ SqlStatement sqlStmt() :
         if (explain != null) {
             // If statement starts by EXPLAIN.
             stmt.setBegin(line, column);
-            stmt.setExplain(explain);
+            stmt.explain = explain;
         }
         return stmt;
     }
@@ -431,8 +431,8 @@ AlterTableStmt alterTableStmt() :
     |   stmt = addColumnStmt()
     ) {
         stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
+        stmt.database = database;
+        stmt.table = table;
         return stmt;
     }
 }
@@ -440,12 +440,10 @@ AlterTableStmt alterTableStmt() :
 AlterTableStmt renameTableStmt() :
 {
     RenameTableStmt stmt = new RenameTableStmt();
-    Name table;
 }
 {
     "RENAME" "TO"
-    table = name() {
-        stmt.setNewTable(table);
+    stmt.newTable = name() {
         return stmt;
     }
 }
@@ -453,12 +451,10 @@ AlterTableStmt renameTableStmt() :
 AlterTableStmt addColumnStmt() :
 {
     AddColumnStmt stmt = new AddColumnStmt();
-    ColumnDef column;
 }
 {
     "ADD" [ "COLUMN" ]
-    column = columnDef() {
-        stmt.setColumn(column);
+    stmt.column = columnDef() {
         return stmt;
     }
 }
@@ -466,23 +462,19 @@ AlterTableStmt addColumnStmt() :
 AnalyzeStmt analyzeStmt() :
 {
     AnalyzeStmt stmt = new AnalyzeStmt();
-    Name first = null;
-    Name second = null;
 }
 {
     "ANALYZE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        first = name()
+        stmt.first = name()
         [
             "."
-            second = name()
+            stmt.second = name()
         ]
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setFirstName(first);
-        stmt.setSecondName(second);
         return stmt;
     }
 }
@@ -490,8 +482,6 @@ AnalyzeStmt analyzeStmt() :
 AttachStmt attachStmt() :
 {
     AttachStmt stmt = new AttachStmt();
-    Expression expr;
-    Name database;
 }
 {
     "ATTACH" {
@@ -500,12 +490,10 @@ AttachStmt attachStmt() :
     [
         "DATABASE"
     ]
-    expr = expr()
+    stmt.expr = expr()
     "AS"
-    database = name() {
+    stmt.database = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setExpression(expr);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -520,13 +508,13 @@ BeginStmt beginStmt() :
     }
     [
         "DEFERRED" {
-            stmt.setType(BeginStmt.Type.DEFERRED);
+            stmt.type = BeginStmt.Type.DEFERRED;
         }
     |   "IMMEDIATE" {
-            stmt.setType(BeginStmt.Type.IMMEDIATE);
+            stmt.type = BeginStmt.Type.IMMEDIATE;
         }
     |   "EXCLUSIVE" {
-            stmt.setType(BeginStmt.Type.EXCLUSIVE);
+            stmt.type = BeginStmt.Type.EXCLUSIVE;
         }
     ]
     [
@@ -566,13 +554,9 @@ RollbackStmt rollbackStmt() :
     }
     [ "TRANSACTION" ]
     [
-        "TO" {
-            Name savepoint;
-        }
+        "TO"
         [ "SAVEPOINT" ]
-        savepoint = name() {
-            stmt.setSavepoint(savepoint);
-        }
+        stmt.savepoint = name()
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
@@ -582,14 +566,12 @@ RollbackStmt rollbackStmt() :
 SavepointStmt savepointStmt() :
 {
     SavepointStmt stmt = new SavepointStmt();
-    Name savepoint;
 }
 {
     "SAVEPOINT"  {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
-    savepoint = name() {
-        stmt.setSavepoint(savepoint);
+    stmt.savepoint = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
     }
@@ -598,15 +580,13 @@ SavepointStmt savepointStmt() :
 ReleaseStmt releaseStmt() :
 {
     ReleaseStmt stmt = new ReleaseStmt();
-    Name savepoint;
 }
 {
     "RELEASE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [ "SAVEPOINT" ]
-    savepoint = name() {
-        stmt.setSavepoint(savepoint);
+    stmt.savepoint = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
     }
@@ -615,10 +595,9 @@ ReleaseStmt releaseStmt() :
 CreateIndexStmt createIndexStmt() :
 {
     CreateIndexStmt stmt = new CreateIndexStmt();
-    Name database = null;
-    Name index;
-    Name table;
     IndexedColumn column;
+    
+    stmt.columns = new ArrayList<IndexedColumn>();
 }
 {
     "CREATE" {
@@ -626,69 +605,60 @@ CreateIndexStmt createIndexStmt() :
     }
     [
         "UNIQUE" { 
-            stmt.setUnique(true);
+            stmt.hasUnique = true;
         }
     ]
     "INDEX"
     [
         "IF" "NOT" "EXISTS" { 
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    index = name()
+    stmt.name = name()
     "ON"
-    table = name()
+    stmt.table = name()
     "("
     column = indexedColumn() {
-        stmt.addColumn(column);
+        stmt.columns.add(column);
     }
     (
         ","
 	    column = indexedColumn() {
-	        stmt.addColumn(column);
+	        stmt.columns.add(column);
 	    }
     )*
     ")" {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(index);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
         return stmt;
     }
 }
 
 IndexedColumn indexedColumn() :
 {
-    IndexedColumn indColumn = new IndexedColumn();
-    Name column;
+    IndexedColumn column = new IndexedColumn();
 }
 {
-    column = name() {
-        indColumn.setColumn(column);
-        indColumn.setBegin(column);
+    column.column = name() {
+        column.setBegin(column.column);
     }
     [
-        "COLLATE" {
-            Name collation;
-        }
-        collation = name() {
-            indColumn.setCollation(collation);
-        }
+        "COLLATE"
+        column.collation = name()
     ]
     [
         "ASC" {
-            indColumn.setOrder(IndexedColumn.Order.ASC);
+            column.order = IndexedColumn.Order.ASC;
         }
     |   "DESC" {
-            indColumn.setOrder(IndexedColumn.Order.DESC);
+            column.order = IndexedColumn.Order.DESC;
         }
     ] {
-        indColumn.setEnd(token.endLine, token.endColumn);
-        return indColumn;
+        column.setEnd(token.endLine, token.endColumn);
+        return column;
     }}
 
 CreateTableStmt createTableStmt() :
@@ -696,7 +666,7 @@ CreateTableStmt createTableStmt() :
     CreateTableStmt stmt;
     int line;
     int column;
-    boolean hasTemp = false;
+    boolean hasTemporary = false;
     boolean hasIfNotExists = false;
     Name database = null;
     Name table;
@@ -708,7 +678,7 @@ CreateTableStmt createTableStmt() :
     }
     [
         ("TEMP" | "TEMPORARY") { 
-            hasTemp = true;
+            hasTemporary = true;
         }
     ]
     "TABLE"
@@ -727,10 +697,10 @@ CreateTableStmt createTableStmt() :
     |   stmt = createTableStmtWithSelect()
     ) {
         stmt.setBeginEnd(line, column, token.endLine, token.endColumn);
-        stmt.setTemporary(hasTemp);
-        stmt.setIfNotExists(hasIfNotExists);
-        stmt.setName(table);
-        stmt.setDatabase(database);
+        stmt.hasTemporary = hasTemporary;
+        stmt.hasIfNotExists = hasIfNotExists;
+        stmt.name = table;
+        stmt.database = database;
         return stmt;
     }}
 
@@ -738,11 +708,13 @@ CreateTableStmt createTableStmtWithColumns() :
 {
     CreateTableStmtWithColumns stmt = new CreateTableStmtWithColumns();
     ColumnDef column;
+    
+    stmt.columns = new ArrayList<ColumnDef>();
 }
 {
     "("
     column = columnDef() { 
-        stmt.addColumn(column);
+        stmt.columns.add(column);
     }
     // As the two next expressions start by "," it's necessary to use 
     // LOOKAHEAD(2) to decide if we're seeing a column definition or a table
@@ -751,15 +723,18 @@ CreateTableStmt createTableStmtWithColumns() :
         LOOKAHEAD(2)
         ","
         column = columnDef() {
-            stmt.addColumn(column);
+            stmt.columns.add(column);
         }
     )* 
     (   
         "," {
+            if (stmt.constraints == null) {
+                stmt.constraints = new ArrayList<TableConstraint>();
+            }
             TableConstraint constraint;
         }
         constraint = tableConstraint() { 
-            stmt.addConstraint(constraint);
+            stmt.constraints.add(constraint);
         }
     )*
     ")" {
@@ -770,39 +745,37 @@ CreateTableStmt createTableStmtWithColumns() :
 CreateTableStmt createTableStmtWithSelect() :
 {
     CreateTableStmtWithSelect stmt = new CreateTableStmtWithSelect();
-    SelectStmt select;
 }
 {
     "AS"
-    select = selectStmt() {
-        stmt.setSelect(select);
+    stmt.select = selectStmt() {
         return stmt;
     }
 }
 
 ColumnDef columnDef() :
 {
-    ColumnDef columnDef = new ColumnDef();
-    Name column;
-    TypeName type;
-    ColumnConstraint constraint;}
+    ColumnDef column = new ColumnDef();
+    ColumnConstraint constraint = null;
+    
+    column.constraints = new ArrayList<ColumnConstraint>();}
 {
-    column = name() {
-        columnDef.setColumn(column);
-        columnDef.setBegin(column);
+    column.column = name() {
+        column.setBegin(column.column);
     }
     [
-        type = typeName() {
-            columnDef.setType(type);
-        }
+        column.type = typeName()
     ]
     (
         constraint = columnConstraint() {
-            columnDef.addConstraint(constraint);
+            column.constraints.add(constraint);
         }
     )* {
-        columnDef.setEnd(token.endLine, token.endColumn);
-        return columnDef;
+        column.setEnd(token.endLine, token.endColumn);
+        if (constraint == null) {
+            column.constraints = null;
+        }
+        return column;
     }}
 
 TypeName typeName() :
@@ -810,7 +783,7 @@ TypeName typeName() :
     TypeName type = new TypeName();
     String name = new String();
     
-    type.setName(name);}
+    type.name = name;}
 {
     name() {
         type.setBegin(token.beginLine, token.beginColumn);
@@ -822,19 +795,11 @@ TypeName typeName() :
         }
     )*
     [
-        "(" {
-            UnaryExpr xDim;
-        }
-        xDim = signedNumber() {
-            type.setDimensionInX(xDim);
-        }
+        "("
+        type.xDimension = signedNumber()
         [
-            "," {
-                UnaryExpr yDim;
-            }
-            yDim = signedNumber() {
-                type.setDimensionInY(yDim);
-            }
+            ","
+            type.yDimension = signedNumber()
         ]
         ")"
     ] {
@@ -866,7 +831,7 @@ ColumnConstraint columnConstraint() :
     ) {
         if (name != null) {
             constraint.setBegin(line, column);
-            constraint.setName(name);
+            constraint.name = name;
         }
         return constraint;
     }
@@ -875,7 +840,6 @@ ColumnConstraint columnConstraint() :
 PrimaryKeyColumnConstraint primaryKeyColumnConstraint() :
 {
     PrimaryKeyColumnConstraint constraint = new PrimaryKeyColumnConstraint();
-    ConflictClause clause;
 }
 {
     "PRIMARY" {
@@ -884,18 +848,16 @@ PrimaryKeyColumnConstraint primaryKeyColumnConstraint() :
     "KEY" 
     [
         "ASC" {
-            constraint.setOrder(PrimaryKeyColumnConstraint.Order.ASC);
+            constraint.order = PrimaryKeyColumnConstraint.Order.ASC;
         }
     |   "DESC" {
-            constraint.setOrder(PrimaryKeyColumnConstraint.Order.DESC);
+            constraint.order = PrimaryKeyColumnConstraint.Order.DESC;
         }
     ]
-    clause = conflictClause() {
-        constraint.setClause(clause);
-    }
+    constraint.clause = conflictClause()
     [
         "AUTOINCREMENT" {
-            constraint.setAutoincrement(true);
+            constraint.hasAutoincrement = true;
         }
     ] {
         constraint.setEnd(token.endLine, token.endColumn);
@@ -906,15 +868,13 @@ PrimaryKeyColumnConstraint primaryKeyColumnConstraint() :
 NotNullColumnConstraint notNullColumnConstraint() :
 {
     NotNullColumnConstraint constraint = new NotNullColumnConstraint();
-    ConflictClause clause;
 }
 {
     "NOT" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "NULL"
-    clause = conflictClause() {
-        constraint.setClause(clause);
+    constraint.clause = conflictClause() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -923,14 +883,12 @@ NotNullColumnConstraint notNullColumnConstraint() :
 UniqueColumnConstraint uniqueColumnConstraint() :
 {
     UniqueColumnConstraint constraint = new UniqueColumnConstraint();
-    ConflictClause clause;
 }
 {
     "UNIQUE" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
-    clause = conflictClause() {
-        constraint.setClause(clause);
+    constraint.clause = conflictClause() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -939,16 +897,14 @@ UniqueColumnConstraint uniqueColumnConstraint() :
 CheckColumnConstraint checkColumnConstraint() :
 {
     CheckColumnConstraint constraint = new CheckColumnConstraint();
-    Expression expr;
 }
 {
     "CHECK" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "(" 
-    expr = expr()
+    constraint.expr = expr()
     ")" {
-        constraint.setExpression(expr);
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -957,7 +913,6 @@ CheckColumnConstraint checkColumnConstraint() :
 DefaultColumnConstraint defaultColumnConstraint() :
 {
     DefaultColumnConstraint constraint = new DefaultColumnConstraint();
-    Expression expr;
     Literal literal;
 }
 {
@@ -968,16 +923,15 @@ DefaultColumnConstraint defaultColumnConstraint() :
         // As signedNumber and literalValue match a numericLiteral() it is only
         // consider to exist a signedNumber if actually there is sign.
         LOOKAHEAD("+" | "-")
-        expr = signedNumber()
+        constraint.expr = signedNumber()
     |   literal = literalValue() {
-            expr = new LiteralExpr(literal, literal);
+            constraint.expr = new LiteralExpr(literal, literal);
         }
     |   "("
-        expr = expr()
+        constraint.expr = expr()
         ")"
     ) {
         constraint.setEnd(token.endLine, token.endColumn);
-        constraint.setExpression(expr);
         return constraint;
     }
 }
@@ -985,14 +939,12 @@ DefaultColumnConstraint defaultColumnConstraint() :
 CollateColumnConstraint collateColumnConstraint() :
 {
     CollateColumnConstraint constraint = new CollateColumnConstraint();
-    Name collation;
 }
 {
     "COLLATE" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
-    collation = name() {
-        constraint.setCollation(collation);
+    constraint.collation = name() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -1001,12 +953,9 @@ CollateColumnConstraint collateColumnConstraint() :
 ForeignKeyColumnConstraint foreignKeyColumnConstraint() :
 {
     ForeignKeyColumnConstraint constraint = new ForeignKeyColumnConstraint();
-    ForeignKeyClause clause;
 }
 {
-    clause = foreignKeyClause() {
-        constraint.setBeginEnd(clause);
-        constraint.setClause(clause);
+    constraint.clause = foreignKeyClause() {
         return constraint;
     }
 }
@@ -1019,22 +968,22 @@ UnaryExpr signedNumber() :
     [
         (
             "+" {
-                number.setOperator(UnaryExpr.Operator.POSITIVE);
+                number.operator = UnaryExpr.Operator.POSITIVE;
             }
         |   "-" {
-                number.setOperator(UnaryExpr.Operator.NEGATIVE);
+                number.operator = UnaryExpr.Operator.NEGATIVE;
             }
         ) {
             number.setBegin(token.beginLine, token.beginColumn);
         }
     ]
     literal = numericLiteral() {
-        if (number.getOperator() == null) {
+        if (number.operator == null) {
             number.setBeginEnd(literal);
         } else {
             number.setEnd(token.endLine, token.endColumn);
         }
-        number.setExpression(new LiteralExpr(literal, literal));
+        number.expr = new LiteralExpr(literal, literal);
         return number;
     }}
 
@@ -1059,7 +1008,7 @@ TableConstraint tableConstraint() :
     ) {
         if (name != null) {
             constraint.setBegin(line, column);
-            constraint.setName(name);
+            constraint.name = name;
         }
         return constraint;
     }}
@@ -1068,7 +1017,8 @@ PrimaryKeyTableConstraint primaryKeyTableConstraint() :
 {
     PrimaryKeyTableConstraint constraint = new PrimaryKeyTableConstraint();
     IndexedColumn column;
-    ConflictClause clause;
+    
+    constraint.columns = new ArrayList<IndexedColumn>();
 }
 {
     "PRIMARY" {
@@ -1077,17 +1027,16 @@ PrimaryKeyTableConstraint primaryKeyTableConstraint() :
     "KEY"
     "(" 
     column = indexedColumn() {
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     }
     (
         ","
         column = indexedColumn() {
-            constraint.addColumn(column);
+            constraint.columns.add(column);
         }
     )*
     ")"
-    clause = conflictClause() {
-        constraint.setClause(clause);
+    constraint.clause = conflictClause() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -1097,7 +1046,8 @@ UniqueTableConstraint uniqueTableConstraint() :
 {
     UniqueTableConstraint constraint = new UniqueTableConstraint();
     IndexedColumn column;
-    ConflictClause clause;
+    
+    constraint.columns = new ArrayList<IndexedColumn>();
 }
 {
     "UNIQUE" {
@@ -1105,17 +1055,16 @@ UniqueTableConstraint uniqueTableConstraint() :
     }
     "(" 
     column = indexedColumn() {
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     }
     (
         ","
         column = indexedColumn() {
-            constraint.addColumn(column);
+            constraint.columns.add(column);
         }
     )*
     ")"
-    clause = conflictClause() {
-        constraint.setClause(clause);
+    constraint.clause = conflictClause() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -1124,16 +1073,14 @@ UniqueTableConstraint uniqueTableConstraint() :
 CheckTableConstraint checkTableConstraint() :
 {
     CheckTableConstraint constraint = new CheckTableConstraint();
-    Expression expr;
 }
 {
     "CHECK" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
     "("
-    expr = expr() 
+    constraint.expr = expr() 
     ")" {
-        constraint.setExpression(expr);
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -1143,7 +1090,8 @@ ForeignKeyTableConstraint foreignKeyTableConstraint() :
 {
     ForeignKeyTableConstraint constraint = new ForeignKeyTableConstraint();
     Name column;
-    ForeignKeyClause clause;
+    
+    constraint.columns = new ArrayList<Name>();
 }
 {
     "FOREIGN" {
@@ -1152,17 +1100,16 @@ ForeignKeyTableConstraint foreignKeyTableConstraint() :
     "KEY"
     "("
     column = name() {
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     }
     (
         "," 
         column = name() {
-            constraint.addColumn(column);
+            constraint.columns.add(column);
         }
     )*
     ")"
-    clause = foreignKeyClause() {
-        constraint.setClause(clause);
+    constraint.clause = foreignKeyClause() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -1171,46 +1118,48 @@ ForeignKeyTableConstraint foreignKeyTableConstraint() :
 ForeignKeyClause foreignKeyClause() :
 {
     ForeignKeyClause clause = new ForeignKeyClause();
-    Block block = new Block();
-    Name table;
-    ForeignKeySetting sett;}
+    ForeignKeySetting setting = null;
+    
+    clause.settings = new ArrayList<ForeignKeySetting>();}
 {
     "REFERENCES" {
         clause.setBegin(token.beginLine, token.beginColumn);
     }
-    table = name() {
-        clause.setTable(table);
-    }
+    clause.table = name()
     [
         "(" {
             Name column;
+            clause.columns = new ArrayList<Name>();
         }
         column = name() {
-            clause.addColumn(column);
+            clause.columns.add(column);
         }
         (
             ","
             column = name() {
-                clause.addColumn(column);
+                clause.columns.add(column);
             }
         )*
         ")"
     ]
     (
-        sett = onSetting() {
-            clause.addSetting(sett);
+        setting = onSetting() {
+            clause.settings.add(setting);
         }
-    |   sett = matchSetting() {
-            clause.addSetting(sett);
+    |   setting = matchSetting() {
+            clause.settings.add(setting);
         }
     )*
     [
         LOOKAHEAD(2) // Ensures that is deferrable because first token can be 
                      // either NOT or DEFERRABLE.
-        sett = deferrableSetting() {
-            clause.addSetting(sett);
+        setting = deferrableSetting() {
+            clause.settings.add(setting);
         }
     ] {
+        if (setting == null) {
+            clause.settings = null;
+        }
         clause.setEnd(token.endLine, token.endColumn);
         return clause;
     }}
@@ -1225,30 +1174,30 @@ OnSetting onSetting() :
     }
     (
         "DELETE" {
-            sett.setEvent(OnSetting.Event.DELETE);
+            sett.event = OnSetting.Event.DELETE;
         }
     |   "UPDATE" {
-            sett.setEvent(OnSetting.Event.UPDATE);
+            sett.event = OnSetting.Event.UPDATE;
         }
     )
     (
         "SET"
         (
             "NULL" {
-                sett.setAction(OnSetting.Action.SET_NULL);
+                sett.action = OnSetting.Action.SET_NULL;
             }
         |   "DEFAULT" {
-                sett.setAction(OnSetting.Action.SET_DEFAULT);
+                sett.action = OnSetting.Action.SET_DEFAULT;
             }
         )
     |   "CASCADE" {
-            sett.setAction(OnSetting.Action.CASCADE);
+            sett.action = OnSetting.Action.CASCADE;
         }
     |   "RESTRICT" {
-            sett.setAction(OnSetting.Action.RESTRICT);
+            sett.action = OnSetting.Action.RESTRICT;
         }
     |   "NO" "ACTION" {
-            sett.setAction(OnSetting.Action.NO_ACTION);
+            sett.action = OnSetting.Action.NO_ACTION;
         }
     ) {
         sett.setEnd(token.endLine, token.endColumn);
@@ -1265,8 +1214,8 @@ MatchSetting matchSetting() :
         sett.setBegin(token.beginLine, token.beginColumn);
     }
     name() {
-        sett.setName(new Name(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image));
+        sett.name = new Name(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);
         sett.setEnd(token.endLine, token.endColumn);
         return sett;
     }
@@ -1280,22 +1229,22 @@ DeferrableSetting deferrableSetting() :
     (
         "NOT" {
             sett.setBegin(token.beginLine, token.beginColumn);
-            sett.setType(DeferrableSetting.Type.NOT_DEFERRABLE);
+            sett.type = DeferrableSetting.Type.NOT_DEFERRABLE;
         }
         "DEFERRABLE"
     |   "DEFERRABLE" {
             sett.setBegin(token.beginLine, token.beginColumn);
-            sett.setType(DeferrableSetting.Type.DEFERRABLE);
+            sett.type = DeferrableSetting.Type.DEFERRABLE;
         }
     )
     [
         "INITIALLY"
         (
             "DEFERRED" {
-                sett.setMode(DeferrableSetting.Mode.DEFERRED);
+                sett.mode = DeferrableSetting.Mode.DEFERRED;
             }
         |   "IMMEDIATE" {
-                sett.setMode(DeferrableSetting.Mode.IMMEDIATE);
+                sett.mode = DeferrableSetting.Mode.IMMEDIATE;
             }
         )
     ] {
@@ -1316,19 +1265,19 @@ ConflictClause conflictClause() :
         "CONFLICT"
         (
             "ROLLBACK" {
-                clause.setAction(ConflictClause.Action.ROLLBACK);
+                clause.action = ConflictClause.Action.ROLLBACK;
             }
         |   "ABORT" {
-                clause.setAction(ConflictClause.Action.ABORT);
+                clause.action = ConflictClause.Action.ABORT;
             }
         |   "FAIL" {
-                clause.setAction(ConflictClause.Action.FAIL);
+                clause.action = ConflictClause.Action.FAIL;
             }
         |   "IGNORE" {
-                clause.setAction(ConflictClause.Action.IGNORE);
+                clause.action = ConflictClause.Action.IGNORE;
             }
         |   "REPLACE" {
-                clause.setAction(ConflictClause.Action.REPLACE);
+                clause.action = ConflictClause.Action.REPLACE;
             }
         ) {
             clause.setEnd(token.endLine, token.endColumn);
@@ -1341,11 +1290,7 @@ ConflictClause conflictClause() :
 CreateTriggerStmt createTriggerStmt() :
 {
     CreateTriggerStmt stmt = new CreateTriggerStmt();
-    boolean hasIfNotExists = false;
-    Name database = null;
-    Name trigger;
-    Name table;
-    EventStmt eventStmt;
+    stmt.stmts = new ArrayList<EventStmt>();
 }
 {
     "CREATE" {
@@ -1353,72 +1298,71 @@ CreateTriggerStmt createTriggerStmt() :
     }
     [
         ("TEMP" | "TEMPORARY") {
-            stmt.setTemporary(true);
+            stmt.hasTemporary = true;
         }
     ]
     "TRIGGER"
     [
         "IF" "NOT" "EXISTS" {
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    trigger = name()
+    stmt.name = name()
     [
         "BEFORE" {
-            stmt.setTime(CreateTriggerStmt.Time.BEFORE);
+            stmt.time = CreateTriggerStmt.Time.BEFORE;
         }
     |   "AFTER" {
-            stmt.setTime(CreateTriggerStmt.Time.AFTER);
+            stmt.time = CreateTriggerStmt.Time.AFTER;
         }
     |   "INSTEAD" "OF" {
-            stmt.setTime(CreateTriggerStmt.Time.INSTEAD_OF);
+            stmt.time = CreateTriggerStmt.Time.INSTEAD_OF;
         }
     ]
     (
         "DELETE" {
-            stmt.setEvent(CreateTriggerStmt.Event.DELETE);
+            stmt.event = CreateTriggerStmt.Event.DELETE;
         }
     |   "INSERT"  {
-            stmt.setEvent(CreateTriggerStmt.Event.INSERT);
+            stmt.event = CreateTriggerStmt.Event.INSERT;
         }
     |   "UPDATE" {
-            stmt.setEvent(CreateTriggerStmt.Event.DELETE);
+            stmt.event = CreateTriggerStmt.Event.DELETE;
         }
         [
             "OF" {
                 Name column;
+                stmt.columns = new ArrayList<Name>();
             }
             column = name() {
-                stmt.addColumn(column);
+                stmt.columns.add(column);
             }
             (
                 ","
                 column = name() {
-                    stmt.addColumn(column);
+                    stmt.columns.add(column);
                 }
             )*
         ]
     )
     "ON"
-    table = name()
+    stmt.table = name()
     [
         "FOR" "EACH" "ROW" {
-            stmt.setForEachRow(true);
+            stmt.hasForEachRow = true;
         }
     ]
     [
-        "WHEN" {
-            Expression expr;
-        }
-        expr = expr() {
-            stmt.setWhen(expr);
-        }
+        "WHEN"
+        stmt.when = expr()
     ]
-    "BEGIN"
+    "BEGIN" {
+        EventStmt eventStmt;
+    }
     (
         (
             eventStmt = updateStmt()
@@ -1426,15 +1370,12 @@ CreateTriggerStmt createTriggerStmt() :
         |   eventStmt = deleteStmt()
         |   eventStmt = selectStmt()
         ) {
-            stmt.addStatement(eventStmt);
+            stmt.stmts.add(eventStmt);
         }
         ";"
     )+
     "END" {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(trigger);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
         return stmt;
     }
 }
@@ -1442,9 +1383,6 @@ CreateTriggerStmt createTriggerStmt() :
 CreateViewStmt createViewStmt() :
 {
     CreateViewStmt stmt = new CreateViewStmt();
-    Name database = null;
-    Name view;
-    SelectStmt select;
 }
 {
     "CREATE" {
@@ -1452,26 +1390,23 @@ CreateViewStmt createViewStmt() :
     }
     [
         ("TEMP" | "TEMPORARY") {
-            stmt.setTemporary(true);
+            stmt.hasTemporary = true;
         }
     ]
     "VIEW"
     [
         "IF" "NOT" "EXISTS" {
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    view = name()
+    stmt.name = name()
     "AS"
-    select = selectStmt() {
+    stmt.select = selectStmt() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(view);
-        stmt.setDatabase(database);
-        stmt.setSelect(select);
         return stmt;
     }
 }
@@ -1479,9 +1414,6 @@ CreateViewStmt createViewStmt() :
 CreateVirtualTableStmt createVirtualTableStmt() :
 {
     CreateVirtualTableStmt stmt = new CreateVirtualTableStmt();
-    Name database = null;
-    Name table;
-    Name module;
 }
 {
     "CREATE" {
@@ -1490,34 +1422,33 @@ CreateVirtualTableStmt createVirtualTableStmt() :
     "VIRTUAL" "TABLE"
     [
         "IF" "NOT" "EXISTS" {
-            stmt.setIfNotExists(true);
+            stmt.hasIfNotExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    table = name()
+    stmt.name = name()
     "USING"
-    module = name()
+    stmt.module = name()
     [
         "(" {
-            ModuleArgument arg;
+            ModuleArgument argument;
+            stmt.arguments = new ArrayList<ModuleArgument>();
         }
-        arg = moduleArgument() {
-            stmt.addModuleArgument(arg);
+        argument = moduleArgument() {
+            stmt.arguments.add(argument);
         }
         (
             ","
-            arg = moduleArgument() {
-                stmt.addModuleArgument(arg);
+            argument = moduleArgument() {
+                stmt.arguments.add(argument);
             }
         )*
         ")"
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(module);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1551,73 +1482,61 @@ void other() :
 DeleteStmt deleteStmt() :
 {
     DeleteStmt stmt = new DeleteStmt();
-    QualifiedTableName qualifiedTable;
-    EventConstraint constraint = null;
 }
 {
     "DELETE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     "FROM"
-    qualifiedTable = qualifiedTableName()
+    stmt.qualifiedTable = qualifiedTableName()
     [
-        "WHERE" {
-            Expression expr;
-        }
-        expr = expr() {
-            stmt.setWhere(expr);
-        }
+        "WHERE"
+        stmt.where = expr()
     ]
-    constraint = eventConstraint() {
+    stmt.constraint = eventConstraint() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setQualifiedTable(qualifiedTable);
-        stmt.setConstraint(constraint);
         return stmt;
     }
 }
 
 EventConstraint eventConstraint() :
 {
-    EventConstraint constraint = null;
+    EventConstraint constraint = new EventConstraint();
 }
 {
     [
         "ORDER" {
-            constraint = new EventConstraint();
             constraint.setBegin(token.beginLine, token.beginColumn);
             OrderingTerm term;
+            
+            constraint.terms = new ArrayList<OrderingTerm>();
         }
         "BY"
         term = orderingTerm() {
-            constraint.addTerm(term);
+            constraint.terms.add(term);
         }
         (
             ","
             term = orderingTerm() {
-                constraint.addTerm(term);
+                constraint.terms.add(term);
             }
         )*
     ]
     [
         "LIMIT" {
-            if (constraint == null) {
-                constraint = new EventConstraint();
+            if (constraint.terms == null) {
                 constraint.setBegin(token.beginLine, token.beginColumn);
             }
-            Expression expr;
         }
-        expr = expr() {
-            constraint.setLimit(expr);
-        }
+        constraint.limit = expr()
         [
             ( "OFFSET" | "," )
-            expr = expr() {
-                constraint.setOffset(expr);
-            }
+            constraint.offset = expr()
         ]
     ] {
-        if (constraint != null) {
-            constraint.setEnd(token.endLine, token.endColumn);
+        constraint.setEnd(token.endLine, token.endColumn);
+        if (constraint.terms == null && constraint.limit == null) {
+            return null;
         }
         return constraint;
     }
@@ -1626,16 +1545,14 @@ EventConstraint eventConstraint() :
 DetachStmt detachStmt() :
 {
     DetachStmt stmt = new DetachStmt();
-    Name database;
 }
 {
     "DETACH" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [ "DATABASE" ]
-    database = name() {
+    stmt.database = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1643,8 +1560,6 @@ DetachStmt detachStmt() :
 DropIndexStmt dropIndexStmt() :
 {
     DropIndexStmt stmt = new DropIndexStmt();
-    Name database = null;
-    Name index;
 }
 {
     "DROP" {
@@ -1653,17 +1568,15 @@ DropIndexStmt dropIndexStmt() :
     "INDEX"
     [
         "IF" "EXISTS" {
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    index = name() {
+    stmt.name = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(index);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1671,8 +1584,6 @@ DropIndexStmt dropIndexStmt() :
 DropTableStmt dropTableStmt() :
 {
     DropTableStmt stmt = new DropTableStmt();
-    Name database = null;
-    Name table;
 }
 {
     "DROP" {
@@ -1681,17 +1592,15 @@ DropTableStmt dropTableStmt() :
     "TABLE"
     [
         "IF" "EXISTS" {
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    table = name() {
+    stmt.name = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(table);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1699,8 +1608,6 @@ DropTableStmt dropTableStmt() :
 DropTriggerStmt dropTriggerStmt() :
 {
     DropTriggerStmt stmt = new DropTriggerStmt();
-    Name database = null;
-    Name trigger;
 }
 {
     "DROP" {
@@ -1709,17 +1616,15 @@ DropTriggerStmt dropTriggerStmt() :
     "TRIGGER"
     [
         "IF" "EXISTS" {
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    trigger = name() {
+    stmt.name = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(trigger);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1727,8 +1632,6 @@ DropTriggerStmt dropTriggerStmt() :
 DropViewStmt dropViewStmt() :
 {
     DropViewStmt stmt = new DropViewStmt();
-    Name database = null;
-    Name view;
 }
 {
     "DROP" {
@@ -1737,17 +1640,15 @@ DropViewStmt dropViewStmt() :
     "VIEW"
     [
         "IF" "EXISTS" {
-            stmt.setIfExists(true);
+            stmt.hasIfExists = true;
         }
     ]
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    view = name() {
+    stmt.name = name() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setName(view);
-        stmt.setDatabase(database);
         return stmt;
     }
 }
@@ -1764,9 +1665,8 @@ Expression expr() :
     (
         "OR"
         right = andExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.OR);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.OR);
         }
     )* {
         return left;
@@ -1783,9 +1683,8 @@ Expression andExpr() :
     (
         "AND"
         right = notExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.AND);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.AND);
         }
     )* {
         return left;
@@ -1803,8 +1702,8 @@ Expression notExpr() :
             int column = token.beginColumn;
         }
         expr = notExpr() {
-            expr = new UnaryExpr(new Block(line, column, token.endLine,
-                token.endColumn), UnaryExpr.Operator.LOGICAL_NOT, expr);
+            expr = new UnaryExpr(new Block(line, column, token.endLine, token.endColumn),
+                UnaryExpr.Operator.LOGICAL_NOT, expr);
         }
     |   expr = equalityExpr() 
     ) {
@@ -1835,35 +1734,35 @@ Expression equalityExpr() :
 
 Expression unaryEqualityExpr(Expression expr) :
 {
-    UnaryExpr.Operator op;
+    UnaryExpr.Operator operator;
 }
 {
     (
         "ISNULL" {
-            op = UnaryExpr.Operator.IS_NULL;
+            operator = UnaryExpr.Operator.IS_NULL;
         }
     |   "NOTNULL" {
-            op = UnaryExpr.Operator.NOT_NULL;
+            operator = UnaryExpr.Operator.NOT_NULL;
         }
     |   "NOT" "NULL" {
-            op = UnaryExpr.Operator.NOT_NULL;
+            operator = UnaryExpr.Operator.NOT_NULL;
         }
     ) {
-        return new UnaryExpr(new Block(expr.beginLine, expr.beginColumn,
-            token.endLine, token.endColumn), op, expr);
+        return new UnaryExpr(new Block(expr.beginLine, expr.beginColumn, token.endLine,
+            token.endColumn), operator, expr);
     }
 }
 
 Expression binaryEqualityExpr(Expression left) :
 {
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
 }
 {
-    op = binaryEqualityOperator()
+    operator = binaryEqualityOperator()
     right = relationalExpr() {
-        return new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-            token.endLine, token.endColumn), left, right, op);
+        return new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+            token.endColumn), left, right, operator);
     }
 }
 
@@ -1924,24 +1823,21 @@ BetweenExpr betweenExpr(Expression expr) :
 {
     BetweenExpr between = new BetweenExpr();
     
-    between.setExpression(expr);
+    between.expr = expr;
     between.setBegin(expr);
 }
 {
     (
         "NOT" "BETWEEN" {
-            between.setOperator(BetweenExpr.Operator.NOT_BETWEEN);
+            between.operator = BetweenExpr.Operator.NOT_BETWEEN;
         }
     |   "BETWEEN" {
-            between.setOperator(BetweenExpr.Operator.BETWEEN);
+            between.operator = BetweenExpr.Operator.BETWEEN;
         }
     )
-    expr = relationalExpr() {
-        between.setLower(expr);
-    }
+    between.lower = relationalExpr()
     "AND"
-    expr = relationalExpr() {
-        between.setUpper(expr);
+    between.upper = relationalExpr() {
         between.setEnd(token.endLine, token.endColumn);
         return between;
     }
@@ -1950,32 +1846,28 @@ BetweenExpr betweenExpr(Expression expr) :
 InExpr inExpr(Expression expr) :
 {
     InExpr in = null;
-    InExpr.Operator op;
+    InExpr.Operator operator;
 }
 {
     (
         "NOT" "IN" {
-            op = InExpr.Operator.NOT_IN;
+            operator = InExpr.Operator.NOT_IN;
         }
     |   "IN" {
-            op = InExpr.Operator.IN;
+            operator = InExpr.Operator.IN;
         }
     )
     (
         "("
-        [
+        (
             in = inSelectExpr()
         |   in = inSetExpr()
-        ] {
-            if (in == null) {
-                in = new InSetExpr();
-            }
-        }
+        )
         ")"
     |   in = inTableExpr()
     ) {
-        in.setExpression(expr);
-        in.setOperator(op);
+        in.expr = expr;
+        in.operator = operator;
         in.setBegin(expr);
         in.setEnd(token.endLine, token.endColumn);
         return in;
@@ -1984,12 +1876,10 @@ InExpr inExpr(Expression expr) :
 
 InSelectExpr inSelectExpr() :
 {
-    SelectStmt stmt;
+    InSelectExpr in = new InSelectExpr();
 }
 {
-    stmt = selectStmt() {
-        InSelectExpr in = new InSelectExpr();
-        in.setSelect(stmt);
+    in.select = selectStmt() {
         return in;
     }
 }
@@ -2000,15 +1890,18 @@ InSetExpr inSetExpr() :
     Expression expr;
 }
 {
-    expr = expr() {
-        in.addExpression(expr);
-    }
-    (
-        ","
-        expr = expr() {
-            in.addExpression(expr);
-        }
-    )* {
+    [
+	    expr = expr() {
+	        in.set = new ArrayList<Expression>();
+	        in.set.add(expr);
+	    }
+	    (
+	        ","
+	        expr = expr() {
+	            in.set.add(expr);
+	        }
+	    )*
+    ] {
         return in;
     }
 }
@@ -2016,19 +1909,14 @@ InSetExpr inSetExpr() :
 InTableExpr inTableExpr() :
 {
     InTableExpr in = new InTableExpr();
-    Name database = null;
-    Name table;
 }
 {
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() {
-            in.setDatabase(database);
-        }
+        in.database = name()
         "."
     ]
-    table = name() {
-        in.setTable(table);
+    in.table = name() {
         return in;
     }
 }
@@ -2037,28 +1925,28 @@ Expression relationalExpr() :
 {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
 }
 {
     left = escapeExpr()
     (
         (
             "<" {
-                op = BinaryExpr.Operator.LESS;
+                operator = BinaryExpr.Operator.LESS;
             }
         |   "<=" {
-                op = BinaryExpr.Operator.LESS_OR_EQUAL;
+                operator = BinaryExpr.Operator.LESS_OR_EQUAL;
             }
         |   ">" {
-                op = BinaryExpr.Operator.GREATER;
+                operator = BinaryExpr.Operator.GREATER;
             }
         |   ">=" {
-                op = BinaryExpr.Operator.GREATER_OR_EQUAL;
+                operator = BinaryExpr.Operator.GREATER_OR_EQUAL;
             }
         )
         right = escapeExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
         }
     )* {
         return left;
@@ -2075,9 +1963,8 @@ Expression escapeExpr() :
     [
         "ESCAPE"
         right = bitwiseExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.ESCAPE);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.ESCAPE);
         }
     ] {
         return left;
@@ -2088,15 +1975,15 @@ Expression bitwiseExpr() :
 {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
 }
 {
     left = additiveExpr()
     (
-        op = bitwiseOperator()
+        operator = bitwiseOperator()
         right = additiveExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
         }
     )* {
         return left;
@@ -2125,22 +2012,22 @@ Expression additiveExpr() :
 {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
 }
 {
     left = multiplicativeExpr()
     (
         (
             "+" {
-                op = BinaryExpr.Operator.ADDITION;
+                operator = BinaryExpr.Operator.ADDITION;
             }
         |   "-" {
-                op = BinaryExpr.Operator.SUBTRACTION;
+                operator = BinaryExpr.Operator.SUBTRACTION;
             }
         )
         right = multiplicativeExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
         }
     )* {
         return left;
@@ -2151,25 +2038,25 @@ Expression multiplicativeExpr() :
 {
     Expression left;
     Expression right;
-    BinaryExpr.Operator op;
+    BinaryExpr.Operator operator;
 }
 {
     left = concatenateExpr()
     (
         (
             "*" {
-                op = BinaryExpr.Operator.MULTIPLICATION;
+                operator = BinaryExpr.Operator.MULTIPLICATION;
             }
         |   "/" {
-                op = BinaryExpr.Operator.DIVISION;
+                operator = BinaryExpr.Operator.DIVISION;
             }
         |   "%" {
-                op = BinaryExpr.Operator.MODULO;
+                operator = BinaryExpr.Operator.MODULO;
             }
         )
         right = concatenateExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right, op);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, operator);
         }
     )* {
         return left;
@@ -2186,9 +2073,8 @@ Expression concatenateExpr() :
     (
         "||"
         right = collateExpr() {
-            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn,
-                token.endLine, token.endColumn), left, right,
-                BinaryExpr.Operator.CONCATENATION);
+            left = new BinaryExpr(new Block(left.beginLine, left.beginColumn, token.endLine,
+                token.endColumn), left, right, BinaryExpr.Operator.CONCATENATION);
         }
     )* {
         return left;
@@ -2205,8 +2091,8 @@ Expression collateExpr() :
     (
         "COLLATE"
         collation = name() {
-            expr = new CollateExpr(new Block(expr.beginLine, expr.beginColumn,
-                token.endLine, token.endColumn), expr, collation);
+            expr = new CollateExpr(new Block(expr.beginLine, expr.beginColumn, token.endLine,
+                token.endColumn), expr, collation);
         }
     )* {
         return expr;
@@ -2216,17 +2102,17 @@ Expression collateExpr() :
 Expression unaryExpr() :
 {
     Expression expr;
-    UnaryExpr.Operator op;
+    UnaryExpr.Operator operator;
 }
 {
     (   
-	    op = unaryOperator() {
+	    operator = unaryOperator() {
 	        int line = token.beginLine;
 	        int column = token.beginColumn;
 	    }
         expr = unaryExpr() {
-            expr = new UnaryExpr(new Block(line, column, token.endLine,
-                token.endColumn), op, expr);
+            expr = new UnaryExpr(new Block(line, column, token.endLine, token.endColumn), operator,
+                expr);
         }
     |   expr = terminalExpr()
     ) {
@@ -2288,39 +2174,38 @@ BindParameterExpr bindParameterExpr() :
 }
 {
     <PARAMETER> {
-        return new BindParameterExpr(new Block(token.beginLine, 
-            token.beginColumn, token.endLine, token.endColumn), token.image);
+        return new BindParameterExpr(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);
     }
 }
 
 FunctionExpr functionExpr() :
 {
     FunctionExpr function = new FunctionExpr();
-    Name name;
     Expression expr;
 }
 {
-    name = name() {
-        function.setFunction(name);
-        function.setBegin(name);
+    function.function = name() {
+        function.setBegin(function.function);
     }
     "("
     [
         "*" {
-            function.setOperator(FunctionExpr.Operator.UNIVERSAL);
+            function.operator = FunctionExpr.Operator.UNIVERSAL;
         }
     |   [
             "DISTINCT" {
-                function.setOperator(FunctionExpr.Operator.DISTINCT);
+                function.operator = FunctionExpr.Operator.DISTINCT;
             }
         ]
         expr = expr() {
-            function.addExpression(expr);
+            function.exprs = new ArrayList<Expression>();
+            function.exprs.add(expr);
         }
         (
             ","
             expr = expr() {
-                function.addExpression(expr);
+                function.exprs.add(expr);
             }
         )*
     ]
@@ -2333,39 +2218,32 @@ FunctionExpr functionExpr() :
 ColumnExpr columnExpr() :
 {
     ColumnExpr reference = new ColumnExpr();
-    Name database = null;
-    Name table = null;
-    Name column;
 }
 {
     (
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
         [
             LOOKAHEAD(4) // Anticipate the occurrence of a dot.
-            database = name() {
-                reference.setBegin(database);
-                reference.setDatabase(database);
+            reference.database = name() {
+                reference.setBegin(reference.database);
             }
             "."
         ]
-        table = name() {
-            if (database == null) {
-                reference.setBegin(table);
+        reference.table = name() {
+            if (reference.database == null) {
+                reference.setBegin(reference.table);
             }
-            reference.setTable(table);
         }
         "."    
-	    column = name() {
-	        reference.setColumn(column);
+	    reference.column = name() {
 	        return reference;
 	    }
     |   <ID> {
             // In case ColumnExpr only has the column name, that can't be a
             // <STRING> because would exist a syntactic conflict with a string
             // literal.
-            reference.setColumn(new Name(new Block(token.beginLine,
-                token.beginColumn, token.endLine, token.endColumn),
-                token.image));
+            reference.column = new Name(new Block(token.beginLine, token.beginColumn, token.endLine,
+                token.endColumn), token.image);
         }
     ) {
         reference.setEnd(token.endLine, token.endColumn);
@@ -2376,21 +2254,15 @@ ColumnExpr columnExpr() :
 CastExpr castExpr() :
 {
     CastExpr cast = new CastExpr();
-    Expression expr;
-    TypeName type;
 }
 {
     "CAST" {
         cast.setBegin(token.beginLine, token.beginColumn);
     }
     "("
-    expr = expr() {
-        cast.setExpression(expr);
-    }
+    cast.expr = expr()
     "AS"
-    type = typeName() {
-        cast.setType(type);
-    }
+    cast.type = typeName()
     ")" {
         cast.setEnd(token.endLine, token.endColumn);
         return cast;
@@ -2400,15 +2272,13 @@ CastExpr castExpr() :
 UnaryExpr existsExpr() :
 {
     UnaryExpr exists = new UnaryExpr();
-    Expression expr;
 }
 {
     "EXISTS" {
         exists.setBegin(token.beginLine, token.beginColumn);
     }
-    expr = selectExpr() {
-        exists.setExpression(expr);
-        exists.setOperator(UnaryExpr.Operator.EXISTS);
+    exists.expr = selectExpr() {
+        exists.operator = UnaryExpr.Operator.EXISTS;
         exists.setEnd(token.endLine, token.endColumn);
         return exists;
     }
@@ -2417,15 +2287,13 @@ UnaryExpr existsExpr() :
 SelectExpr selectExpr() :
 {
     SelectExpr expr = new SelectExpr();
-    SelectStmt stmt;
 }
 {
     "(" {
         expr.setBegin(token.beginLine, token.beginColumn);
     }
-    stmt = selectStmt()
+    expr.select = selectStmt()
     ")" {
-        expr.setSelect(stmt);
         expr.setEnd(token.endLine, token.endColumn);
         return expr;
     }
@@ -2434,28 +2302,25 @@ SelectExpr selectExpr() :
 CaseExpr caseExpr() :
 {
     CaseExpr caseExpr = new CaseExpr();
-    Expression expr;
-    WhenExpr when;
+    WhenExpr expr;
+    
+    caseExpr.whens = new ArrayList<WhenExpr>();
 }
 {
     "CASE" {
         caseExpr.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        expr = expr() {
-            caseExpr.setCase(expr);
-        }
+        caseExpr.caseExpr = expr()
     ]
     (
-        when = whenExpr() {
-            caseExpr.addWhen(when);
+        expr = whenExpr() {
+            caseExpr.whens.add(expr);
         }
     )+
     [
         "ELSE"
-        expr = expr() {
-            caseExpr.setElse(expr);
-        }
+        caseExpr.elseExpr = expr()
     ]
     "END" {
         caseExpr.setEnd(token.endLine, token.endColumn);
@@ -2466,18 +2331,14 @@ CaseExpr caseExpr() :
 WhenExpr whenExpr() :
 {
     WhenExpr when = new WhenExpr();
-    Expression expr;
 }
 {
     "WHEN" {
         when.setBegin(token.beginLine, token.beginColumn);
     }
-    expr = expr() {
-        when.setWhen(expr);
-    }
+    when.when = expr()
     "THEN"
-    expr = expr() {
-        when.setThen(expr);
+    when.then = expr() {
         when.setEnd(token.endLine, token.endColumn);
         return when;
     }
@@ -2494,17 +2355,17 @@ RaiseFunctionExpr raiseFunctionExpr() :
     "("
     (
         "IGNORE" {
-            expr.setType(RaiseFunctionExpr.Type.IGNORE);
+            expr.type = RaiseFunctionExpr.Type.IGNORE;
         }
     |   (
             "ROLLBACK" {
-                expr.setType(RaiseFunctionExpr.Type.ROLLBACK);
+                expr.type = RaiseFunctionExpr.Type.ROLLBACK;
             }
         |   "ABORT" {
-                expr.setType(RaiseFunctionExpr.Type.ABORT);
+                expr.type = RaiseFunctionExpr.Type.ABORT;
             }
         |   "FAIL" {
-                expr.setType(RaiseFunctionExpr.Type.FAIL);
+                expr.type = RaiseFunctionExpr.Type.FAIL;
             }
         )
         ","
@@ -2512,7 +2373,7 @@ RaiseFunctionExpr raiseFunctionExpr() :
             <ID>
         |   <STRING>
         ) {
-            expr.setError(token.image);
+            expr.error = token.image;
         }
     )
     ")" {
@@ -2536,8 +2397,8 @@ Literal literalValue() :
         |   "CURRENT_DATE"
         |   "CURRENT_TIMESTAMP"
         ) {
-           literal = new Literal(new Block(token.beginLine, token.beginColumn,
-               token.endLine, token.endColumn), token.image);
+            literal = new Literal(new Block(token.beginLine, token.beginColumn, token.endLine,
+                token.endColumn), token.image);
         }
     ) {
         return literal;
@@ -2549,8 +2410,8 @@ NumericLiteral numericLiteral() :
 }
 {
     <NUMERIC> {
-        return new NumericLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+        return new NumericLiteral(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);
     }
 }
 
@@ -2559,8 +2420,8 @@ StringLiteral stringLiteral() :
 }
 {
     <STRING> {
-        return new StringLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+        return new StringLiteral(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);
     }
 }
 
@@ -2569,61 +2430,59 @@ BlobLiteral blobLiteral() :
 }
 {
     <BLOB> {
-        return new BlobLiteral(new Block(token.beginLine, token.beginColumn,
-            token.endLine, token.endColumn), token.image);
+        return new BlobLiteral(new Block(token.beginLine, token.beginColumn, token.endLine,
+            token.endColumn), token.image);
     }
 }
 
 InsertStmt insertStmt() :
 {
     InsertStmt stmt = new InsertStmtDefault();
-    Name database = null;
-    Name table;
     List<Name> columns = null;
 }
 {
     (
         "INSERT" {
             stmt.setBegin(token.beginLine, token.beginColumn);
-            stmt.setType(InsertStmt.Type.INSERT);
+            stmt.type = InsertStmt.Type.INSERT;
         }
         [
             "OR"
             (
                 "ROLLBACK" {
-                    stmt.setType(InsertStmt.Type.INSERT_OR_ROLLBACK);
+                    stmt.type = InsertStmt.Type.INSERT_OR_ROLLBACK;
                 }
             |   "ABORT" {
-                    stmt.setType(InsertStmt.Type.INSERT_OR_ABORT);
+                    stmt.type = InsertStmt.Type.INSERT_OR_ABORT;
                 }
             |   "REPLACE" {
-                    stmt.setType(InsertStmt.Type.INSERT_OR_REPLACE);
+                    stmt.type = InsertStmt.Type.INSERT_OR_REPLACE;
                 }
             |   "FAIL" {
-                    stmt.setType(InsertStmt.Type.INSERT_OR_FAIL);
+                    stmt.type = InsertStmt.Type.INSERT_OR_FAIL;
                 }
             |   "IGNORE" {
-                    stmt.setType(InsertStmt.Type.INSERT_OR_IGNORE);
+                    stmt.type = InsertStmt.Type.INSERT_OR_IGNORE;
                 }
             )
         ]
     |   "REPLACE" {
             stmt.setBegin(token.beginLine, token.beginColumn);
-            stmt.setType(InsertStmt.Type.REPLACE);
+            stmt.type = InsertStmt.Type.REPLACE;
         }
     )
     "INTO"
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    table = name()
+    stmt.table = name()
     (
         "DEFAULT" "VALUES"
     |   [
             "(" {
                 Name column;
-                columns = new LinkedList<Name>();
+                columns = new ArrayList<Name>();
             }
             column = name() {
                 columns.add(column);
@@ -2642,8 +2501,6 @@ InsertStmt insertStmt() :
         )
     ) {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(database);
-        stmt.setTable(table);
         return stmt;
     }
 }
@@ -2651,38 +2508,43 @@ InsertStmt insertStmt() :
 InsertStmt insertStmtWithValues(InsertStmt stmt, List<Name> columns) :
 {
     InsertStmtWithValues stmtWValues = new InsertStmtWithValues(stmt);
+    List<Expression> list = new ArrayList<Expression>();
     Expression expr;
 
-    stmtWValues.setColumns(columns);
+    stmtWValues.columns = columns;
 }
 {
     "VALUES"
     "("
     expr = expr() {
-        stmtWValues.addValue(expr);
+        list.add(expr);
     }
     (
         ","
 	    expr = expr() {
-	        stmtWValues.addValue(expr);
+	        list.add(expr);
 	    }
     )*
-    ")"
+    ")" {
+        stmtWValues.rows.add(list);
+    }
     (
         "," {
-            stmtWValues.addRow();
+            list = new ArrayList<Expression>();
         }
         "("
         expr = expr() {
-	        stmtWValues.addValue(expr);
+	        list.add(expr);
 	    }
 	    (
 	        ","
 	        expr = expr() {
-	            stmtWValues.addValue(expr);
+	            list.add(expr);
 	        }
 	    )*
-        ")"
+        ")" {
+            stmtWValues.rows.add(list);
+        }
     )* {
         return stmtWValues;
     }
@@ -2690,13 +2552,12 @@ InsertStmt insertStmtWithValues(InsertStmt stmt, List<Name> columns) :
         
 InsertStmt insertStmtWithSelect(InsertStmt stmt, List<Name> columns) :
 {
-    SelectStmt select;
+    InsertStmtWithSelect stmtWSelect = new InsertStmtWithSelect(stmt);
+
+    stmtWSelect.columns = columns;
 }
 {
-    select = selectStmt() {
-        InsertStmtWithSelect stmtWSelect = new InsertStmtWithSelect(stmt);
-        stmtWSelect.setSelect(select);
-        stmtWSelect.setColumns(columns);
+    stmtWSelect.select = selectStmt() {
         return stmtWSelect;
     }
 }
@@ -2704,9 +2565,6 @@ InsertStmt insertStmtWithSelect(InsertStmt stmt, List<Name> columns) :
 PragmaStmt pragmaStmt() :
 {
     PragmaStmt stmt = new PragmaStmt();
-    Name database = null;
-    Name pragma;
-    PragmaValue value = null;
 }
 {
     "PRAGMA" {
@@ -2714,20 +2572,17 @@ PragmaStmt pragmaStmt() :
     }
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() "."
+        stmt.database = name() "."
     ]
-    pragma = name()
+    stmt.pragma = name()
     [
         "="
-        value = pragmaValue()
+        stmt.value = pragmaValue()
     |   "("
-        value = pragmaValue()
+        stmt.value = pragmaValue()
         ")"
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setDatabase(database);
-        stmt.setPragma(pragma);
-        stmt.setValue(value);
         return stmt;
     }
 }
@@ -2756,23 +2611,19 @@ PragmaValue pragmaValue() :
 ReindexStmt reindexStmt() :
 {
     ReindexStmt stmt = new ReindexStmt();
-    Name first = null;
-    Name second = null;
 }
 {
     "REINDEX" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        first = name()
+        stmt.first = name()
         [
             "."
-            second = name()
+            stmt.second = name()
         ]
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setFirst(first);
-        stmt.setSecond(second);
         return stmt;
     }
 }
@@ -2780,27 +2631,22 @@ ReindexStmt reindexStmt() :
 SelectStmt selectStmt() :
 {
     SelectStmt stmt = new SelectStmt();
-    SelectUnit unit;
-    SelectCompound.Operator op;
+    SelectCompound.Operator operator;
     SelectUnit core;
-    EventConstraint constraint = null;
 }
 {
-    unit = selectCore() {
-        stmt.setBegin(unit);
+    stmt.unit = selectCore() {
+        stmt.setBegin(stmt.unit);
     }
     (
-        op = compoundOperator()
+        operator = compoundOperator()
         core = selectCore() {
-            unit = new SelectCompound(new Block(unit.beginLine, 
-                unit.beginColumn, token.endLine, token.endColumn), unit, op,
-                core);
+            stmt.unit = new SelectCompound(new Block(stmt.unit.beginLine, stmt.unit.beginColumn,
+                token.endLine, token.endColumn), stmt.unit, operator, core);
         }
     )* {
     }
-    constraint = eventConstraint() {
-        stmt.setUnit(unit);
-        stmt.setConstraint(constraint);
+    stmt.constraint = eventConstraint() {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
     }
@@ -2809,60 +2655,54 @@ SelectStmt selectStmt() :
 SelectCore selectCore() :
 {
     SelectCore core = new SelectCore();
-    ResultColumn column;}
+    ResultColumn column;
+    
+    core.columns = new ArrayList<ResultColumn>();}
 {
     "SELECT" {
         core.setBegin(token.beginLine, token.beginColumn);
     }
     [
         "DISTINCT" {
-            core.setDistinct(true);
+            core.hasDistinct = true;
         }
     |   "ALL"
     ]
     column = resultColumn() {
-        core.addColumn(column);
+        core.columns.add(column);
     }
     (
         ","
         resultColumn() {
-	        core.addColumn(column);
+	        core.columns.add(column);
 	    }
     )*
     [
-        "FROM" {
-            JoinSrc src;
-        }
-        src = joinSource() {
-            core.setFrom(src);
-        }
+        "FROM"
+        core.from = joinSource()
     ]
     [
-        "WHERE" {
-            Expression expr;
-        }
-        expr = expr() {
-            core.setWhere(expr);
-        }
+        "WHERE"
+        core.where = expr()
     ]
     [
         "GROUP" "BY" {
             Expression expr;
+            
+            core.groupBy = new ArrayList<Expression>();
         }
         expr = expr() {
-            core.addGroupByExpression(expr);
+            core.groupBy.add(expr);
         }
         (
             ","
             expr = expr() {
-                core.addGroupByExpression(expr);
+                core.groupBy.add(expr);
             }
         )*
         [
             "HAVING"
-            expr = expr() {
-                core.setHaving(expr);
-            }
+            core.having = expr()
         ]
     ] {
         core.setEnd(token.endLine, token.endColumn);
@@ -2885,20 +2725,16 @@ ResultColumn resultColumn() :
 UniversalColumn universalColumn() :
 {
     UniversalColumn column = new UniversalColumn();
-    Name table;
 }
 {
     (
         "*" {
-            column.setBeginEnd(token.beginLine, token.beginColumn,
-                token.endLine, token.endColumn);
+            column.setBeginEnd(token.beginLine, token.beginColumn, token.endLine, token.endColumn);
         }
-    |   table = name() {
-            column.setTable(table);
-        }
+    |   column.table = name()
         "." 
         "*" {
-            column.setBeginEnd(table.beginLine, table.beginColumn, token.endLine,
+            column.setBeginEnd(column.table.beginLine, column.table.beginColumn, token.endLine,
                 token.endColumn);
         }
     ) {
@@ -2919,9 +2755,8 @@ ExpressionColumn expressionColumn() :
         if (column == null) {
             column = new ExpressionColumn();
         }
-        column.setExpression(expr);
-        column.setBeginEnd(expr.beginLine, expr.beginColumn, token.endLine,
-            token.endColumn);
+        column.expr = expr;
+        column.setBeginEnd(expr.beginLine, expr.beginColumn, token.endLine, token.endColumn);
         return column;
     }
 }
@@ -2929,12 +2764,10 @@ ExpressionColumn expressionColumn() :
 AliasedColumn aliasedColumn() :
 {
     AliasedColumn column = new AliasedColumn();
-    Name alias;
 }
 {
 	[ "AS" ]
-	alias = name() {
-	    column.setAlias(alias);
+	column.alias = name() {
 	    return column;
 	}
 }
@@ -2942,17 +2775,17 @@ AliasedColumn aliasedColumn() :
 JoinSrc joinSource() :
 {
     JoinSrc src;
-    JoinCompound.Operator op;
+    JoinCompound.Operator operator;
     JoinSrc right;
     JoinConstraint constraint;}
 {
     src = singleSource()
     (
-        op = joinOp()
+        operator = joinOp()
         right = singleSource()
         constraint = joinConstraint() {
-            src = new JoinCompound(new Block(src.beginLine, src.beginColumn,
-                token.endLine, token.endColumn), src, op, right, constraint);
+            src = new JoinCompound(new Block(src.beginLine, src.beginColumn, token.endLine,
+                token.endColumn), src, operator, right, constraint);
         }
     )* {
         return src;
@@ -2985,35 +2818,25 @@ JoinSrc singleSource() :
 TableSrc tableSource() :
 {
     TableSrc src = new TableSrc();
-    Name database = null;
-    Name table;
-    IndexedBy indexed;
 }
 {
     [
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() {
-            src.setDatabase(database);
-            src.setBegin(database);
+        src.database = name() {
+            src.setBegin(src.database);
         }
         "."
     ]
-    table = name() {
-        src.setTable(table);
-        if (database == null) {
-            src.setBegin(table);
+    src.table = name() {
+        if (src.database == null) {
+            src.setBegin(src.table);
         }
     }
     [
-        [ "AS" ] {
-            Name alias;
-        }
-        alias = name() {
-            src.setAlias(alias);
-        }
+        [ "AS" ]
+        src.alias = name()
     ]
-    indexed = indexedBy() {
-        src.setIndexed(indexed);
+    src.indexedBy = indexedBy() {
         src.setEnd(token.endLine, token.endColumn);
         return src;
     }
@@ -3022,23 +2845,16 @@ TableSrc tableSource() :
 SelectSrc selectSource() :
 {
     SelectSrc src = new SelectSrc();
-    SelectStmt stmt;
 }
 {
     "(" {
         src.setBegin(token.beginLine, token.beginColumn);
     }
-    stmt = selectStmt() {
-        src.setSelect(stmt);
-    }
+    src.select = selectStmt()
     ")"
     [
-        [ "AS" ] {
-            Name alias;
-        }
-        alias = name() {
-            src.setAlias(alias);
-        }
+        [ "AS" ]
+        src.alias = name()
     ] {
         src.setEnd(token.endLine, token.endColumn);
         return src;
@@ -3105,14 +2921,12 @@ JoinConstraint joinConstraint() :
 JoinConstraintOn joinConstraintOn() :
 {
     JoinConstraintOn constraint = new JoinConstraintOn();
-    Expression expr;
 }
 {
     "ON" {
         constraint.setBegin(token.beginLine, token.beginColumn);
     }
-    expr = expr() {
-        constraint.setExpression(expr);
+    constraint.expr = expr() {
         constraint.setEnd(token.endLine, token.endColumn);
         return constraint;
     }
@@ -3122,6 +2936,8 @@ JoinConstraintUsing joinConstraintUsing():
 {
     JoinConstraintUsing constraint = new JoinConstraintUsing();
     Name column;
+    
+    constraint.columns = new ArrayList<Name>();
 }
 {
     "USING" {
@@ -3129,12 +2945,12 @@ JoinConstraintUsing joinConstraintUsing():
     }
 	"("
 	column = name() {
-        constraint.addColumn(column);
+        constraint.columns.add(column);
     }
     (
         ","
         column = name() {
-            constraint.addColumn(column);
+            constraint.columns.add(column);
         }
     )*
     ")" {
@@ -3146,18 +2962,17 @@ JoinConstraintUsing joinConstraintUsing():
 OrderingTerm orderingTerm() :
 {
     OrderingTerm term = new OrderingTerm();
-    Expression expr;}
+}
 {
-    expr = expr() {
-        term.setBegin(expr);
-        term.setExpression(expr);
+    term.expr = expr() {
+        term.setBegin(term.expr);
     }
     [
         "ASC" {
-            term.setOrder(OrderingTerm.Order.ASC);
+            term.order = OrderingTerm.Order.ASC;
         }
     |   "DESC" {
-            term.setOrder(OrderingTerm.Order.DESC);
+            term.order = OrderingTerm.Order.DESC;
         }
     ] {
         term.setEnd(token.endLine, token.endColumn);
@@ -3186,26 +3001,23 @@ SelectCompound.Operator compoundOperator() :
 
 IndexedBy indexedBy() :
 {
-    IndexedBy indexed = new IndexedBy();
+    IndexedBy indexedBy = new IndexedBy();
 }
 {
     [
 	    (
 	        "INDEXED" {
-	            Name index;
-	            indexed.setBegin(token.beginLine, token.beginColumn);
+	            indexedBy.setBegin(token.beginLine, token.beginColumn);
             }
             "BY"
-	        index = name() {
-	            indexed.setIndex(index);
-	        }
+	        indexedBy.index = name()
 	    |   "NOT" {
-                indexed.setBegin(token.beginLine, token.beginColumn);
+                indexedBy.setBegin(token.beginLine, token.beginColumn);
             }
             "INDEXED"
 	    ) {
-            indexed.setEnd(token.endLine, token.endColumn);
-            return indexed;
+            indexedBy.setEnd(token.endLine, token.endColumn);
+            return indexedBy;
         }
     ] {
         return null;
@@ -3215,58 +3027,52 @@ IndexedBy indexedBy() :
 UpdateStmt updateStmt() :
 {
     UpdateStmt stmt = new UpdateStmt();
-    QualifiedTableName qualifiedTable;
-    ColumnAssign assign;
-    EventConstraint constraint = null;
+    ColumnAssignment assignment;
+    
+    stmt.assignments = new ArrayList<ColumnAssignment>();
 }
 {
     "UPDATE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
-        stmt.setType(UpdateStmt.Type.UPDATE);
+        stmt.type = UpdateStmt.Type.UPDATE;
     }
     [
         "OR"
         (
             "ROLLBACK" {
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_ROLLBACK);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_ROLLBACK;
             }
         |   "ABORT" {
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_ABORT);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_ABORT;
             }
         |   "REPLACE" {
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_REPLACE);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_REPLACE;
             }
         |   "FAIL" {
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_FAIL);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_FAIL;
             }
         |   "IGNORE" {
-                stmt.setType(UpdateStmt.Type.UPDATE_OR_IGNORE);
+                stmt.type = UpdateStmt.Type.UPDATE_OR_IGNORE;
             }
         )
     ]
-    qualifiedTable = qualifiedTableName()
+    stmt.qualifiedTable = qualifiedTableName()
     "SET"
-    assign = columnAssign() {
-        stmt.addAssignment(assign);
+    assignment = columnAssignment() {
+        stmt.assignments.add(assignment);
     }
     (
         ","
-	    assign = columnAssign() {
-	        stmt.addAssignment(assign);
+	    assignment = columnAssignment() {
+	        stmt.assignments.add(assignment);
 	    }
     )*
     [
-        "WHERE" {
-            Expression expr;
-        }
-        expr = expr() {
-            stmt.setWhere(expr);
-        }
+        "WHERE"
+        stmt.where = expr()
     ]
-    constraint = eventConstraint() {
+    stmt.constraint = eventConstraint() {
         stmt.setEnd(token.endLine, token.endColumn);
-        stmt.setQualifiedTable(qualifiedTable);
-        stmt.setConstraint(constraint);
         return stmt;
     }
 }
@@ -3274,33 +3080,27 @@ UpdateStmt updateStmt() :
 QualifiedTableName qualifiedTableName() :
 {
     QualifiedTableName qualifiedTable = new QualifiedTableName();
-    Name database = null;
-    Name table;
-    IndexedBy indexed;
 }
 {
     [   
         LOOKAHEAD(2) // Anticipate the occurrence of a dot.
-        database = name() {
-            qualifiedTable.setBegin(database);
+        qualifiedTable.database = name() {
+            qualifiedTable.setBegin(qualifiedTable.database);
         }
         "."
     ]
-    table = name() {
-        if (database == null) {
-            qualifiedTable.setBegin(table);
+    qualifiedTable.table = name() {
+        if (qualifiedTable.database == null) {
+            qualifiedTable.setBegin(qualifiedTable.table);
         }
     }
-    indexed = indexedBy() {
+    qualifiedTable.indexedBy = indexedBy() {
         qualifiedTable.setEnd(token.endLine, token.endColumn);
-        qualifiedTable.setDatabase(database);
-        qualifiedTable.setTable(table);
-        qualifiedTable.setIndexed(indexed);
         return qualifiedTable;
     }
 }
 
-ColumnAssign columnAssign() :
+ColumnAssignment columnAssignment() :
 {
     Name column;
     Expression expr;
@@ -3309,8 +3109,8 @@ ColumnAssign columnAssign() :
     column = name()
     "="
     expr = expr() {
-        return new ColumnAssign(new Block(column.beginLine, column.beginColumn,
-            token.endLine, token.endColumn), column, expr);
+        return new ColumnAssignment(new Block(column.beginLine, column.beginColumn, token.endLine,
+            token.endColumn), column, expr);
     }
 }
 
@@ -3321,8 +3121,7 @@ VacuumStmt vacuumStmt() :
 {
     "VACUUM" {
         VacuumStmt stmt = new VacuumStmt();
-        stmt.setBeginEnd(token.beginLine, token.beginColumn, token.endLine,
-            token.endColumn);
+        stmt.setBeginEnd(token.beginLine, token.beginColumn, token.endLine, token.endColumn);
         return stmt;
     }
 }

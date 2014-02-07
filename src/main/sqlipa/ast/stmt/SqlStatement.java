@@ -10,7 +10,7 @@ public abstract class SqlStatement extends Node {
         PLAN
     }
     
-    private Explain explain;
+    public Explain explain;
 
     public SqlStatement() {
         super();
@@ -18,14 +18,6 @@ public abstract class SqlStatement extends Node {
     
     public SqlStatement(Block block, Explain explain) {
         super(block);
-        this.explain = explain;
-    }
-    
-    public Explain getExplain() {
-        return explain;
-    }
-    
-    public void setExplain(Explain explain) {
         this.explain = explain;
     }
 

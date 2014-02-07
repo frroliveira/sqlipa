@@ -7,30 +7,20 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CreateTableStmtWithSelect extends CreateTableStmt {
 
-    private SelectStmt select;
+    public SelectStmt select;
     
     public CreateTableStmtWithSelect() {
         super();
     }
     
     public CreateTableStmtWithSelect(CreateTableStmt stmt) {
-        super(stmt, stmt.getExplain(), stmt.hasIfNotExists(),
-                new Name(stmt.getDatabase()),
-                new Name(stmt.getName()), stmt.hasTemporary());
+        super(stmt, stmt.explain, stmt.hasIfNotExists, new Name(stmt.database), new Name(stmt.name),
+                stmt.hasTemporary);
     }
     
-    public CreateTableStmtWithSelect(Block block, Explain explain, 
-            boolean hasIfNotExists, Name db, Name name, boolean hasTemp,
-            SelectStmt select) {
-        super(block, explain, hasIfNotExists, db, name, hasTemp);
-        this.select = select;
-    }
-    
-    public SelectStmt getSelect() {
-        return select;
-    }
-    
-    public void setSelect(SelectStmt select) {
+    public CreateTableStmtWithSelect(Block block, Explain explain, boolean hasIfNotExists,
+            Name database, Name name, boolean hasTemporary, SelectStmt select) {
+        super(block, explain, hasIfNotExists, database, name, hasTemporary);
         this.select = select;
     }
 

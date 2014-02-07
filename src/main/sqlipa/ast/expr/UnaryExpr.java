@@ -15,33 +15,17 @@ public class UnaryExpr extends Expression {
         NOT_NULL
     }
     
-    private Operator op;
+    public Operator operator;
     
-    private Expression expr;
+    public Expression expr;
     
     public UnaryExpr() {
         super();
     }
     
-    public UnaryExpr(Block block, Operator op, Expression expr) {
+    public UnaryExpr(Block block, Operator operator, Expression expr) {
         super(block);
-        this.op = op;
-        this.expr = expr;
-    }
-    
-    public Operator getOperator() {
-        return op;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public void setOperator(Operator op) {
-        this.op = op;
-    }
-    
-    public void setExpression(Expression expr) {
+        this.operator = operator;
         this.expr = expr;
     }
 

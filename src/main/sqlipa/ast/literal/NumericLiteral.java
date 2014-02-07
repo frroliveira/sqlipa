@@ -5,6 +5,10 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class NumericLiteral extends Literal {
 
+    public NumericLiteral() {
+        super();
+    }
+    
     public NumericLiteral(Block block, String value) {
         super(block, value);
     }

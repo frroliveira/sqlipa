@@ -14,7 +14,7 @@ public class ConflictClause extends Node {
         REPLACE
     }
 
-    private Action action;
+    public Action action;
     
     public ConflictClause() {
         super();
@@ -22,14 +22,6 @@ public class ConflictClause extends Node {
     
     public ConflictClause(Block block, Action action) {
         super(block);
-        this.action = action;
-    }
-    
-    public Action getAction() {
-        return action;
-    }
-    
-    public void setAction(Action action) {
         this.action = action;
     }
 

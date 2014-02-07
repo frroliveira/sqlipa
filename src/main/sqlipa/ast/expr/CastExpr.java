@@ -6,9 +6,9 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CastExpr extends Expression {
 
-    private Expression expr;
+    public Expression expr;
     
-    private TypeName type;
+    public TypeName type;
     
     public CastExpr() {
         super();
@@ -19,22 +19,7 @@ public class CastExpr extends Expression {
         this.expr = expr;
         this.type = type;
     }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public TypeName getType() {
-        return type;
-    }
-    
-    public void setExpression(Expression expr) {
-        this.expr = expr;
-    }
-    
-    public void setType(TypeName type) {
-        this.type = type;
-    }
+
 
     @Override
     public void accept(VoidVisitor visitor) {

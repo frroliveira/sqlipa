@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class UniversalColumn extends ResultColumn {
 
-    private Name table;
+    public Name table;
     
     public UniversalColumn() {
         super();
@@ -14,14 +14,6 @@ public class UniversalColumn extends ResultColumn {
     
     public UniversalColumn(Block block, Name table) {
         super(block);
-        this.table = table;
-    }
-    
-    public Name getTable() {
-        return table;
-    }
-    
-    public void setTable(Name table) {
         this.table = table;
     }
 

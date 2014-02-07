@@ -48,19 +48,19 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(Name name) {
-        print(name.getName());
+        print(name.name);
         print(" ");
     }
 
     @Override
     public void visit(TypeName name) {
-        print(name.getName());
-        if (name.getDimensionInX() != null) {
+        print(name.name);
+        if (name.xDimension != null) {
             print("(");
-            name.getDimensionInX().accept(this);
-            if (name.getDimensionInY() != null) {
+            name.xDimension.accept(this);
+            if (name.yDimension != null) {
                 print(",");
-                name.getDimensionInY().accept(this);
+                name.yDimension.accept(this);
             }
             print(")");
         }        
@@ -74,9 +74,9 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(ColumnDef column) {
-        printNode(column.getColumn());
-        printNode(column.getType());
-        printList(column.getConstraints());
+        printNode(column.column);
+        printNode(column.type);
+        printList(column.constraints);
     }
 
     @Override
@@ -99,11 +99,11 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(SqlStmtList stmtList) {
-        printList(stmtList.getStatements());
+        printList(stmtList.stmts);
     }
 
     private void visit(SqlStatement stmt) {
-        Explain explain = stmt.getExplain();
+        Explain explain = stmt.explain;
         printIf("EXPLAIN ", explain != null);
         printIf("QUERY PLAN ", explain == Explain.PLAN);
     }
@@ -192,18 +192,18 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     private void visit(CreateTableStmt stmt) {
         visit((CreateStmt) stmt);
-        printIf("TEMP ", stmt.hasTemporary());
+        printIf("TEMP ", stmt.hasTemporary);
         print("TABLE ");
-        printIf("IF NOT EXISTS ", stmt.hasIfNotExists());
-        printNode(stmt.getDatabase(), ".", false);
-        printNode(stmt.getName());
+        printIf("IF NOT EXISTS ", stmt.hasIfNotExists);
+        printNode(stmt.database, ".", false);
+        printNode(stmt.name);
     }
 
     @Override
     public void visit(CreateTableStmtWithColumns stmt) {
         visit((CreateTableStmt) stmt);
         indent("(");
-        printlnList(stmt.getColumns(), stmt.getConstraints());
+        printlnList(stmt.columns, stmt.constraints);
         unindent(")");
     }
 
@@ -211,7 +211,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     public void visit(CreateTableStmtWithSelect stmt) {
         visit((CreateTableStmt) stmt);
         print("AS ");
-        printNode(stmt.getSelect());
+        printNode(stmt.select);
     }
 
     @Override
@@ -316,7 +316,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     @Override
     public void visit(SelectStmt stmt) {
         visit((SqlStatement) stmt);
-        printNode(stmt.getUnit());
+        printNode(stmt.unit);
     }
 
     private void visit(SelectUnit unit) {
@@ -325,7 +325,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     @Override
     public void visit(SelectCore core) {
         print("SELECT ");
-        printIf("DISTINCT ", core.hasDistinct());
+        printIf("DISTINCT ", core.hasDistinct);
         // TODO: finish
     }
 
@@ -410,7 +410,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     }
 
     @Override
-    public void visit(ColumnAssign assign) {
+    public void visit(ColumnAssignment assign) {
         // TODO Auto-generated method stub
         
     }
@@ -485,7 +485,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     }
 
     private void visit(ColumnConstraint constraint) {
-        printNode(constraint.getName(), "CONSTRAINT ", true);
+        printNode(constraint.name, "CONSTRAINT ", true);
     }
 
     @Override
@@ -522,10 +522,10 @@ public class SourcePrinterVisitor implements VoidVisitor {
     public void visit(PrimaryKeyColumnConstraint constraint) {
         visit((ColumnConstraint) constraint);
         print("PRIMARY KEY ");
-        printIf("ASC ", constraint.getOrder() == Order.ASC);
-        printIf("DESC ", constraint.getOrder() == Order.DESC);
-        printNode(constraint.getClause());
-        printIf("AUTOINCREMENT ", constraint.hasAutoincrement());
+        printIf("ASC ", constraint.order == Order.ASC);
+        printIf("DESC ", constraint.order == Order.DESC);
+        printNode(constraint.clause);
+        printIf("AUTOINCREMENT ", constraint.hasAutoincrement);
     }
 
     @Override

@@ -5,11 +5,11 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class QualifiedTableName extends Node {
 
-    private Name database;
+    public Name database;
     
-    private Name table;
+    public Name table;
     
-    private IndexedBy indexed;
+    public IndexedBy indexedBy;
     
     public QualifiedTableName() {
         super();
@@ -19,30 +19,6 @@ public class QualifiedTableName extends Node {
         super(block);
         this.database = database;
         this.table = table;
-    }
-    
-    public Name getDatabase() {
-        return database;
-    }
-    
-    public Name getTable() {
-        return table;
-    }
-    
-    public IndexedBy getIndexed() {
-        return indexed;
-    }
-    
-    public void setDatabase(Name database) {
-        this.database = database;
-    }
-    
-    public void setTable(Name table) {
-        this.table = table;
-    }
-    
-    public void setIndexed(IndexedBy indexed) {
-        this.indexed = indexed;
     }
 
     @Override

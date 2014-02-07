@@ -13,54 +13,21 @@ public class FunctionExpr extends Expression {
         UNIVERSAL
     }
     
-    private Name function;
+    public Name function;
     
-    private Operator op;
+    public Operator operator;
     
-    private List<Expression> exprs;
+    public List<Expression> exprs;
     
     public FunctionExpr() {
         super();
     }
     
-    public FunctionExpr(Block block, Name function, Operator op,
-            List<Expression> exprs) {
+    public FunctionExpr(Block block, Name function, Operator operator, List<Expression> exprs) {
         super(block);
         this.function = function;
-        this.op = op;
+        this.operator = operator;
         this.exprs = exprs;
-    }
-    
-    public Name getFunction() {
-        return function;
-    }
-    
-    public Operator getOperator() {
-        return op;
-    }
-    
-    public List<Expression> getExpressions() {
-        return exprs;
-    }
-    
-    public void setFunction(Name function) {
-        this.function = function;
-    }
-    
-    public void setOperator(Operator op) {
-        this.op = op;
-    }
-    
-    public void setExpressions(List<Expression> exprs) {
-        this.exprs = exprs;
-    }
-    
-    public void addExpression(Expression expr) {
-        exprs.add(expr);
-    }
-    
-    public boolean removeExpression(Expression expr) {
-        return exprs.remove(expr);
     }
 
     @Override

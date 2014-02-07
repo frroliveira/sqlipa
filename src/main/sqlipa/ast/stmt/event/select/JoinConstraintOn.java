@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class JoinConstraintOn extends JoinConstraint {
 
-    private Expression expr;
+    public Expression expr;
     
     public JoinConstraintOn() {
         super();
@@ -14,14 +14,6 @@ public class JoinConstraintOn extends JoinConstraint {
     
     public JoinConstraintOn(Block block, Expression expr) {
         super(block);
-        this.expr = expr;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public void setExpression(Expression expr) {
         this.expr = expr;
     }
 

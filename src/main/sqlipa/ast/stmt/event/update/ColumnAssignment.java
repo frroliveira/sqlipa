@@ -1,26 +1,27 @@
-package main.sqlipa.ast.stmt;
+package main.sqlipa.ast.stmt.event.update;
 
 import main.sqlipa.ast.Block;
 import main.sqlipa.ast.Name;
+import main.sqlipa.ast.Node;
 import main.sqlipa.ast.expr.Expression;
 import main.sqlipa.ast.visitor.VoidVisitor;
 
-public class AttachStmt extends SqlStatement {
+public class ColumnAssignment extends Node {
+    
+    public Name column;
     
     public Expression expr;
     
-    public Name database;
-        
-    public AttachStmt() {
+    public ColumnAssignment() {
         super();
     }
     
-    public AttachStmt(Block block, Explain explain, Expression expr, Name database) {
-        super(block, explain);
+    public ColumnAssignment(Block block, Name column, Expression expr) {
+        super(block);
+        this.column = column;
         this.expr = expr;
-        this.database = database;
     }
-
+    
     @Override
     public void accept(VoidVisitor visitor) {
         visitor.visit(this);

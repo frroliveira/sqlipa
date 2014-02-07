@@ -1,6 +1,5 @@
 package main.sqlipa.ast.stmt.create;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.ast.Block;
@@ -10,45 +9,19 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CreateVirtualTableStmt extends CreateStmt {
     
-    private Name module;
+    public Name module;
     
-    private List<ModuleArgument> args;
+    public List<ModuleArgument> arguments;
     
     public CreateVirtualTableStmt() {
         super();
-        this.args = new LinkedList<ModuleArgument>();
     }
     
-    public CreateVirtualTableStmt(Block block, Explain explain,
-            boolean hasIfNotExists, Name db, Name name, Name module,
-            List<ModuleArgument> args) {
-        super(block, explain, hasIfNotExists, db, name);
+    public CreateVirtualTableStmt(Block block, Explain explain, boolean hasIfNotExists,
+            Name database, Name name, Name module, List<ModuleArgument> arguments) {
+        super(block, explain, hasIfNotExists, database, name);
         this.module = module;
-        this.args = args;
-    }
-    
-    public Name getModule() {
-        return module;
-    }
-    
-    public List<ModuleArgument> getModuleArguments() {
-        return args;
-    }
-    
-    public void setModule(Name module) {
-        this.module = module;
-    }
-    
-    public void setModuleArguments(List<ModuleArgument> args) {
-        this.args = args;
-    }
-    
-    public void addModuleArgument(ModuleArgument arg) {
-        args.add(arg);
-    }
-    
-    public boolean removeModuleArgument(ModuleArgument arg) {
-        return args.remove(arg);
+        this.arguments = arguments;
     }
 
     @Override

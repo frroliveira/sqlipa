@@ -19,56 +19,24 @@ public class JoinCompound extends JoinSrc {
         NATURAL_CROSS_JOIN
     }
     
-    private JoinSrc left;
+    public JoinSrc left;
     
-    private Operator op;
+    public Operator operator;
 
-    private JoinSrc right;
+    public JoinSrc right;
     
-    private JoinConstraint constraint;
+    public JoinConstraint constraint;
     
     public JoinCompound() {
         super();
     }
     
-    public JoinCompound(Block block, JoinSrc left, Operator op, JoinSrc right,
+    public JoinCompound(Block block, JoinSrc left, Operator operator, JoinSrc right,
             JoinConstraint constraint) {
         super(block);
         this.left = left;
-        this.op = op;
+        this.operator = operator;
         this.right = right;
-        this.constraint = constraint;
-    }
-
-    public JoinSrc getLeft() {
-        return left;
-    }
-    
-    public Operator getOperator() {
-        return op;
-    }
-    
-    public JoinSrc getRight() {
-        return right;
-    }
-
-    public JoinConstraint getConstraint() {
-        return constraint;
-    }
-    
-    public void setLeft(JoinSrc left) {
-        this.left = left;
-    }
-    
-    public void setOperator(Operator op) {
-        this.op = op;
-    }
-    
-    public void setRight(JoinSrc right) {
-        this.right = right;
-    }
-    
-    public void setConstraint(JoinConstraint constraint) {
         this.constraint = constraint;
     }
 

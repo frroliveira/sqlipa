@@ -4,23 +4,15 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class ModuleArgument extends Node {
     
-    private String arg;
+    public String argument;
     
     public ModuleArgument() {
         super();
     }
     
-    public ModuleArgument(Block block, String arg) {
+    public ModuleArgument(Block block, String argument) {
         super(block);
-        this.arg = arg;
-    }
-    
-    public String getArgument() {
-        return arg;
-    }
-    
-    public void setArgument(String arg) {
-        this.arg = arg;
+        this.argument = argument;
     }
 
     @Override

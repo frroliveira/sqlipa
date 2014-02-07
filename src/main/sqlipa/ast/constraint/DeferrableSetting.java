@@ -15,9 +15,9 @@ public class DeferrableSetting extends ForeignKeySetting {
         IMMEDIATE
     }
     
-    private Type type;
+    public Type type;
     
-    private Mode mode;
+    public Mode mode;
     
     public DeferrableSetting() {
         super();
@@ -26,22 +26,6 @@ public class DeferrableSetting extends ForeignKeySetting {
     public DeferrableSetting(Block block, Type type, Mode mode) {
         super(block);
         this.type = type;
-        this.mode = mode;
-    }
-    
-    public Type getType() {
-        return type;
-    }
-    
-    public Mode getMode() {
-        return mode;
-    }
-    
-    public void setType(Type type) {
-        this.type = type;
-    }
-    
-    public void setMode(Mode mode) {
         this.mode = mode;
     }
 

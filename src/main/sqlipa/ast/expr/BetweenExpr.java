@@ -10,57 +10,25 @@ public class BetweenExpr extends Expression {
         NOT_BETWEEN
     }
     
-    private Expression expr;
+    public Expression expr;
     
-    private Expression lower;
+    public Expression lower;
     
-    private Expression upper;
+    public Expression upper;
     
-    private Operator op;
+    public Operator operator;
     
     public BetweenExpr() {
         super();
     }
     
-    public BetweenExpr(Block block, Expression expr, Expression lower,
-            Expression upper, Operator op) {
+    public BetweenExpr(Block block, Expression expr, Expression lower, Expression upper,
+            Operator operator) {
         super(block);
         this.expr = expr;
         this.lower = lower;
         this.upper = upper;
-        this.op = op;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public Expression getLower() {
-        return lower;
-    }
-    
-    public Expression getUpper() {
-        return upper;
-    }
-    
-    public Operator getOperator() {
-        return op;
-    }
-    
-    public void setExpression(Expression expr) {
-        this.expr = expr;
-    }
-    
-    public void setLower(Expression lower) {
-        this.lower = lower;
-    }
-    
-    public void setUpper(Expression upper) {
-        this.upper = upper;
-    }
-    
-    public void setOperator(Operator op) {
-        this.op = op;
+        this.operator = operator;
     }
 
     @Override

@@ -50,33 +50,33 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
     @Override
     public void visit(TypeName name) {
         visit((Name) name);
-        acceptNode(name.getDimensionInX());
-        acceptNode(name.getDimensionInY());
+        acceptNode(name.xDimension);
+        acceptNode(name.yDimension);
     }
 
     @Override
     public void visit(QualifiedTableName name) {
-        acceptNode(name.getDatabase());
-        acceptNode(name.getTable());
-        acceptNode(name.getIndexed());
+        acceptNode(name.database);
+        acceptNode(name.table);
+        acceptNode(name.indexedBy);
     }
 
     @Override
     public void visit(ColumnDef column) {
-        acceptNode(column.getColumn());
-        acceptNode(column.getType());
-        acceptList(column.getConstraints());
+        acceptNode(column.column);
+        acceptNode(column.type);
+        acceptList(column.constraints);
     }
 
     @Override
     public void visit(IndexedBy indexed) {
-        acceptNode(indexed.getIndex());
+        acceptNode(indexed.index);
     }
 
     @Override
     public void visit(IndexedColumn indexed) {
-        acceptNode(indexed.getColumn());
-        acceptNode(indexed.getCollation());
+        acceptNode(indexed.column);
+        acceptNode(indexed.collation);
     }
 
     @Override
@@ -86,19 +86,19 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(SqlStmtList stmtList) {
-        acceptList(stmtList.getStatements());
+        acceptList(stmtList.stmts);
     }
     
     @Override
     public void visit(AnalyzeStmt stmt) {
-        acceptNode(stmt.getFirstName());
-        acceptNode(stmt.getSecondName());
+        acceptNode(stmt.first);
+        acceptNode(stmt.second);
     }
 
     @Override
     public void visit(AttachStmt stmt) {
-        acceptNode(stmt.getExpression());
-        acceptNode(stmt.getDatabase());
+        acceptNode(stmt.expr);
+        acceptNode(stmt.database);
     }
 
     @Override
@@ -111,28 +111,28 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(DetachStmt stmt) {
-        acceptNode(stmt.getDatabase());
+        acceptNode(stmt.database);
     }
 
     @Override
     public void visit(ReindexStmt stmt) {
-        acceptNode(stmt.getFirst());
-        acceptNode(stmt.getSecond());
+        acceptNode(stmt.first);
+        acceptNode(stmt.second);
     }
 
     @Override
     public void visit(ReleaseStmt stmt) {
-        acceptNode(stmt.getSavepoint());
+        acceptNode(stmt.savepoint);
     }
 
     @Override
     public void visit(RollbackStmt stmt) {
-        acceptNode(stmt.getSavepoint());        
+        acceptNode(stmt.savepoint);        
     }
 
     @Override
     public void visit(SavepointStmt stmt) {
-        acceptNode(stmt.getSavepoint());        
+        acceptNode(stmt.savepoint);        
     }
 
     @Override
@@ -141,130 +141,130 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(AddColumnStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getTable());
-        acceptNode(stmt.getColumn());
+        acceptNode(stmt.database);
+        acceptNode(stmt.table);
+        acceptNode(stmt.column);
     }
 
     @Override
     public void visit(RenameTableStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getTable());
-        acceptNode(stmt.getNewTable());
+        acceptNode(stmt.database);
+        acceptNode(stmt.table);
+        acceptNode(stmt.newTable);
     }
 
     @Override
     public void visit(CreateTableStmtWithColumns stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
-        acceptList(stmt.getColumns());
-        acceptList(stmt.getConstraints());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
+        acceptList(stmt.columns);
+        acceptList(stmt.constraints);
     }
 
     @Override
     public void visit(CreateTableStmtWithSelect stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
-        acceptNode(stmt.getSelect());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
+        acceptNode(stmt.select);
     }
 
     @Override
     public void visit(CreateIndexStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
-        acceptNode(stmt.getTable());
-        acceptList(stmt.getColumns());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
+        acceptNode(stmt.table);
+        acceptList(stmt.columns);
     }
 
     @Override
     public void visit(CreateViewStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
-        acceptNode(stmt.getSelect());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
+        acceptNode(stmt.select);
     }
 
     @Override
     public void visit(CreateTriggerStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
-        acceptList(stmt.getColumns());
-        acceptNode(stmt.getTable());
-        acceptNode(stmt.getWhen());
-        acceptList(stmt.getStatements());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
+        acceptList(stmt.columns);
+        acceptNode(stmt.table);
+        acceptNode(stmt.when);
+        acceptList(stmt.stmts);
     }
 
     @Override
     public void visit(CreateVirtualTableStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
-        acceptNode(stmt.getModule());
-        acceptList(stmt.getModuleArguments());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
+        acceptNode(stmt.module);
+        acceptList(stmt.arguments);
     }
 
     @Override
     public void visit(DropIndexStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
     }
 
     @Override
     public void visit(DropTableStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
     }
 
     @Override
     public void visit(DropTriggerStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
     }
 
     @Override
     public void visit(DropViewStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getName());
+        acceptNode(stmt.database);
+        acceptNode(stmt.name);
     }
 
     @Override
     public void visit(EventConstraint constraint) {
-        acceptList(constraint.getTerms());
-        acceptNode(constraint.getLimit());
-        acceptNode(constraint.getOffset());
+        acceptList(constraint.terms);
+        acceptNode(constraint.limit);
+        acceptNode(constraint.offset);
     }
 
     @Override
     public void visit(OrderingTerm term) {
-        acceptNode(term.getExpression());
+        acceptNode(term.expr);
     }
 
     @Override
     public void visit(DeleteStmt stmt) {
-        acceptNode(stmt.getQualifiedTable());
-        acceptNode(stmt.getWhere());
-        acceptNode(stmt.getConstraint());
+        acceptNode(stmt.qualifiedTable);
+        acceptNode(stmt.where);
+        acceptNode(stmt.constraint);
     }
 
     @Override
     public void visit(InsertStmtDefault stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getTable());        
+        acceptNode(stmt.database);
+        acceptNode(stmt.table);        
     }
 
     @Override
     public void visit(InsertStmtWithSelect stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getTable());
-        acceptList(stmt.getColumns());
-        acceptNode(stmt.getSelect());
+        acceptNode(stmt.database);
+        acceptNode(stmt.table);
+        acceptList(stmt.columns);
+        acceptNode(stmt.select);
     }
 
     @Override
     public void visit(InsertStmtWithValues stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getTable());        
-        acceptList(stmt.getColumns());
-        if (stmt.getRows() != null) {
-            for (List<? extends Node> row : stmt.getRows()) {
+        acceptNode(stmt.database);
+        acceptNode(stmt.table);        
+        acceptList(stmt.columns);
+        if (stmt.rows != null) {
+            for (List<? extends Node> row : stmt.rows) {
                 acceptList(row);
             }
         }
@@ -272,106 +272,106 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(SelectStmt stmt) {
-        acceptNode(stmt.getUnit());
-        acceptNode(stmt.getConstraint());
+        acceptNode(stmt.unit);
+        acceptNode(stmt.constraint);
     }
 
     @Override
     public void visit(SelectCore core) {
-        acceptList(core.getColumns());
-        acceptNode(core.getFrom());
-        acceptNode(core.getWhere());
-        acceptList(core.getGroupBy());
-        acceptNode(core.getHaving());
+        acceptList(core.columns);
+        acceptNode(core.from);
+        acceptNode(core.where);
+        acceptList(core.groupBy);
+        acceptNode(core.having);
     }
 
     @Override
     public void visit(SelectCompound compound) {
-        acceptNode(compound.getLeft());
-        acceptNode(compound.getRight());
+        acceptNode(compound.left);
+        acceptNode(compound.right);
     }
 
     @Override
     public void visit(AliasedColumn column) {
-        acceptNode(column.getExpression());
-        acceptNode(column.getAlias());
+        acceptNode(column.expr);
+        acceptNode(column.alias);
     }
 
     @Override
     public void visit(ExpressionColumn column) {
-        acceptNode(column.getExpression());
+        acceptNode(column.expr);
     }
 
     @Override
     public void visit(UniversalColumn column) {
-        acceptNode(column.getTable());
+        acceptNode(column.table);
     }
 
     @Override
     public void visit(JoinConstraintOn constraint) {
-        acceptNode(constraint.getExpression());
+        acceptNode(constraint.expr);
     }
 
     @Override
     public void visit(JoinConstraintUsing constraint) {
-        acceptList(constraint.getColumns());
+        acceptList(constraint.columns);
     }
 
     @Override
     public void visit(SelectSrc src) {
-        acceptNode(src.getSelect());
-        acceptNode(src.getAlias());
+        acceptNode(src.select);
+        acceptNode(src.alias);
     }
 
     @Override
     public void visit(TableSrc src) {
-        acceptNode(src.getDatabase());
-        acceptNode(src.getTable());
-        acceptNode(src.getAlias());
-        acceptNode(src.getIndexed());
+        acceptNode(src.database);
+        acceptNode(src.table);
+        acceptNode(src.alias);
+        acceptNode(src.indexedBy);
     }
 
     @Override
     public void visit(JoinCompound compound) {
-        acceptNode(compound.getLeft());
-        acceptNode(compound.getRight());
-        acceptNode(compound.getConstraint());
+        acceptNode(compound.left);
+        acceptNode(compound.right);
+        acceptNode(compound.constraint);
     }
 
     @Override
     public void visit(UpdateStmt stmt) {
-        acceptNode(stmt.getQualifiedTable());
-        acceptList(stmt.getAssignments());
-        acceptNode(stmt.getWhere());
-        acceptNode(stmt.getConstraint());
+        acceptNode(stmt.qualifiedTable);
+        acceptList(stmt.assignments);
+        acceptNode(stmt.where);
+        acceptNode(stmt.constraint);
     }
 
     @Override
-    public void visit(ColumnAssign assign) {
-        acceptNode(assign.getColumn());
-        acceptNode(assign.getExpr());
+    public void visit(ColumnAssignment assign) {
+        acceptNode(assign.column);
+        acceptNode(assign.expr);
     }
 
     @Override
     public void visit(PragmaStmt stmt) {
-        acceptNode(stmt.getDatabase());
-        acceptNode(stmt.getPragma());
-        acceptNode(stmt.getValue());
+        acceptNode(stmt.database);
+        acceptNode(stmt.pragma);
+        acceptNode(stmt.value);
     }
 
     @Override
     public void visit(PragmaNumber number) {
-        acceptNode(number.getNumber());
+        acceptNode(number.number);
     }
 
     @Override
     public void visit(PragmaName name) {
-        acceptNode(name.getName());
+        acceptNode(name.name);
     }
 
     @Override
     public void visit(PragmaString string) {
-        acceptNode(string.getString());
+        acceptNode(string.string);
     }
 
     @Override
@@ -380,9 +380,9 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(ForeignKeyClause clause) {
-        acceptNode(clause.getTable());
-        acceptList(clause.getColumns());
-        acceptList(clause.getSettings());
+        acceptNode(clause.table);
+        acceptList(clause.columns);
+        acceptList(clause.settings);
     }
 
     @Override
@@ -399,84 +399,84 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(CheckColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getExpression());
+        acceptNode(constraint.name);
+        acceptNode(constraint.expr);
     }
 
     @Override
     public void visit(CollateColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getCollation());
+        acceptNode(constraint.name);
+        acceptNode(constraint.collation);
     }
 
     @Override
     public void visit(DefaultColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getExpression());
+        acceptNode(constraint.name);
+        acceptNode(constraint.expr);
     }
 
     @Override
     public void visit(ForeignKeyColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getClause());
+        acceptNode(constraint.name);
+        acceptNode(constraint.clause);
     }
 
     @Override
     public void visit(NotNullColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getClause());
+        acceptNode(constraint.name);
+        acceptNode(constraint.clause);
     }
 
     @Override
     public void visit(PrimaryKeyColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getClause());
+        acceptNode(constraint.name);
+        acceptNode(constraint.clause);
     }
 
     @Override
     public void visit(UniqueColumnConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getClause());
+        acceptNode(constraint.name);
+        acceptNode(constraint.clause);
     }
 
     @Override
     public void visit(CheckTableConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptNode(constraint.getExpression());        
+        acceptNode(constraint.name);
+        acceptNode(constraint.expr);        
     }
 
     @Override
     public void visit(ForeignKeyTableConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptList(constraint.getColumns());
-        acceptNode(constraint.getClause());
+        acceptNode(constraint.name);
+        acceptList(constraint.columns);
+        acceptNode(constraint.clause);
     }
 
     @Override
     public void visit(PrimaryKeyTableConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptList(constraint.getColumns());
-        acceptNode(constraint.getClause());
+        acceptNode(constraint.name);
+        acceptList(constraint.columns);
+        acceptNode(constraint.clause);
     }
 
     @Override
     public void visit(UniqueTableConstraint constraint) {
-        acceptNode(constraint.getName());
-        acceptList(constraint.getColumns());
-        acceptNode(constraint.getClause());        
+        acceptNode(constraint.name);
+        acceptList(constraint.columns);
+        acceptNode(constraint.clause);        
     }
 
     @Override
     public void visit(BetweenExpr expr) {
-        acceptNode(expr.getExpression());
-        acceptNode(expr.getLower());
-        acceptNode(expr.getUpper());
+        acceptNode(expr.expr);
+        acceptNode(expr.lower);
+        acceptNode(expr.upper);
     }
 
     @Override
     public void visit(BinaryExpr expr) {
-        acceptNode(expr.getLeft());
-        acceptNode(expr.getRight());
+        acceptNode(expr.left);
+        acceptNode(expr.right);
     }
 
     @Override
@@ -485,58 +485,58 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(CaseExpr expr) {
-        acceptNode(expr.getCase());
-        acceptList(expr.getWhens());
-        acceptNode(expr.getElse());
+        acceptNode(expr.caseExpr);
+        acceptList(expr.whens);
+        acceptNode(expr.elseExpr);
     }
 
     @Override
     public void visit(CastExpr expr) {
-        acceptNode(expr.getExpression());
-        acceptNode(expr.getType());
+        acceptNode(expr.expr);
+        acceptNode(expr.type);
     }
 
     @Override
     public void visit(CollateExpr expr) {
-        acceptNode(expr.getExpression());
-        acceptNode(expr.getCollation());
+        acceptNode(expr.expr);
+        acceptNode(expr.collation);
     }
 
     @Override
     public void visit(ColumnExpr expr) {
-        acceptNode(expr.getDatabase());
-        acceptNode(expr.getTable());
-        acceptNode(expr.getColumn());
+        acceptNode(expr.database);
+        acceptNode(expr.table);
+        acceptNode(expr.column);
     }
 
     @Override
     public void visit(FunctionExpr expr) {
-        acceptNode(expr.getFunction());
-        acceptList(expr.getExpressions());
+        acceptNode(expr.function);
+        acceptList(expr.exprs);
     }
 
     @Override
     public void visit(InSelectExpr expr) {
-        acceptNode(expr.getExpression());
-        acceptNode(expr.getSelect());
+        acceptNode(expr.expr);
+        acceptNode(expr.select);
     }
 
     @Override
     public void visit(InSetExpr expr) {
-        acceptNode(expr.getExpression());
-        acceptList(expr.getSet());
+        acceptNode(expr.expr);
+        acceptList(expr.set);
     }
 
     @Override
     public void visit(InTableExpr expr) {
-        acceptNode(expr.getExpression());
-        acceptNode(expr.getDatabase());
-        acceptNode(expr.getTable());
+        acceptNode(expr.expr);
+        acceptNode(expr.database);
+        acceptNode(expr.table);
     }
 
     @Override
     public void visit(LiteralExpr expr) {
-        acceptNode(expr.getLiteral());
+        acceptNode(expr.literal);
     }
 
     @Override
@@ -545,18 +545,18 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
 
     @Override
     public void visit(SelectExpr expr) {
-        acceptNode(expr.getSelect());
+        acceptNode(expr.select);
     }
 
     @Override
     public void visit(UnaryExpr expr) {
-        acceptNode(expr.getExpression());
+        acceptNode(expr.expr);
     }
 
     @Override
     public void visit(WhenExpr expr) {
-        acceptNode(expr.getWhen());
-        acceptNode(expr.getThen());
+        acceptNode(expr.when);
+        acceptNode(expr.then);
     }
 
     @Override

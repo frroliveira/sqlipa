@@ -5,7 +5,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class BindParameterExpr extends Expression {
 
-    private String parameter;
+    public String parameter;
     
     public BindParameterExpr() {
         super();
@@ -13,14 +13,6 @@ public class BindParameterExpr extends Expression {
     
     public BindParameterExpr(Block block, String parameter) {
         super(block);
-        this.parameter = parameter;
-    }
-    
-    public String getParameter() {
-        return parameter;
-    }
-    
-    public void setParameter(String parameter) {
         this.parameter = parameter;
     }
 

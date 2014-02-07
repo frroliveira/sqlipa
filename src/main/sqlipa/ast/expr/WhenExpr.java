@@ -6,9 +6,9 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class WhenExpr extends Node {
     
-    private Expression when;
+    public Expression when;
     
-    private Expression then;
+    public Expression then;
     
     public WhenExpr() {
         super();
@@ -17,22 +17,6 @@ public class WhenExpr extends Node {
     public WhenExpr(Block block, Expression when, Expression then) {
         super(block);
         this.when = when;
-        this.then = then;
-    }
-    
-    public Expression getWhen() {
-        return when;
-    }
-    
-    public Expression getThen() {
-        return then;
-    }
-    
-    public void setWhen(Expression when) {
-        this.when = when;
-    }
-    
-    public void setThen(Expression then) {
         this.then = then;
     }
 

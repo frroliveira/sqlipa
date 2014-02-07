@@ -9,33 +9,17 @@ public abstract class InExpr extends Expression {
         NOT_IN
     }
     
-    private Operator op;
+    public Operator operator;
     
-    private Expression expr;
+    public Expression expr;
     
     public InExpr() {
         super();
     }
     
-    public InExpr(Block block, Operator op, Expression expr) {
+    public InExpr(Block block, Operator operator, Expression expr) {
         super(block);
-        this.op = op;
-        this.expr = expr;
-    }
-    
-    public Operator getOperator() {
-        return op;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public void setOperator(Operator op) {
-        this.op = op;
-    }
-    
-    public void setExpression(Expression expr) {
+        this.operator = operator;
         this.expr = expr;
     }
 

@@ -6,38 +6,22 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class TypeName extends Name {
     
-    private UnaryExpr xDim;
+    public UnaryExpr xDimension;
     
-    private UnaryExpr yDim;
+    public UnaryExpr yDimension;
     
     public TypeName() {
         super();
     }
     
     public TypeName(Name name) {
-        super(new Block(name), new String(name.getName()));
+        super(new Block(name), new String(name.name));
     }
      
-    public TypeName(Block block, String name, UnaryExpr xDim, UnaryExpr yDim) {
+    public TypeName(Block block, String name, UnaryExpr xDimension, UnaryExpr yDimension) {
         super(block, name);
-        this.xDim = xDim;
-        this.yDim = yDim;
-    }
-    
-    public UnaryExpr getDimensionInX() {
-        return xDim;
-    }
-    
-    public UnaryExpr getDimensionInY() {
-        return yDim;
-    }
-    
-    public void setDimensionInX(UnaryExpr xDim) {
-        this.xDim = xDim;
-    }
-    
-    public void setDimensionInY(UnaryExpr yDim) {
-        this.yDim = yDim;
+        this.xDimension = xDimension;
+        this.yDimension = yDimension;
     }
 
     @Override

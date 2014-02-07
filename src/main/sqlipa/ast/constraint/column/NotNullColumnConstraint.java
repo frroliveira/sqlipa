@@ -7,7 +7,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class NotNullColumnConstraint extends ColumnConstraint {
 
-    private ConflictClause clause;
+    public ConflictClause clause;
     
     public NotNullColumnConstraint() {
         super();
@@ -16,14 +16,6 @@ public class NotNullColumnConstraint extends ColumnConstraint {
     public NotNullColumnConstraint(Block block, Name name,
             ConflictClause clause) {
         super(block, name);
-        this.clause = clause;
-    }
-    
-    public ConflictClause getClause() {
-        return clause;
-    }
-    
-    public void setClause(ConflictClause clause) {
         this.clause = clause;
     }
 

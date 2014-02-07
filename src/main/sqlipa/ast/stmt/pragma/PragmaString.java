@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class PragmaString extends PragmaValue {
     
-    private StringLiteral string;
+    public StringLiteral string;
     
     public PragmaString() {
         super();
@@ -14,14 +14,6 @@ public class PragmaString extends PragmaValue {
     
     public PragmaString(Block block, StringLiteral string) {
         super(block);
-        this.string = string;
-    }
-    
-    public StringLiteral getString() {
-        return string;
-    }
-    
-    public void setString(StringLiteral string) {
         this.string = string;
     }
 

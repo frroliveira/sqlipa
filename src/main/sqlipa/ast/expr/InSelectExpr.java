@@ -6,23 +6,14 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class InSelectExpr extends InExpr {
 
-    private SelectStmt select;
+    public SelectStmt select;
     
     public InSelectExpr() {
         super();
     }
     
-    public InSelectExpr(Block block, Operator op, Expression expr,
-            SelectStmt select) {
-        super(block, op, expr);
-        this.select = select;
-    }
-    
-    public SelectStmt getSelect() {
-        return select;
-    }
-    
-    public void setSelect(SelectStmt select) {
+    public InSelectExpr(Block block, Operator operator, Expression expr, SelectStmt select) {
+        super(block, operator, expr);
         this.select = select;
     }
 

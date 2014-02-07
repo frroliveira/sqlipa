@@ -6,18 +6,14 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class Literal extends Node {
     
-    private String value;
+    public String value;
+    
+    public Literal() {
+        super();
+    }
     
     public Literal(Block block, String value) {
         super(block);
-        this.value = value;
-    }
-    
-    public String getValue() {
-        return value;
-    }
-    
-    public void setValue(String value) {
         this.value = value;
     }
 

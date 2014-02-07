@@ -3,7 +3,7 @@ package main.sqlipa.parser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import main.sqlipa.ast.*;
 import main.sqlipa.ast.constraint.*;
 import main.sqlipa.ast.constraint.table.*;
@@ -25,19 +25,17 @@ import main.sqlipa.ast.stmt.pragma.*;
 public class ASTParserTokenManager implements ASTParserConstants
 {
     // TODO: correct comments.
-    private List<Comment> comments = new LinkedList<Comment>();
+    private List<Comment> comments = new ArrayList<Comment>();
 
     private void CommonTokenAction(Token token) {
         token = token.specialToken;
         while (token != null) {
             if (token.kind == LINE_COMMENT) {
-                comments.add(new LineComment(new Block(token.beginLine,
-                    token.beginColumn, token.endLine, token.endColumn),
-                    token.image));
+                comments.add(new LineComment(new Block(token.beginLine, token.beginColumn,
+                    token.endLine, token.endColumn), token.image));
             } else if (token.kind == BLOCK_COMMENT) {
-                comments.add(new BlockComment(new Block(token.beginLine,
-                    token.beginColumn, token.endLine, token.endColumn),
-                    token.image));
+                comments.add(new BlockComment(new Block(token.beginLine, token.beginColumn,
+                    token.endLine, token.endColumn), token.image));
             } else {
                 break;
             }
@@ -47,7 +45,7 @@ public class ASTParserTokenManager implements ASTParserConstants
 
     public List<Comment> popComments() {
         List<Comment> ret = comments;
-        comments = new LinkedList<Comment>();
+        comments = new ArrayList<Comment>();
         return ret;
     }
 

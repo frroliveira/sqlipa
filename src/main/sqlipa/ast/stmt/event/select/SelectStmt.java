@@ -7,34 +7,17 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class SelectStmt extends EventStmt {
 
-    private SelectUnit unit;
+    public SelectUnit unit;
 
-    private EventConstraint constraint;
+    public EventConstraint constraint;
     
     public SelectStmt() {
         super();
     }
     
-    public SelectStmt(Block block, Explain explain, SelectUnit unit,
-            EventConstraint constraint) {
+    public SelectStmt(Block block, Explain explain, SelectUnit unit, EventConstraint constraint) {
         super(block, explain);
         this.unit = unit;
-        this.constraint = constraint;
-    }
-    
-    public SelectUnit getUnit() {
-        return unit;
-    }
-    
-    public EventConstraint getConstraint() {
-        return constraint;
-    }
-    
-    public void setUnit(SelectUnit unit) {
-        this.unit = unit;
-    }
-    
-    public void setConstraint(EventConstraint constraint) {
         this.constraint = constraint;
     }
 

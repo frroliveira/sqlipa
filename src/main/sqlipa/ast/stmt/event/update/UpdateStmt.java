@@ -1,6 +1,5 @@
 package main.sqlipa.ast.stmt.event.update;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import main.sqlipa.ast.Block;
@@ -21,80 +20,30 @@ public class UpdateStmt extends EventStmt {
         UPDATE_OR_IGNORE
     }
     
-    private Type type;
+    public Type type;
     
-    private QualifiedTableName qualifiedTable;
+    public QualifiedTableName qualifiedTable;
     
-    private List<ColumnAssign> assigns;
+    public List<ColumnAssignment> assignments;
     
-    private Expression where;
+    public Expression where;
     
-    private EventConstraint constraint;
+    public EventConstraint constraint;
 
     public UpdateStmt() {
         super();
-        this.assigns = new LinkedList<ColumnAssign>();
     }
     
-    public UpdateStmt(Block block, Explain explain, Type type,
-            QualifiedTableName qualifiedTable, List<ColumnAssign> assigns,
-            Expression where, EventConstraint constraint) {
+    public UpdateStmt(Block block, Explain explain, Type type, QualifiedTableName qualifiedTable,
+            List<ColumnAssignment> assignments, Expression where, EventConstraint constraint) {
         super(block, explain);
         this.type = type;
         this.qualifiedTable = qualifiedTable;
-        this.assigns = assigns;
+        this.assignments = assignments;
         this.where = where;
         this.constraint = constraint;
     }
     
-    public Type getType() {
-        return type;
-    }
-    
-    public QualifiedTableName getQualifiedTable() {
-        return qualifiedTable;
-    }
-    
-    public List<ColumnAssign> getAssignments() {
-        return assigns;
-    }
-    
-    public Expression getWhere() {
-        return where;
-    }
-    
-    public EventConstraint getConstraint() {
-        return constraint;
-    }
-    
-    public void setType(Type type) {
-        this.type = type;
-    }
-    
-    public void setQualifiedTable(QualifiedTableName qualifiedTable) {
-        this.qualifiedTable = qualifiedTable;
-    }
-    
-    public void setAssignments(List<ColumnAssign> assigns) {
-        this.assigns = assigns;
-    }
-    
-    public void setWhere(Expression where) {
-        this.where = where;
-    }
-    
-    public void setConstraint(EventConstraint constraint) {
-        this.constraint = constraint;
-    }
-    
-    public void addAssignment(ColumnAssign assign) {
-        assigns.add(assign);
-    }
-    
-    public boolean removeAssignment(ColumnAssign assign) {
-        return assigns.remove(assign);
-    }
-
     @Override
     public void accept(VoidVisitor visitor) {
         visitor.visit(this);

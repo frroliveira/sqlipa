@@ -6,34 +6,17 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class InTableExpr extends InExpr {
 
-    private Name database;
+    public Name database;
     
-    private Name table;
+    public Name table;
     
     public InTableExpr() {
         super();
     }
     
-    public InTableExpr(Block block, Operator op, Expression expr, Name database,
-            Name table) {
-        super(block, op, expr);
+    public InTableExpr(Block block, Operator operator, Expression expr, Name database, Name table) {
+        super(block, operator, expr);
         this.database = database;
-        this.table = table;
-    }
-    
-    public Name getDatabase() {
-        return database;
-    }
-    
-    public Name getTable() {
-        return table;
-    }
-    
-    public void setDatabase(Name database) {
-        this.database = database;
-    }
-    
-    public void setTable(Name table) {
         this.table = table;
     }
 

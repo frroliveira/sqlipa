@@ -10,9 +10,9 @@ public class DropTableStmt extends DropStmt {
         super();
     }
     
-    public DropTableStmt(Block block, Explain explain, boolean hasIfExists, 
-            Name db, Name name) {
-        super(block, explain, hasIfExists, db, name);
+    public DropTableStmt(Block block, Explain explain, boolean hasIfExists, Name database,
+            Name name) {
+        super(block, explain, hasIfExists, database, name);
     }
 
     @Override

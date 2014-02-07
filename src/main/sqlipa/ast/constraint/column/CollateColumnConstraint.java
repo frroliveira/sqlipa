@@ -6,7 +6,7 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CollateColumnConstraint extends ColumnConstraint {
 
-    private Name collation;
+    public Name collation;
     
     public CollateColumnConstraint() {
         super();
@@ -14,14 +14,6 @@ public class CollateColumnConstraint extends ColumnConstraint {
     
     public CollateColumnConstraint(Block block, Name name, Name collation) {
         super(block, name);
-        this.collation = collation;
-    }
-    
-    public Name getCollation() {
-        return collation;
-    }
-    
-    public void setCollation(Name collation) {
         this.collation = collation;
     }
 

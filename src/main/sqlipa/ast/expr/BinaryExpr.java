@@ -37,46 +37,21 @@ public class BinaryExpr extends Expression {
         OR
     }
     
-    private Expression left;
+    public Expression left;
     
-    private Expression right;
+    public Expression right;
     
-    private Operator op;
+    public Operator operator;
     
     public BinaryExpr() {
         super();
     }
     
-    public BinaryExpr(Block block, Expression left, Expression right,
-            Operator op) {
+    public BinaryExpr(Block block, Expression left, Expression right, Operator operator) {
         super(block);
         this.left = left;
         this.right = right;
-        this.op = op;
-    }
-    
-    public Expression getLeft() {
-        return left;
-    }
-    
-    public Expression getRight() {
-        return right;
-    }
-    
-    public Operator getOperator() {
-        return op;
-    }
-    
-    public void setLeft(Expression left) {
-        this.left = left;
-    }
-    
-    public void setRight(Expression right) {
-        this.right = right;
-    }
-    
-    public void setOperator(Operator op) {
-        this.op = op;
+        this.operator = operator;
     }
 
     @Override

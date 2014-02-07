@@ -12,9 +12,9 @@ public class OrderingTerm extends Node {
         DESC
     }
 
-    private Expression expr;
+    public Expression expr;
         
-    private Order order;
+    public Order order;
     
     public OrderingTerm() {
         super();
@@ -23,22 +23,6 @@ public class OrderingTerm extends Node {
     public OrderingTerm(Block block, Expression expr, Order order) {
         super(block);
         this.expr = expr;
-        this.order = order;
-    }
-    
-    public Expression getExpression() {
-        return expr;
-    }
-    
-    public Order getOrder() {
-        return order;
-    }
-    
-    public void setExpression(Expression expr) {
-        this.expr = expr;
-    }
-    
-    public void setOrder(Order order) {
         this.order = order;
     }
 
