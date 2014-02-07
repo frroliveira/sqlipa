@@ -1,4 +1,4 @@
-# Slipa - SQlite Parser
+# SQlipa - SQlite Parser
 
 ## Introduction
 
