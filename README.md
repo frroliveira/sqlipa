@@ -13,3 +13,6 @@ It uses [JavaCC](https://javacc.java.net) for specifying the grammar and [JUnit]
 - AST nodes classes implemented.
 - Syntax almost completely specified.
 - SQL printing and AST testing are under development.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/frroliveira/sqlipa/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
