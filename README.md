@@ -1,9 +1,9 @@
-# SQlipa - SQlite Parser
+# SQLipa - SQLite Parser
 
 ## Introduction
 
-This is Java open-source library has classes for representing the AST of SQlite and do it's
-traversing. The current [SQlite](http://sqlite.org) version implemented is the 3.7.17.
+This is Java open-source library has classes for representing the AST of SQLite and do it's
+traversing. The current [SQLite](http://sqlite.org) version implemented is the 3.7.17.
 
 It uses [JavaCC](https://javacc.java.net) for specifying the grammar and [JUnit](http://junit.org) for testing.
 
