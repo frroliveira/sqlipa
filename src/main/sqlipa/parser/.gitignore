@@ -2,3 +2,6 @@
 /ParseException.java
 /Token.java
 /JavaCharStream.java
+/ASTParser.java
+/ASTParserConstants.java
+/ASTParserTokenManager.java
