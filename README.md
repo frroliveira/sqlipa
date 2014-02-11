@@ -16,3 +16,7 @@ It uses [JavaCC](https://javacc.java.net) for specifying the grammar and [JUnit]
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/frroliveira/sqlipa/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/frroliveira/sqlipa/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
