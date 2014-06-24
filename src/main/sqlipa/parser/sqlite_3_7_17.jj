@@ -488,7 +488,8 @@ AttachStmt attachStmt() :
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        "DATABASE"
+        "DATABASE" {
+        	stmt.hasDatabase = true;        } 
     ]
     stmt.expr = expr()
     "AS"
@@ -518,7 +519,8 @@ BeginStmt beginStmt() :
         }
     ]
     [
-        "TRANSACTION"
+        "TRANSACTION" {			stmt.hasTransaction = true;
+        }
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
@@ -3013,6 +3015,7 @@ IndexedBy indexedBy() :
 	        indexedBy.index = name()
 	    |   "NOT" {
                 indexedBy.setBegin(token.beginLine, token.beginColumn);
+				indexedBy.notIndexed = true;
             }
             "INDEXED"
 	    ) {

@@ -2,13 +2,7 @@ package test.sqlipa.parser;
 
 import static org.junit.Assert.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.List;
 
 import main.sqlipa.ast.Node;
@@ -330,46 +324,14 @@ public class TestASTParser {
         // TODO:
     }
     
-    private static HashMap<String, String> parts;
-    
-    private static void loadFile(final File file) throws IOException {
-		String name = file.getName().substring(0, file.getName().length() - 4);		
-    	BufferedReader reader = new BufferedReader(new FileReader(file));
-		
-    	int count = 0;
-		String sql = null;
-		
-		while ((sql = reader.readLine()) != null) {
-			count++;
-			parts.put(name + count, sql);
-		}
-		reader.close();
-    }
-    
-    static {
-    	parts = new HashMap<String, String>();
-  	
-    	File[] files = new File("src/test/sqlipa/resources").listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile() && file.getName().endsWith(".sql");
-            }
-        });
-    	    	
-    	for (File file: files) {
-			try {
-				loadFile(file);
-			} catch (IOException e) {
-			}
-    	}
-    }
+    private TestHelper mHelper = new TestHelper();
     
     private ASTParser parser(final String sql) {
         return new ASTParser(new StringReader(sql));
     }
     
-    private ASTParser stmt(final String filename) {
-        return parser(parts.get("s_" + filename));
+    private ASTParser stmt(final String part) {
+        return parser(mHelper.getStmt(part));
     }
     
     private void assertList(List<? extends Node> nodes, int size) {

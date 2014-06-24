@@ -68,8 +68,9 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(QualifiedTableName name) {
-        // TODO Auto-generated method stub
-        
+    	printNode(name.database, ".", false);
+    	printNode(name.table);
+    	printNode(name.indexedBy);
     }
 
     @Override
@@ -81,14 +82,17 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(IndexedBy indexed) {
-        // TODO Auto-generated method stub
-        
-    }
+    	printIf("INDEXED BY ", indexed.index != null);
+    	printNode(indexed.index);
+    	printIf("NOT INDEXED ", indexed.notIndexed);
+	}
 
     @Override
     public void visit(IndexedColumn indexed) {
-        // TODO Auto-generated method stub
-        
+    	printNode(indexed.column);
+    	printNode(indexed.collation, "COLLATE", true);
+    	printIf("ASC", indexed.order == IndexedColumn.Order.ASC);
+    	printIf("DESC", indexed.order == IndexedColumn.Order.DESC);
     }
 
     @Override
@@ -110,20 +114,30 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(AnalyzeStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("ANALYZE ");
+        printNode(stmt.first);
+        printNode(stmt.second, ".", true);
     }
 
     @Override
     public void visit(AttachStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("ATTACH ");
+        printIf("DATABASE ", stmt.hasDatabase);
+        printNode(stmt.expr);
+        print("AS ");
+        printNode(stmt.database);
     }
 
     @Override
     public void visit(BeginStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("BEGIN ");
+        printIf("DEFERRED ", stmt.type == BeginStmt.Type.DEFERRED);
+        printIf("IMMEDIATE ", stmt.type == BeginStmt.Type.IMMEDIATE);
+        printIf("EXCLUSIVE ", stmt.type == BeginStmt.Type.EXCLUSIVE);
+        printIf("TRANSACTION", stmt.hasTransaction);
     }
 
     @Override
@@ -158,8 +172,8 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(SavepointStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("SAVEPOINT ");
     }
 
     @Override

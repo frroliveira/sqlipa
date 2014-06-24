@@ -12,14 +12,17 @@ public class BeginStmt extends SqlStatement {
     }
     
     public Type type;
+    
+    public boolean hasTransaction;
 
     public BeginStmt() {
         super();
     }
     
-    public BeginStmt(Block block, Explain explain, Type type) {
+    public BeginStmt(Block block, Explain explain, Type type, boolean hasTransaction) {
         super(block, explain);
         this.type = type;
+        this.hasTransaction = hasTransaction;
     }
 
     @Override

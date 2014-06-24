@@ -7,13 +7,16 @@ public class IndexedBy extends Node {
     
     public Name index;
     
+    public boolean notIndexed;
+    
     public IndexedBy() {
         super();
     }
     
-    public IndexedBy(Block block, Name index) {
+    public IndexedBy(Block block, Name index, boolean notIndexed) {
         super(block);
         this.index = index;
+        this.notIndexed = notIndexed;
     }
 
     @Override
