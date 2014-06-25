@@ -10,6 +10,8 @@ public class SelectCore extends SelectUnit {
     
     public boolean hasDistinct;
     
+    public boolean hasAll;
+    
     public List<ResultColumn> columns;
     
     public JoinSrc from;
@@ -24,10 +26,12 @@ public class SelectCore extends SelectUnit {
         super();
     }
     
-    public SelectCore(Block block, boolean hasDistinct, List<ResultColumn> columns, JoinSrc from,
-            Expression where, List<Expression> groupBy, Expression having) {
+    public SelectCore(Block block, boolean hasDistinct, boolean hasAll,
+    		List<ResultColumn> columns, JoinSrc from, Expression where, List<Expression> groupBy,
+    		Expression having) {
         super(block);
         this.hasDistinct = hasDistinct;
+        this.hasAll = hasAll;
         this.columns = columns;
         this.from = from;
         this.where = where;

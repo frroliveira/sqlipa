@@ -453,7 +453,11 @@ AlterTableStmt addColumnStmt() :
     AddColumnStmt stmt = new AddColumnStmt();
 }
 {
-    "ADD" [ "COLUMN" ]
+    "ADD"
+    [
+    	"COLUMN" {
+    		stmt.hasColumn = true;    	}
+	]
     stmt.column = columnDef() {
         return stmt;
     }
@@ -2683,7 +2687,8 @@ SelectCore selectCore() :
         "DISTINCT" {
             core.hasDistinct = true;
         }
-    |   "ALL"
+    |   "ALL" {			core.hasAll = true;
+	    }
     ]
     column = resultColumn() {
         core.columns.add(column);
@@ -2783,7 +2788,10 @@ AliasedColumn aliasedColumn() :
     AliasedColumn column = new AliasedColumn();
 }
 {
-	[ "AS" ]
+	[
+		"AS" {			column.hasAs = true;
+		}
+	]
 	column.alias = name() {
 	    return column;
 	}

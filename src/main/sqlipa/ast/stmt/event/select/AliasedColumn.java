@@ -9,13 +9,16 @@ public class AliasedColumn extends ExpressionColumn {
 
     public Name alias;
     
+    public boolean hasAs;
+    
     public AliasedColumn() {
         super();
     }
     
-    public AliasedColumn(Block block, Expression expr, Name alias) {
+    public AliasedColumn(Block block, Expression expr, Name alias, boolean hasAs) {
         super(block, expr);
         this.alias = alias;
+        this.hasAs = hasAs;
     }
 
     @Override

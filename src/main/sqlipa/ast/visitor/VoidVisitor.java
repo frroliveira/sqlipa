@@ -129,7 +129,7 @@ public interface VoidVisitor {
             // Update
     public void visit(UpdateStmt stmt);
     
-    public void visit(ColumnAssignment assign);
+    public void visit(ColumnAssignment assignment);
     
         // Pragma
     public void visit(PragmaStmt stmt);
@@ -145,11 +145,11 @@ public interface VoidVisitor {
 
     public void visit(ForeignKeyClause clause);
 
-    public void visit(DeferrableSetting sett);
+    public void visit(DeferrableSetting setting);
 
-    public void visit(MatchSetting sett);
+    public void visit(MatchSetting setting);
 
-    public void visit(OnSetting sett);
+    public void visit(OnSetting setting);
 
         // Column
     public void visit(CheckColumnConstraint constraint);

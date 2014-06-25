@@ -347,9 +347,9 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
     }
 
     @Override
-    public void visit(ColumnAssignment assign) {
-        acceptNode(assign.column);
-        acceptNode(assign.expr);
+    public void visit(ColumnAssignment assignment) {
+        acceptNode(assignment.column);
+        acceptNode(assignment.expr);
     }
 
     @Override
@@ -386,15 +386,15 @@ public abstract class VoidVisitorAdapter implements VoidVisitor {
     }
 
     @Override
-    public void visit(DeferrableSetting sett) {        
+    public void visit(DeferrableSetting setting) {        
     }
 
     @Override
-    public void visit(MatchSetting sett) {        
+    public void visit(MatchSetting setting) {
     }
 
     @Override
-    public void visit(OnSetting sett) {        
+    public void visit(OnSetting setting) {     
     }
 
     @Override
