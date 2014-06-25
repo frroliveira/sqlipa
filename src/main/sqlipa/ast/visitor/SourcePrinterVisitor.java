@@ -77,7 +77,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     public void visit(ColumnDef column) {
         printNode(column.column);
         printNode(column.type);
-        printList(column.constraints);
+        printList(column.constraints, "");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(SqlStmtList stmtList) {
-        printList(stmtList.stmts);
+        printList(stmtList.stmts, ";");
     }
 
     private void visit(SqlStatement stmt) {
@@ -142,61 +142,79 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(CommitStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+    	printIf("COMMIT ", stmt.type == CommitStmt.Type.COMMIT);
+    	printIf("END ", stmt.type == CommitStmt.Type.END);
+    	printIf("TRANSACTION ", stmt.hasTransaction);
     }
 
     @Override
     public void visit(DetachStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+    	print("DETACH ");
+    	printIf("DATABASE ", stmt.hasDatabase);
+    	printNode(stmt.database);
     }
 
     @Override
     public void visit(ReindexStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+    	print("REINDEX ");
+        printNode(stmt.first);
+        printNode(stmt.second, ".", true);
     }
 
     @Override
     public void visit(ReleaseStmt stmt) {
-        // TODO Auto-generated method stub
-        
-    }
+        visit((SqlStatement) stmt);
+    	print("RELEASE ");
+    	printIf("SAVEPOINT ", stmt.hasSavepoint);
+    	printNode(stmt.savepoint);
+	}
 
     @Override
     public void visit(RollbackStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("ROLLBACK ");
+        printIf("TRANSACTION ", stmt.hasTransaction);
+        printIf("TO ", stmt.savepoint != null);
+        printIf("SAVEPOINT ", stmt.hasSavepoint);
+        printNode(stmt.savepoint);
     }
 
     @Override
     public void visit(SavepointStmt stmt) {
         visit((SqlStatement) stmt);
         print("SAVEPOINT ");
+        printNode(stmt.savepoint);
     }
 
     @Override
     public void visit(VacuumStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("VACUUM");        
     }
 
     private void visit(AlterTableStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((SqlStatement) stmt);
+        print("ALTER TABLE ");
+        printNode(stmt.database, ".", false);
+        printNode(stmt.table);
     }
 
     @Override
     public void visit(AddColumnStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((AlterTableStmt) stmt);
+        print("ADD ");
+        printIf("COLUMN ", stmt.hasColumn);
+        printNode(stmt.column);
     }
 
     @Override
     public void visit(RenameTableStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((AlterTableStmt) stmt);
+        print("RENAME TO ");
+        printNode(stmt.newTable);
     }
 
     private void visit(CreateStmt stmt) {
@@ -217,7 +235,7 @@ public class SourcePrinterVisitor implements VoidVisitor {
     public void visit(CreateTableStmtWithColumns stmt) {
         visit((CreateTableStmt) stmt);
         indent("(");
-        printlnList(stmt.columns, stmt.constraints);
+        printlnList(stmt.columns, stmt.constraints, ",");
         unindent(")");
     }
 
@@ -230,20 +248,59 @@ public class SourcePrinterVisitor implements VoidVisitor {
 
     @Override
     public void visit(CreateIndexStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((CreateStmt) stmt);
+        printIf("UNIQUE ", stmt.hasUnique);
+        print("INDEX ");
+        printIf("IF NOT EXISTS ", stmt.hasIfNotExists);
+        printNode(stmt.database, ".", false);
+        printNode(stmt.name);
+        print("ON ");
+        printNode(stmt.table);
+        indent("(");
+        printlnList(stmt.columns, ",");
+        unindent(")");
     }
 
     @Override
     public void visit(CreateViewStmt stmt) {
-        // TODO Auto-generated method stub
-        
+        visit((CreateStmt) stmt);
+        printIf("TEMP ", stmt.hasTemporary);
+        print("VIEW ");
+        printIf("IF NOT EXISTS ", stmt.hasIfNotExists);
+        printNode(stmt.database, ".", false);
+        printNode(stmt.name);
+        print("AS ");
+        printNode(stmt.select);
     }
 
     @Override
     public void visit(CreateTriggerStmt stmt) {
-        // TODO Auto-generated method stub
+        visit((CreateStmt) stmt);
+        printIf("TEMP ", stmt.hasTemporary);
+        print("TRIGGER ");
+        printIf("IF NOT EXISTS ", stmt.hasIfNotExists);
+        printNode(stmt.database, ".", false);
+        printNode(stmt.name);
         
+        printIf("BEFORE ", stmt.time == CreateTriggerStmt.Time.BEFORE);
+        printIf("AFTER ", stmt.time == CreateTriggerStmt.Time.AFTER);
+        printIf("INSTEAD OF ", stmt.time == CreateTriggerStmt.Time.INSTEAD_OF);
+        
+        printIf("DELETE ", stmt.event == CreateTriggerStmt.Event.DELETE);
+        printIf("INSERT ", stmt.event == CreateTriggerStmt.Event.INSERT);
+        printIf("UPDATE ", stmt.event == CreateTriggerStmt.Event.UPDATE);
+        
+        printIf("OF ", stmt.columns.size() > 0);
+        printList(stmt.columns, ",");
+        
+        print("ON ");
+        printNode(stmt.table);
+        printIf("FOR EACH ROW ", stmt.hasForEachRow);
+        printNode(stmt.when);
+        
+        print("BEGIN ");
+        printList(stmt.stmts, ";");
+        print("END");
     }
 
     @Override
@@ -774,37 +831,47 @@ public class SourcePrinterVisitor implements VoidVisitor {
         }
     }
     
-    private void printList(List<? extends Node> nodes) {
+    private void printList(List<? extends Node> nodes, String separator) {
         if (nodes != null) {
-            for (Node node : nodes) {
-                printNode(node);
+            Iterator<? extends Node> it = nodes.iterator();
+            if (it.hasNext()) {
+                printNode(it.next());
+            }
+            while (it.hasNext()) {
+                print(separator);
+                printNode(it.next());
             }
         }
     }
     
-    private void printlnList(List<? extends Node> nodes) {
+    private void printlnList(List<? extends Node> nodes, String separator) {
         if (nodes != null) {
-            for (Node node : nodes) {
-                printNode(node);
-                println();
+            Iterator<? extends Node> it = nodes.iterator();
+            if (it.hasNext()) {
+                printNode(it.next());
+            }
+            while (it.hasNext()) {
+                println(separator);
+                printNode(it.next());
             }
         }
     }
     
-    private void printlnList(List<? extends Node> first, List<? extends Node> second) {
+    private void printlnList(List<? extends Node> first, List<? extends Node> second,
+    		String separator) {
         if (first != null) {
             Iterator<? extends Node> it = first.iterator();
             if (it.hasNext()) {
                 printNode(it.next());
             }
             while (it.hasNext()) {
-                println(",");
+                println(separator);
                 printNode(it.next());
             }
         }
         if (second != null) {
             for (Node node : second) {
-                println(",");
+                println(separator);
                 printNode(node);
             }
         }

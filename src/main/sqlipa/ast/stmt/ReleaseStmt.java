@@ -8,13 +8,16 @@ public class ReleaseStmt extends SqlStatement {
     
     public Name savepoint;
     
+    public boolean hasSavepoint;
+    
     public ReleaseStmt() {
         super();
     }
     
-    public ReleaseStmt(Block block, Explain explain, Name savepoint) {
+    public ReleaseStmt(Block block, Explain explain, Name savepoint, boolean hasSavepoint) {
         super(block, explain);
         this.savepoint = savepoint;
+        this.hasSavepoint = hasSavepoint;
     }
 
     @Override

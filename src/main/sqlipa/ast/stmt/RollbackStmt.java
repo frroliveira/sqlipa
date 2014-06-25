@@ -8,13 +8,20 @@ public class RollbackStmt extends SqlStatement {
     
     public Name savepoint;
     
+    public boolean hasTransaction;
+    
+    public boolean hasSavepoint;
+    
     public RollbackStmt() {
         super();
     }
     
-    public RollbackStmt(Block block, Explain explain, Name savepoint) {
+    public RollbackStmt(Block block, Explain explain, Name savepoint, boolean hasTransaction,
+    		boolean hasSavepoint) {
         super(block, explain);
         this.savepoint = savepoint;
+        this.hasTransaction = hasTransaction;
+        this.hasSavepoint = hasSavepoint;
     }
 
     @Override

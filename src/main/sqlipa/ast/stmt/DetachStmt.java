@@ -8,13 +8,16 @@ public class DetachStmt extends SqlStatement {
     
     public Name database;
     
+    public boolean hasDatabase;
+    
     public DetachStmt() {
         super();
     }
     
-    public DetachStmt(Block block, Explain explain, Name database) {
+    public DetachStmt(Block block, Explain explain, Name database, boolean hasDatabase) {
         super(block, explain);
         this.database = database;
+        this.hasDatabase = hasDatabase;
     }
 
     @Override

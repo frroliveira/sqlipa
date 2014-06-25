@@ -9,14 +9,17 @@ public class AddColumnStmt extends AlterTableStmt {
     
     public ColumnDef column;
     
+    public boolean hasColumn;
+    
     public AddColumnStmt() {
         super();
     }
     
-    public AddColumnStmt(Block block, Explain explain, Name database, Name table,
-            ColumnDef column) {
+    public AddColumnStmt(Block block, Explain explain, Name database, Name table, ColumnDef column,
+    		boolean hasColumn) {
         super(block, explain, database, table);
         this.column = column;
+        this.hasColumn = hasColumn;
     }
 
     @Override

@@ -533,13 +533,16 @@ CommitStmt commitStmt() :
 }
 {
     (
-        "COMMIT"
-    |   "END"
+        "COMMIT" {
+        	stmt.type = CommitStmt.Type.COMMIT;        }
+    |   "END" {			stmt.type = CommitStmt.Type.END;
+        }
     ) {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
     [
-        "TRANSACTION"
+        "TRANSACTION" {
+        	stmt.hasTransaction = true;        }
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
@@ -554,10 +557,16 @@ RollbackStmt rollbackStmt() :
     "ROLLBACK"  {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
-    [ "TRANSACTION" ]
+    [
+    	"TRANSACTION" {			stmt.hasTransaction = true;
+		}
+	]
     [
         "TO"
-        [ "SAVEPOINT" ]
+        [
+        	"SAVEPOINT"	{				stmt.hasSavepoint = true;
+        	}
+        ]
         stmt.savepoint = name()
     ] {
         stmt.setEnd(token.endLine, token.endColumn);
@@ -587,7 +596,10 @@ ReleaseStmt releaseStmt() :
     "RELEASE" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
-    [ "SAVEPOINT" ]
+    [
+    	"SAVEPOINT"	{			stmt.hasSavepoint = true;
+    	}
+	]
     stmt.savepoint = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;
@@ -1552,7 +1564,10 @@ DetachStmt detachStmt() :
     "DETACH" {
         stmt.setBegin(token.beginLine, token.beginColumn);
     }
-    [ "DATABASE" ]
+    [
+    	"DATABASE" {
+    		stmt.hasDatabase = true;    	}
+    ]
     stmt.database = name() {
         stmt.setEnd(token.endLine, token.endColumn);
         return stmt;

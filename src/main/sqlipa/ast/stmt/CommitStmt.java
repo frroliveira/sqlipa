@@ -5,12 +5,23 @@ import main.sqlipa.ast.visitor.VoidVisitor;
 
 public class CommitStmt extends SqlStatement {
     
+	public enum Type {
+		COMMIT,
+		END
+	}
+	
+	public Type type;
+	
+    public boolean hasTransaction;
+
     public CommitStmt() {
         super();
     }
     
-    public CommitStmt(Block block, Explain explain) {
+    public CommitStmt(Block block, Explain explain, Type type, boolean hasTransaction) {
         super(block, explain);
+        this.type = type;
+        this.hasTransaction = hasTransaction;
     }
 
     @Override
