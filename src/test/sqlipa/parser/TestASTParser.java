@@ -12,6 +12,7 @@ import main.sqlipa.ast.TypeName;
 import main.sqlipa.ast.stmt.AnalyzeStmt;
 import main.sqlipa.ast.stmt.AttachStmt;
 import main.sqlipa.ast.stmt.BeginStmt;
+import main.sqlipa.ast.stmt.DetachStmt;
 import main.sqlipa.ast.stmt.alter.AddColumnStmt;
 import main.sqlipa.ast.stmt.alter.AlterTableStmt;
 import main.sqlipa.ast.stmt.alter.RenameTableStmt;
@@ -20,6 +21,11 @@ import main.sqlipa.ast.stmt.create.CreateTableStmt;
 import main.sqlipa.ast.stmt.create.CreateTableStmtWithColumns;
 import main.sqlipa.ast.stmt.create.CreateTableStmtWithSelect;
 import main.sqlipa.ast.stmt.create.CreateTriggerStmt;
+import main.sqlipa.ast.stmt.create.CreateViewStmt;
+import main.sqlipa.ast.stmt.drop.DropIndexStmt;
+import main.sqlipa.ast.stmt.drop.DropTableStmt;
+import main.sqlipa.ast.stmt.drop.DropTriggerStmt;
+import main.sqlipa.ast.stmt.drop.DropViewStmt;
 import main.sqlipa.ast.stmt.event.delete.DeleteStmt;
 import main.sqlipa.ast.stmt.event.insert.InsertStmt;
 import main.sqlipa.ast.stmt.event.select.SelectStmt;
@@ -593,7 +599,36 @@ public class TestASTParser {
 
     @Test
     public void testCreateViewStmt() throws ParseException {
-        // TODO:
+        // -- CREATE VIEW IF NOT EXISTS view_name AS SELECT *
+        CreateViewStmt stmt = stmt("create_view1").createViewStmt();
+
+        assertFalse(stmt.hasTemporary);
+        assertTrue(stmt.hasIfNotExists);
+        assertNull(stmt.database);
+        assertEquals("view_name", stmt.name.name);
+        assertNotNull(stmt.select);
+        
+        // -- CREATE TEMP VIEW database_name.view_name AS SELECT *
+        stmt = stmt("create_view2").createViewStmt();
+
+        assertTrue(stmt.hasTemporary);
+        assertFalse(stmt.hasIfNotExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("view_name", stmt.name.name);
+        assertNotNull(stmt.select);
+        
+        // -- CREATE TEMPORARY VIEW view_name AS SELECT *
+        stmt = stmt("create_view3").createViewStmt();
+
+        assertTrue(stmt.hasTemporary);
+        assertFalse(stmt.hasIfNotExists);
+        assertNull(stmt.database);
+        assertEquals("view_name", stmt.name.name);
+        assertNotNull(stmt.select);
+        
+        // -- CREATE TEMPORARY VIEW view_name AS
+        thrown.expect(ParseException.class);
+        stmt("create_view4").createViewStmt();
     }
 
     @Test
@@ -603,7 +638,33 @@ public class TestASTParser {
 
     @Test
     public void testDeleteStmt() throws ParseException {
-        // TODO:
+        // -- DELETE FROM table_name
+        DeleteStmt stmt = stmt("delete1").deleteStmt();
+
+        assertNotNull(stmt.qualifiedTable);
+        assertNull(stmt.where);
+        assertNull(stmt.constraint);
+        
+        // -- DELETE FROM table_name WHERE column_name == 1
+        stmt = stmt("delete2").deleteStmt();
+
+        assertNotNull(stmt.qualifiedTable);
+        assertNotNull(stmt.where);
+        assertNull(stmt.constraint);
+        
+        // -- DELETE FROM table_name LIMIT 10
+        stmt = stmt("delete3").deleteStmt();
+
+        assertNotNull(stmt.qualifiedTable);
+        assertNull(stmt.where);
+        assertNotNull(stmt.constraint);
+        
+        // -- DELETE FROM table_name WHERE column_name == 1 LIMIT 10
+        stmt = stmt("delete4").deleteStmt();
+
+        assertNotNull(stmt.qualifiedTable);
+        assertNotNull(stmt.where);
+        assertNotNull(stmt.constraint);
     }
 
     @Test
@@ -613,27 +674,113 @@ public class TestASTParser {
 
     @Test
     public void testDetachStmt() throws ParseException {
-        // TODO:
+        // -- DETACH database_name
+        DetachStmt stmt = stmt("detach1").detachStmt();
+
+        assertEquals("database_name", stmt.database.name);
+        assertFalse(stmt.hasDatabase);
+        
+        // -- DETACH DATABASE database_name
+        stmt = stmt("detach2").detachStmt();
+
+        assertEquals("database_name", stmt.database.name);
+        assertTrue(stmt.hasDatabase);
     }
 
     @Test
     public void testDropIndexStmt() throws ParseException {
-        // TODO:
+        // -- DROP INDEX index_name
+        DropIndexStmt stmt = stmt("drop_index1").dropIndexStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertNull(stmt.database);
+        assertEquals("index_name", stmt.name.name);
+        
+        // -- DROP INDEX database_name.index_name
+        stmt = stmt("drop_index2").dropIndexStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("index_name", stmt.name.name);
+
+        // -- DROP INDEX IF EXISTS database_name.index_name
+        stmt = stmt("drop_index3").dropIndexStmt();
+
+        assertTrue(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("index_name", stmt.name.name);
     }
 
     @Test
     public void testDropTableStmt() throws ParseException {
-        // TODO:
+        // -- DROP TABLE table_name
+        DropTableStmt stmt = stmt("drop_table1").dropTableStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertNull(stmt.database);
+        assertEquals("table_name", stmt.name.name);
+        
+        // -- DROP TABLE database_name.table_name
+        stmt = stmt("drop_table2").dropTableStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("table_name", stmt.name.name);
+
+        // -- DROP TABLE IF EXISTS database_name.table_name
+        stmt = stmt("drop_table3").dropTableStmt();
+
+        assertTrue(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("table_name", stmt.name.name);
     }
 
     @Test
     public void testDropTriggerStmt() throws ParseException {
-        // TODO:
+        // -- DROP TRIGGER trigger_name
+        DropTriggerStmt stmt = stmt("drop_trigger1").dropTriggerStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertNull(stmt.database);
+        assertEquals("trigger_name", stmt.name.name);
+        
+        // -- DROP TRIGGER database_name.trigger_name
+        stmt = stmt("drop_trigger2").dropTriggerStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("trigger_name", stmt.name.name);
+
+        // -- DROP TRIGGER IF EXISTS database_name.trigger_name
+        stmt = stmt("drop_trigger3").dropTriggerStmt();
+
+        assertTrue(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("trigger_name", stmt.name.name);
     }
 
     @Test
     public void testDropViewStmt() throws ParseException {
-        // TODO:
+        // -- DROP VIEW view_name
+        DropViewStmt stmt = stmt("drop_view1").dropViewStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertNull(stmt.database);
+        assertEquals("view_name", stmt.name.name);
+        
+        // -- DROP VIEW database_name.view_name
+        stmt = stmt("drop_view2").dropViewStmt();
+
+        assertFalse(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("view_name", stmt.name.name);
+
+        // -- DROP VIEW IF EXISTS database_name.view_name
+        stmt = stmt("drop_view3").dropViewStmt();
+
+        assertTrue(stmt.hasIfExists);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("view_name", stmt.name.name);
     }
 
     @Test

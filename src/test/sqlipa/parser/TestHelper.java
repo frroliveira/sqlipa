@@ -31,7 +31,7 @@ public class TestHelper {
     }
     
     public String getPart(final String part) {
-    	return parts.get(part);
+    	return parts.get("p_" + part);
     }
 
     public String getStmt(final String part) {
