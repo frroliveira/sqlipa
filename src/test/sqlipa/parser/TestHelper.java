@@ -50,6 +50,9 @@ public class TestHelper {
 		String sql = null;
 		
 		while ((sql = reader.readLine()) != null) {
+			while (!sql.endsWith(";")) {
+				sql += "\n" + reader.readLine();
+			}
 			count++;
 			parts.put(name + count, sql);
 		}

@@ -799,17 +799,16 @@ ColumnDef columnDef() :
 TypeName typeName() :
 {
     TypeName type = new TypeName();
-    String name = new String();
-    
-    type.name = name;}
+    type.name = new String();
+}
 {
     name() {
         type.setBegin(token.beginLine, token.beginColumn);
-        name += token.image;
+        type.name += token.image;
     }
     (
         name() {
-            name += " " + token.image;
+            type.name += " " + token.image;
         }
     )*
     [
@@ -1349,7 +1348,7 @@ CreateTriggerStmt createTriggerStmt() :
             stmt.event = CreateTriggerStmt.Event.INSERT;
         }
     |   "UPDATE" {
-            stmt.event = CreateTriggerStmt.Event.DELETE;
+            stmt.event = CreateTriggerStmt.Event.UPDATE;
         }
         [
             "OF" {
