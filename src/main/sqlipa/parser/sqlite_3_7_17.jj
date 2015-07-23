@@ -2538,6 +2538,7 @@ InsertStmt insertStmtWithValues(InsertStmt stmt, List<Name> columns) :
     "("
     expr = expr() {
         list.add(expr);
+        stmtWValues.rows = new ArrayList<List<Expression>>();
     }
     (
         ","

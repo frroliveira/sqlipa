@@ -18,7 +18,7 @@ public class InsertStmtWithValues extends InsertStmt {
     }
     
     public InsertStmtWithValues(InsertStmt stmt) {
-        super(stmt, stmt.explain, stmt.type, new Name(stmt.database), new Name(stmt.table));
+        super(stmt, stmt.explain, stmt.type, stmt.database == null ? null : new Name(stmt.database), new Name(stmt.table));
     }
     
     public InsertStmtWithValues(Block block, Explain explain, Type type, Name database, Name table,

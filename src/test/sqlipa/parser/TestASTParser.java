@@ -28,6 +28,8 @@ import main.sqlipa.ast.stmt.drop.DropTriggerStmt;
 import main.sqlipa.ast.stmt.drop.DropViewStmt;
 import main.sqlipa.ast.stmt.event.delete.DeleteStmt;
 import main.sqlipa.ast.stmt.event.insert.InsertStmt;
+import main.sqlipa.ast.stmt.event.insert.InsertStmtDefault;
+import main.sqlipa.ast.stmt.event.insert.InsertStmtWithValues;
 import main.sqlipa.ast.stmt.event.select.SelectStmt;
 import main.sqlipa.ast.stmt.event.update.UpdateStmt;
 import main.sqlipa.parser.ASTParser;
@@ -794,8 +796,36 @@ public class TestASTParser {
     }
 
     @Test
-    public void testInsertStmt() throws ParseException {
-        // TODO:
+    public void testInsertStmt_default() throws ParseException {
+        // -- INSERT INTO database_name.table_name DEFAULT VALUES
+        InsertStmt stmt = stmt("insert1").insertStmt();
+
+        assertTrue(stmt instanceof InsertStmtDefault);
+        assertEquals(InsertStmt.Type.INSERT, stmt.type);
+        assertEquals("database_name", stmt.database.name);
+        assertEquals("table_name", stmt.table.name);
+        
+        // -- REPLACE INTO table_name DEFAULT VALUES
+        stmt = stmt("insert2").insertStmt();
+
+        assertTrue(stmt instanceof InsertStmtDefault);
+        assertEquals(InsertStmt.Type.REPLACE, stmt.type);
+        assertNull(stmt.database);
+        assertEquals("table_name", stmt.table.name);
+    }
+    
+    @Test
+    public void testInsertStmt_withValues() throws ParseException {
+        // -- INSERT OR ROLLBACK INTO table_name(column_name1) VALUES(1)
+        InsertStmt stmt = stmt("insert3").insertStmt();
+
+        assertTrue(stmt instanceof InsertStmtWithValues);
+        assertEquals(InsertStmt.Type.INSERT_OR_ROLLBACK, stmt.type);
+        assertNull(stmt.database);
+        assertEquals("table_name", stmt.table.name);
+        assertList(((InsertStmtWithValues) stmt).columns, 1);
+
+        
     }
 
     @Test
@@ -843,9 +873,19 @@ public class TestASTParser {
     }
 
     private void assertList(List<? extends Node> nodes, int size) {
-        assertTrue(nodes.size() == size);
+        assertEquals(size, nodes.size());
         for (Node node : nodes) {
             assertNotNull(node);
+        }
+    }
+    
+    private void assertMatrix(List<List<? extends Node>> nodes, int firstSize, int secondSize) {
+        assertEquals(firstSize, nodes.size());
+        for (List<? extends Node> nodeList : nodes) {
+            assertEquals(secondSize, nodeList.size());
+            for (Node node : nodeList) {            	
+            	assertNotNull(node);
+            }
         }
     }
 
